@@ -1,0 +1,56 @@
+<div class="ui-g">
+    <div class="ui-g-0 ui-md-1 ui-xl-2"></div>
+    <div class="ui-g-12 ui-md-10 ui-xl-8">
+        <h1>Settings</h1>
+        <mat-card>
+            <mat-card-content>
+                <form [formGroup]="form" novalidate>
+                    <mat-tab-group [dynamicHeight]="true">
+                        <mat-tab label="Logins">
+                            <br />
+                            <button mat-raised-button color="primary" (click)="addLogin()">Add new</button>
+                            <div formArrayName="logins">
+                                <div *ngFor="let control of logins.controls; let i=index" [formGroupName]="i">
+                                    <mat-form-field class="ui-g-12 full">
+                                        <input matInput placeholder="Username" formControlName="username">
+                                    </mat-form-field>
+                                    <mat-form-field class="ui-g-12 full">
+                                        <input type="password" matInput placeholder="Password" formControlName="password">
+                                    </mat-form-field>
+                                    <mat-form-field class="ui-g-12 full">
+                                        <input matInput placeholder="Domain" formControlName="domain">
+                                    </mat-form-field>
+                                    <button mat-raised-button color="warn" (click)="deleteLogin(i)">Delete</button>
+                                    <hr *ngIf="i < logins.controls.length-1" class="break">
+                                </div>
+                            </div>
+                        </mat-tab>
+                        <mat-tab label="Connection Strings">
+                            <br />
+                            <button mat-raised-button color="primary" (click)="addConnString()">Add new</button>
+                            <div formArrayName="connStrings">
+                                <div *ngFor="let control of connStrings.controls; let i=index" [formGroupName]="i">
+                                    <mat-form-field class="ui-g-12 full">
+                                        <input matInput placeholder="Name" formControlName="name">
+                                    </mat-form-field>
+                                    <mat-form-field class="ui-g-12 full">
+                                        <input matInput placeholder="Connection String" formControlName="connString">
+                                    </mat-form-field>
+                                    <button mat-raised-button color="warn" (click)="deleteConnString(i)">Delete</button>
+                                    <hr *ngIf="i < connStrings.controls.length-1" class="break">
+                                </div>
+                            </div>
+                        </mat-tab>
+                    </mat-tab-group>
+                </form>
+                <!-- <pre>{{form.value | json}}</pre> -->
+            </mat-card-content>
+            <mat-card-actions>
+                <button mat-raised-button routerLink="/dashboard" [disabled]="saving">Back</button>
+                <button mat-raised-button color="primary" (click)="updateForm()" [disabled]="form.pristine || saving">Revert</button>
+                <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid || form.pristine || saving">Save</button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+    <div class="ui-g-0 ui-md-1 ui-xl-2"></div>
+</div>

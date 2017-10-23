@@ -1,0 +1,57 @@
+<div class="ui-g">
+    <div class="ui-g-0 ui-md-1 ui-xl-2"></div>
+    <div class="ui-g-12 ui-md-10 ui-xl-8">
+        <h1>Edit check '{{check.Name}}'</h1>
+        <mat-card>
+            <mat-card-content>
+                <form [formGroup]="form" novalidate>
+                    <mat-tab-group [dynamicHeight]="true">
+                        <mat-tab label="Detail">
+                            <div class="header ui-g-12">Basic settings</div>
+                            <br />
+                            <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
+                            <mat-form-field class="ui-g-12 full">
+                                <input matInput placeholder="Name" formControlName="name">
+                            </mat-form-field>
+                            <mat-select class="ui-g-12" placeholder="Type" formControlName="type" (change)="onTypeChange()">
+                                <mat-option *ngFor="let type of types" [value]="type.ID">{{type.Name}}</mat-option>
+                            </mat-select>
+                            <br />
+                            <div class="full" formArrayName="options">
+                                <div class="header ui-g-12" *ngIf="options.controls.length>0">Type settings</div>
+                                <div class="ui-g-12" *ngFor="let option of options.controls; let i=index" [formGroupName]="i">
+                                    <check-option class="full" [option]="option.get('option')!.value" formControlName="value"></check-option>
+                                </div>
+                            </div>
+                        </mat-tab>
+                        <mat-tab label="Schedules">
+                            <br />
+                            <button mat-raised-button color="primary" (click)="addSchedule()">Add new</button>
+                            <div formArrayName="schedules">
+                                <div *ngFor="let schedule of schedules.controls; let i=index" [formGroupName]="i">
+                                    <mat-form-field class="ui-g-12 full">
+                                        <input matInput placeholder="second minute hour day-of-month month day-of-week" formControlName="expression">
+                                    </mat-form-field>
+                                    <div [innerHTML]="validateExpression(i)"></div>
+                                    <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
+                                    <button mat-raised-button color="warn" (click)="deleteSchedule(i)">Delete</button>
+                                    <hr *ngIf="i < schedules.controls.length-1" class="schedule-break">
+                                </div>
+                            </div>
+                        </mat-tab>
+                    </mat-tab-group>
+                </form>
+                <!-- <pre>{{check | json}}</pre> -->
+                <!-- <pre>{{form.value | json}}</pre> -->
+            </mat-card-content>
+            <mat-card-actions>
+                <button mat-raised-button routerLink="/dashboard" [disabled]="saving">Back</button>
+                <button mat-raised-button color="primary" (click)="updateForm()" [disabled]="form.pristine || saving">Revert</button>
+                <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid || form.pristine || saving">Save</button>
+                <button mat-raised-button color="primary" (click)="run()" [disabled]="form.dirty || saving || check.ID === 0">Run</button>
+                <button *ngIf="check.ID > 0" mat-raised-button color="warn" (click)="delete()">Delete</button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+    <div class="ui-g-0 ui-md-1 ui-xl-2"></div>
+</div>

@@ -1,0 +1,33 @@
+<div class="ui-g">
+    <div class="ui-g-0 ui-md-1 ui-xl-2"></div>
+    <div class="ui-g-12 ui-md-10 ui-xl-8">
+        <h1>Dashboard</h1>
+        <div class="buttons">
+            <button mat-raised-button color="primary" routerLink="/edit/0">Add new</button>
+            <button mat-raised-button color="primary" routerLink="/settings">Settings</button>
+        </div>
+        <br />
+        <p-dataTable #dt [value]="checks" [paginator]="true" [rows]="10" [responsive]="true">
+            <p-column header="Name" field="Name" sortable="true" [filter]="true"></p-column>
+            <p-column header="Active" field="Active" sortable="true" [filter]="true" filterMatchMode="equals" [style]="{'overflow':'visible'}">
+                <ng-template pTemplate="filter" let-col>
+                    <p-dropdown [options]="activeOptions" [(ngModel)]="activeOption" [style]="{'width':'100%'}" (onChange)="updateActiveFilter()"
+                        styleClass="ui-column-filter"></p-dropdown>
+                </ng-template>
+                <ng-template let-check="rowData" pTemplate="body">
+                    {{check.Active ? "Yes" : "No"}}
+                </ng-template>
+            </p-column>
+            <p-column header="Options">
+                <ng-template let-check="rowData" pTemplate="body">
+                    <div class="rowbuttons">
+                        <button mat-raised-button color="primary" routerLink="/edit/{{check.ID}}">Edit</button>
+                        <button mat-raised-button color="primary" routerLink="/edit/{{check.ID}}/copy">Copy</button>
+                        <button mat-raised-button color="primary" (click)="run(check)">Run</button>
+                    </div>
+                </ng-template>
+            </p-column>
+        </p-dataTable>
+    </div>
+    <div class="ui-g-0 ui-md-1 ui-xl-2"></div>
+</div>

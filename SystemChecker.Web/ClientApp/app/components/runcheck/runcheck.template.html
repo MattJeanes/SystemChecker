@@ -1,0 +1,7 @@
+<div *ngIf="check">
+    <h1>Run check {{check.Name}}</h1>
+    <button mat-button mat-raised-button color="accent" [disabled]="running" (click)="close()">Close</button>
+    <button mat-button mat-raised-button color="primary" [disabled]="running" (click)="run()">Re-run</button>
+    <button mat-button mat-raised-button color="primary" [disabled]="running" (click)="clear()">Clear log</button>
+    <pre autoScroll><div *ngFor="let message of log"><span [class]="CheckLogType[message.Type].toLowerCase()">{{CheckLogType[message.Type]}}</span><span>: {{message.Message}}</span></div></pre>
+</div>

@@ -1,0 +1,34 @@
+<div class="container">
+    <div *ngIf="option.OptionType === CheckTypeOptionType.Boolean">
+        <mat-checkbox type="checkbox" [(ngModel)]="value" [required]="option.IsRequired">{{option.Label}}</mat-checkbox>
+    </div>
+    <div *ngIf="option.OptionType === CheckTypeOptionType.String">
+        <mat-form-field>
+            <input matInput type="text" [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired" />
+        </mat-form-field>
+    </div>
+    <div *ngIf="option.OptionType === CheckTypeOptionType.Number">
+        <mat-form-field>
+            <input matInput type="number" [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired" />
+        </mat-form-field>
+    </div>
+    <div *ngIf="option.OptionType === CheckTypeOptionType.Date">
+        <mat-form-field>
+            <input matInput [matDatepicker]="picker" [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired">
+            <mat-datepicker-toggle mdSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+    </div>
+    <div *ngIf="option.OptionType === CheckTypeOptionType.Login">
+        <mat-select *ngIf="settings" [placeholder]="option.Label" [(ngModel)]="value">
+            <mat-option [value]="undefined">None</mat-option>
+            <mat-option *ngFor="let login of settings.Logins" [value]="login.ID">{{login.Username}}</mat-option>
+        </mat-select>
+    </div>
+    <div *ngIf="option.OptionType === CheckTypeOptionType.ConnString">
+        <mat-select *ngIf="settings" [placeholder]="option.Label" [(ngModel)]="value">
+            <mat-option [value]="undefined">None</mat-option>
+            <mat-option *ngFor="let connString of settings.ConnStrings" [value]="connString.ID">{{connString.Name}}</mat-option>
+        </mat-select>
+    </div>
+</div>
