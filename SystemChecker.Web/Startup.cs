@@ -4,15 +4,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NetEscapades.AspNetCore.SecurityHeaders;
 
 namespace SystemChecker.Web
 {
     public class Startup
     {
+        private IHostingEnvironment _env;
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -21,6 +25,7 @@ namespace SystemChecker.Web
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
+            _env = env;
         }
 
         public IConfigurationRoot Configuration { get; }
@@ -28,6 +33,14 @@ namespace SystemChecker.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            if (!_env.IsDevelopment())
+            {
+                services.Configure<MvcOptions>(options =>
+                {
+                    options.Filters.Add(new RequireHttpsAttribute());
+                });
+                services.AddCustomHeaders();
+            }
             // Add framework services.
             services.AddMvc();
         }
@@ -49,6 +62,10 @@ namespace SystemChecker.Web
             }
             else
             {
+                var options = new RewriteOptions()
+                   .AddRedirectToHttps();
+                app.UseRewriter(options);
+                app.UseCustomHeadersMiddleware(new HeaderPolicyCollection().AddDefaultSecurityHeaders());
                 app.UseExceptionHandler("/Home/Error");
             }
 
