@@ -48,7 +48,7 @@ export class SettingsComponent implements OnInit {
         const connStringGroups = this.settings.ConnStrings.map(connString => this.formBuilder.group({
             id: connString.ID,
             name: [connString.Name, Validators.required],
-            connString: [connString.ConnString, Validators.required],
+            connString: [connString.Value, Validators.required],
         }));
         while (this.connStrings.length) {
             this.connStrings.removeAt(0);
@@ -107,7 +107,7 @@ export class SettingsComponent implements OnInit {
         this.settings.ConnStrings = model.connStrings.map((connString: any): IConnString => ({
             ID: connString.id,
             Name: connString.name,
-            ConnString: connString.connString,
+            Value: connString.connString,
         }));
     }
     private createForm() {

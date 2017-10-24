@@ -13,9 +13,11 @@
                             <mat-form-field class="ui-g-12 full">
                                 <input matInput placeholder="Name" formControlName="name">
                             </mat-form-field>
-                            <mat-select class="ui-g-12" placeholder="Type" formControlName="type" (change)="onTypeChange()">
-                                <mat-option *ngFor="let type of types" [value]="type.ID">{{type.Name}}</mat-option>
-                            </mat-select>
+                            <mat-form-field class="ui-g-12 full">
+                                <mat-select placeholder="Type" formControlName="type" (change)="onTypeChange()">
+                                    <mat-option *ngFor="let type of types" [value]="type.ID">{{type.Name}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
                             <br />
                             <div class="full" formArrayName="options">
                                 <div class="header ui-g-12" *ngIf="options.controls.length>0">Type settings</div>

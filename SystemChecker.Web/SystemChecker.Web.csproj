@@ -3,6 +3,7 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <Version>1.0.0-dev</Version>
+    <TypeScriptToolsVersion>2.4</TypeScriptToolsVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0" />
@@ -10,15 +11,18 @@
     <PackageReference Include="Microsoft.AspNetCore.Rewrite" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0" />
+    <PackageReference Include="***REMOVED***" Version="2.1.17884.8902" />
     <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.4.1" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="ClientApp\**" />
-    
-    <Compile Remove="wwwroot\dist\**" />
-    <Content Remove="wwwroot\dist\**" />
-    <EmbeddedResource Remove="wwwroot\dist\**" />
-    <None Remove="wwwroot\dist\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="wwwroot\dist\main.js" />
+    <None Include="wwwroot\dist\vendor.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SystemChecker.Model\SystemChecker.Model.csproj" />
   </ItemGroup>
   <Target Name="NpmCommandsDebug" Condition="'$(Configuration)'=='Debug'" AfterTargets="Build">
     <Exec Command="npm run-script vendor" />

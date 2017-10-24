@@ -11,6 +11,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NetEscapades.AspNetCore.SecurityHeaders;
+using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json;
+using ***REMOVED***;
 
 namespace SystemChecker.Web
 {
@@ -42,7 +45,13 @@ namespace SystemChecker.Web
                 services.AddCustomHeaders();
             }
             // Add framework services.
-            services.AddMvc();
+            services
+                .AddMvc()
+                .AddJsonOptions(options =>
+                {
+                    options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,9 +60,10 @@ namespace SystemChecker.Web
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
+            app.UseErrorHandlingMiddleware();
+
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
                 app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
                 {
                     HotModuleReplacement = true,
@@ -66,7 +76,6 @@ namespace SystemChecker.Web
                    .AddRedirectToHttps();
                 app.UseRewriter(options);
                 app.UseCustomHeadersMiddleware(new HeaderPolicyCollection().AddDefaultSecurityHeaders());
-                app.UseExceptionHandler("/Home/Error");
             }
 
             app.UseStaticFiles();

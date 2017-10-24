@@ -19,16 +19,20 @@
             <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
     </div>
-    <div *ngIf="option.OptionType === CheckTypeOptionType.Login">
-        <mat-select *ngIf="settings" [placeholder]="option.Label" [(ngModel)]="value">
-            <mat-option [value]="undefined">None</mat-option>
-            <mat-option *ngFor="let login of settings.Logins" [value]="login.ID">{{login.Username}}</mat-option>
-        </mat-select>
+    <div *ngIf="option.OptionType === CheckTypeOptionType.Login && settings">
+        <mat-form-field>
+            <mat-select [placeholder]="option.Label" [(ngModel)]="value">
+                <mat-option [value]="undefined">None</mat-option>
+                <mat-option *ngFor="let login of settings.Logins" [value]="login.ID">{{login.Username}}</mat-option>
+            </mat-select>
+        </mat-form-field>
     </div>
-    <div *ngIf="option.OptionType === CheckTypeOptionType.ConnString">
-        <mat-select *ngIf="settings" [placeholder]="option.Label" [(ngModel)]="value">
-            <mat-option [value]="undefined">None</mat-option>
-            <mat-option *ngFor="let connString of settings.ConnStrings" [value]="connString.ID">{{connString.Name}}</mat-option>
-        </mat-select>
+    <div *ngIf="option.OptionType === CheckTypeOptionType.ConnString && settings">
+        <mat-form-field>
+            <mat-select [placeholder]="option.Label" [(ngModel)]="value">
+                <mat-option [value]="undefined">None</mat-option>
+                <mat-option *ngFor="let connString of settings.ConnStrings" [value]="connString.ID">{{connString.Name}}</mat-option>
+            </mat-select>
+        </mat-form-field>
     </div>
 </div>

@@ -1,19 +1,4 @@
-﻿export enum RequestType {
-    GetAll,
-    GetDetails,
-    Edit,
-    Delete,
-    GetTypes,
-    GetSettings,
-    SetSettings,
-    Run,
-}
-
-export enum ResponseType {
-    Run,
-}
-
-export enum CheckTypeOptionType {
+﻿export enum CheckTypeOptionType {
     Boolean = 1,
     String = 2,
     Number = 3,
@@ -23,8 +8,8 @@ export enum CheckTypeOptionType {
 }
 
 export enum CheckLogType {
-    Info,
-    Warn,
-    Error,
-    Done,
+    Info = 1,
+    Warn = 2,
+    Error = 3,
+    Done = 4,
 }

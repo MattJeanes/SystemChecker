@@ -39,7 +39,7 @@ export class AppService {
         return await this.webService.get<ISettings>("settings");
     }
     public async setSettings(settings: ISettings) {
-        return await this.webService.post<ISettings>( { data: settings });
+        return await this.webService.post<ISettings>({ path: "settings", data: settings });
     }
     public async startRun(id: number) {
         return await this.webService.post<boolean>(`run/${id}`);

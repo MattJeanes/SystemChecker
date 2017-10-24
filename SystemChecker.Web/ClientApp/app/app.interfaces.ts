@@ -47,7 +47,7 @@ export interface ILogin {
 export interface IConnString {
     ID: number;
     Name: string;
-    ConnString: string;
+    Value: string;
 }
 
 export interface ISettings {
