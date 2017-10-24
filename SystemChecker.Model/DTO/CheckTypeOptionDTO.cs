@@ -1,8 +1,8 @@
 using SystemChecker.Model.Enums;
 
-namespace SystemChecker.Model.Data
+namespace SystemChecker.Model.DTO
 {
-    public class CheckTypeOption
+    public class CheckTypeOptionDTO
     {
         public int ID { get; set; }
         public CheckTypeOptionType OptionType { get; set; }

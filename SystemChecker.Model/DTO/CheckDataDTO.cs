@@ -1,6 +1,6 @@
-namespace SystemChecker.Model.Data
+namespace SystemChecker.Model.DTO
 {
-    public class CheckData
+    public class CheckDataDTO
     {
         public dynamic TypeOptions { get; set; }
     }

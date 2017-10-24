@@ -1,6 +1,6 @@
-namespace SystemChecker.Model.Data
+namespace SystemChecker.Model.DTO
 {
-    public class Login
+    public class LoginDTO
     {
         public int ID { get; set; }
         public string Username { get; set; }

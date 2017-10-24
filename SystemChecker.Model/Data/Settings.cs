@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using SystemChecker.Model.DTO;
 
 namespace SystemChecker.Model.Data
 {
     public class Settings
     {
-        public List<Login> Logins { get; set; }
-        public List<ConnString> ConnStrings { get; set; }
+        public List<LoginDTO> Logins { get; set; }
+        public List<ConnStringDTO> ConnStrings { get; set; }
     }
 }

@@ -1,6 +1,6 @@
-namespace SystemChecker.Model.Data
+namespace SystemChecker.Model.DTO
 {
-    public class ConnString
+    public class ConnStringDTO
     {
         public int ID { get; set; }
         public string Name { get; set; }

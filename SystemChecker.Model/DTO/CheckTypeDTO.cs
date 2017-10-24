@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 
-namespace SystemChecker.Model.Data
+namespace SystemChecker.Model.DTO
 {
-    public class CheckType
+    public class CheckTypeDTO
     {
         public int ID { get; set; }
         public string Name { get; set; }
-        public List<CheckTypeOption> Options { get; set; }
+        public List<CheckTypeOptionDTO> Options { get; set; }
     }
 }
