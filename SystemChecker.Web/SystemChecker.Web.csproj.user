@@ -3,5 +3,9 @@
   <PropertyGroup>
     <ToolsVersionPromptShown>0.0</ToolsVersionPromptShown>
     <ShowAllFiles>true</ShowAllFiles>
+    <ActiveDebugProfile>Service</ActiveDebugProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

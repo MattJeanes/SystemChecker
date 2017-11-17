@@ -19,6 +19,11 @@ using SystemChecker.Model.Data;
 using SystemChecker.Model.Data.Helpers;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using Quartz;
+using Quartz.Impl;
+using SystemChecker.Model;
+using Quartz.Spi;
+using SystemChecker.Model.Jobs;
 
 namespace SystemChecker.Web
 {
@@ -63,6 +68,15 @@ namespace SystemChecker.Web
             builder.UseSqlServer(Configuration.GetConnectionString("SystemChecker"));
             services.AddScoped<ICheckerUow>(_ => new CheckerUow(new RepositoryProvider(new RepositoryFactories()), builder.Options));
             services.AddSingleton<IMapper>(_ => new Mapper(new MapperConfiguration(x => x.AddProfile<MappingProfile>())));
+            services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+            services.AddSingleton<ISchedulerManager, SchedulerManager>();
+            services.AddSingleton<IJobFactory, JobFactory>();
+
+            services.AddOptions();
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+
+            // Jobs
+            services.AddTransient<ScheduleUpdater>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
