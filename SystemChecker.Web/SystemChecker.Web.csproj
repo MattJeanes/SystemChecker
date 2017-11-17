@@ -5,6 +5,9 @@
     <Version>1.0.0-dev</Version>
     <TypeScriptToolsVersion>2.4</TypeScriptToolsVersion>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <WarningsAsErrors>NU1605</WarningsAsErrors>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="2.0.1" />
@@ -13,8 +16,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Rewrite" Version="2.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="2.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.1" />
+    <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
     <PackageReference Include="***REMOVED***" Version="2.1.19130.10145" />
-    <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.4.1" />
     <PackageReference Include="Quartz" Version="2.6.1" />
   </ItemGroup>
   <ItemGroup>

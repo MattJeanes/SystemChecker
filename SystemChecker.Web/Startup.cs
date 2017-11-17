@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NetEscapades.AspNetCore.SecurityHeaders;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using ***REMOVED***;
@@ -46,14 +45,6 @@ namespace SystemChecker.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            if (!_env.IsDevelopment())
-            {
-                services.Configure<MvcOptions>(options =>
-                {
-                    options.Filters.Add(new RequireHttpsAttribute());
-                });
-                services.AddCustomHeaders();
-            }
             // Add framework services.
             services
                 .AddMvc()
@@ -94,13 +85,6 @@ namespace SystemChecker.Web
                     HotModuleReplacement = true,
                     ConfigFile = "webpack.dev.js"
                 });
-            }
-            else
-            {
-                var options = new RewriteOptions()
-                   .AddRedirectToHttps();
-                app.UseRewriter(options);
-                app.UseCustomHeadersMiddleware(new HeaderPolicyCollection().AddDefaultSecurityHeaders());
             }
 
             app.UseStaticFiles();

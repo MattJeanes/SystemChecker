@@ -13,7 +13,12 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "applicationUrl": ""
+    },
+    "Executable": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 5123"
     }
   }
 }
