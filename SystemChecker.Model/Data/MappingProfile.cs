@@ -13,10 +13,12 @@ namespace SystemChecker.Model.Data
     {
         public MappingProfile()
         {
-            CreateMap<CheckDataDTO, CheckData>().ReverseMap();
-            CreateMap<CheckDetailDTO, Check>().ReverseMap();
-            CreateMap<CheckDTO, Check>().ReverseMap();
             CreateMap<CheckScheduleDTO, CheckSchedule>().ReverseMap();
+            CreateMap<CheckDataDTO, CheckData>().ReverseMap();
+            CreateMap<CheckDetailDTO, Check>()
+                .ForMember(d => d.Schedules, o => o.UseDestinationValue())
+                .ReverseMap();
+            CreateMap<CheckDTO, Check>().ReverseMap();
             CreateMap<CheckTypeDTO, CheckType>().ReverseMap();
             CreateMap<CheckTypeOptionDTO, CheckTypeOption>().ReverseMap();
             CreateMap<ConnStringDTO, ConnString>().ReverseMap();

@@ -10,6 +10,7 @@ namespace SystemChecker.Model.Data.Interfaces
         Task<T> GetById(int id);
         void Add(T entity);
         void Update(T entity);
+        void Detach(T entity);
         void Delete(T entity);
         void Delete(int id);
     }

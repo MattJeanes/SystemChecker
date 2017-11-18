@@ -18,7 +18,12 @@
     },
     "Executable": {
       "commandName": "Project",
-      "commandLineArgs": "--port 5123"
+      "commandLineArgs": "--port 51114",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:51114/"
     }
   }
 }

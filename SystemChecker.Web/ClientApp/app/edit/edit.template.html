@@ -32,9 +32,11 @@
                             <div formArrayName="schedules">
                                 <div *ngFor="let schedule of schedules.controls; let i=index" [formGroupName]="i">
                                     <mat-form-field class="ui-g-12 full">
-                                        <input matInput placeholder="second minute hour day-of-month month day-of-week" formControlName="expression">
+                                        <input matInput (keyup)="validateExpression(i)" placeholder="second minute hour day-of-month month day-of-week" formControlName="expression">
                                     </mat-form-field>
-                                    <div [innerHTML]="validateExpression(i)"></div>
+                                    <mat-form-field class="ui-g-12 full">
+                                        <textarea autosize matInput formControlName="next"></textarea>
+                                    </mat-form-field>
                                     <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
                                     <button mat-raised-button color="warn" (click)="deleteSchedule(i)">Delete</button>
                                     <hr *ngIf="i < schedules.controls.length-1" class="schedule-break">

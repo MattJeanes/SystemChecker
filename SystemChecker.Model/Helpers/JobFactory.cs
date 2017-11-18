@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Quartz;
 
-namespace SystemChecker.Model
+namespace SystemChecker.Model.Helpers
 {
     public class JobFactory : IJobFactory
     {

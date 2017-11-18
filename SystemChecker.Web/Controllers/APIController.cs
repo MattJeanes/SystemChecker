@@ -10,6 +10,8 @@ using SystemChecker.Model.Data.Interfaces;
 using SystemChecker.Model.DTO;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Quartz;
+using SystemChecker.Model;
 
 namespace SystemChecker.Web.Controllers
 {
@@ -18,9 +20,12 @@ namespace SystemChecker.Web.Controllers
     {
         private readonly ICheckerUow _uow;
         private readonly IMapper _mapper;
-        public APIController(ICheckerUow uow, IMapper mapper) {
+        private readonly ISchedulerManager _manager;
+        public APIController(ICheckerUow uow, IMapper mapper, ISchedulerManager manager)
+        {
             _uow = uow;
             _mapper = mapper;
+            _manager = manager;
         }
 
         [HttpGet]
@@ -49,16 +54,61 @@ namespace SystemChecker.Web.Controllers
         {
             var logins = await _uow.Logins.GetAll().ToListAsync();
             var connStrings = await _uow.ConnStrings.GetAll().ToListAsync();
-            return new Settings {
+            return new Settings
+            {
                 Logins = _mapper.Map<List<LoginDTO>>(logins),
                 ConnStrings = _mapper.Map<List<ConnStringDTO>>(connStrings)
             };
         }
 
         [HttpPost]
-        public CheckDetailDTO Edit([FromBody]CheckDetailDTO value)
+        public async Task<CheckDetailDTO> Edit([FromBody]CheckDetailDTO value)
         {
-            return value;
+            Check check;
+            if (value.ID > 0)
+            {
+                check = await _uow.Checks.GetDetails(value.ID);
+            }
+            else
+            {
+                check = new Check();
+            }
+            foreach (var schedule in check.Schedules)
+            {
+                if (!value.Schedules.Exists(x => x.ID == schedule.ID))
+                {
+                    _uow.CheckSchedules.Delete(schedule);
+                }
+                else
+                {
+                    _uow.CheckSchedules.Detach(schedule);
+                }
+            }
+
+            _mapper.Map(value, check);
+
+            if (check.ID > 0)
+            {
+                _uow.Checks.Update(check);
+            }
+            else
+            {
+                _uow.Checks.Add(check);
+            }
+            foreach (var schedule in check.Schedules)
+            {
+                if (schedule.ID > 0)
+                {
+                    _uow.CheckSchedules.Update(schedule);
+                }
+                else
+                {
+                    _uow.CheckSchedules.Add(schedule);
+                }
+            }
+            await _uow.Commit();
+            _manager.UpdateSchedule(check);
+            return await GetDetails(check.ID);
         }
 
         [HttpPost("settings")]
@@ -77,6 +127,49 @@ namespace SystemChecker.Web.Controllers
         public bool Delete(int id)
         {
             return true;
+        }
+
+        [HttpPost("cron/{validateOnly:bool?}")]
+        public object ValidateCronExpression(bool? validateOnly, [FromBody]string cron)
+        {
+            try
+            {
+                var expression = new CronExpression(cron);
+                if (validateOnly ?? false)
+                {
+                    return new
+                    {
+                        valid = true
+                    };
+                }
+                DateTimeOffset? time = DateTimeOffset.UtcNow;
+                var count = 5;
+                var next = "";
+                while (count > 0)
+                {
+                    count--;
+                    time = expression.GetTimeAfter(time.Value);
+                    if (!time.HasValue)
+                    {
+                        break;
+                    }
+                    next += time.Value.DateTime.ToString("yyyy-mm-dd HH:mm:ss") + "\n";
+                }
+                next += "\n" + expression.GetExpressionSummary();
+                return new
+                {
+                    valid = true,
+                    next = next
+                };
+            }
+            catch (Exception e)
+            {
+                return new
+                {
+                    valid = false,
+                    error = e.Message
+                };
+            }
         }
     }
 }

@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SystemChecker.Model.Enums;
 
 namespace SystemChecker.Model.Data.Entities
 {
@@ -17,6 +18,9 @@ namespace SystemChecker.Model.Data.Entities
         public string Name { get; set; }
 
         public bool Active { get; set; }
+
+        [Column("TypeID")]
+        public CheckType Type { get; set; }
 
         public int TypeID { get; set; }
 

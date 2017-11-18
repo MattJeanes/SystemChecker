@@ -51,6 +51,12 @@ namespace SystemChecker.Model.Data.Repositories
             dbEntityEntry.State = EntityState.Modified;
         }
 
+        public virtual void Detach(T entity)
+        {
+            var dbEntityEntry = DbContext.Entry(entity);
+            dbEntityEntry.State = EntityState.Detached;
+        }
+
         public virtual void Delete(T entity)
         {
             var dbEntityEntry = DbContext.Entry(entity);

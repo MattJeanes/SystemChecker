@@ -23,6 +23,7 @@ using Quartz.Impl;
 using SystemChecker.Model;
 using Quartz.Spi;
 using SystemChecker.Model.Jobs;
+using SystemChecker.Model.Helpers;
 
 namespace SystemChecker.Web
 {
@@ -67,7 +68,8 @@ namespace SystemChecker.Web
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             // Jobs
-            services.AddTransient<ScheduleUpdater>();
+            services.AddTransient<DatabaseChecker>();
+            services.AddTransient<WebRequestChecker>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -9,5 +9,6 @@ namespace SystemChecker.Model.Data.Interfaces
         IRepository<Login> Logins { get; }
         IRepository<ConnString> ConnStrings { get; }
         ICheckTypeRepository CheckTypes { get; }
+        IRepository<CheckSchedule> CheckSchedules { get; }
     }
 }

@@ -102,10 +102,6 @@
   dependencies:
     "@types/webpack" "*"
 
-"@types/later@^1.2.3":
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/@types/later/-/later-1.2.3.tgz#7f14cdc70cc964a00dc78c5dd6eb4e34c4ccb41e"
-
 "@types/node@*", "@types/node@^6.0.46":
   version "6.0.90"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-6.0.90.tgz#0ed74833fa1b73dcdb9409dcb1c97ec0a8b13b02"
@@ -2682,10 +2678,6 @@ kind-of@^5.0.0, kind-of@^5.0.2:
 kind-of@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-6.0.0.tgz#3606e9e2fa960e7ddaa8898c03804e47e5d66644"
-
-later@RickCarlino/later:
-  version "1.2.0"
-  resolved "https://codeload.github.com/RickCarlino/later/tar.gz/fc9ceb582728f75edbf9581e4f53da5fbb8cd4ac"
 
 lazy-cache@^0.2.3:
   version "0.2.7"

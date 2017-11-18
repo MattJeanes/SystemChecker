@@ -23,7 +23,7 @@ export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy 
 
     public CheckTypeOptionType = CheckTypeOptionType;
 
-    // tslint:disable:variable-name
+    // tslint:disable-next-line:variable-name
     private _value: number = 0;
 
     get value() {

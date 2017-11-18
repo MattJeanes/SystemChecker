@@ -41,6 +41,8 @@ import {
     CovalentDialogsModule,
 } from "@covalent/core";
 
+import { Autosize } from "./directives";
+
 const routes: Routes = [
     { path: "", redirectTo: "dashboard", pathMatch: "full" },
     { path: "dashboard", component: DashboardComponent },
@@ -81,6 +83,7 @@ const routes: Routes = [
         SettingsComponent,
         RunCheckComponent,
         PageNotFoundComponent,
+        Autosize,
     ],
     exports: [
         RouterModule,

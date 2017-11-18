@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace SystemChecker.Model.Data.Repositories
 {
@@ -14,11 +15,23 @@ namespace SystemChecker.Model.Data.Repositories
 
         public async Task<Check> GetDetails(int id)
         {
-            return await GetAll()
+            return await GetDetailsQuery()
                 .Where(x => x.ID == id)
-                .Include("Schedules")
-                .Include("Data")
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<Check>> GetDetails()
+        {
+            return await GetDetailsQuery()
+                .ToListAsync();
+        }
+
+        private IQueryable<Check> GetDetailsQuery()
+        {
+            return GetAll()
+                .Include(x => x.Schedules)
+                .Include(x => x.Data)
+                .Include(x => x.Type);
         }
     }
 }

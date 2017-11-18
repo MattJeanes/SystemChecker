@@ -55,4 +55,10 @@ export class AppService {
             .first()
             .toPromise() as Promise<void>;
     }
+    public async validateCronExpression(cron: string, validateOnly?: boolean) {
+        return await this.webService.post<{ valid: boolean, next?: string; error?: string }>({
+            path: "cron" + (typeof validateOnly !== "undefined" ? "/" + validateOnly.toString() : ""),
+            data: cron,
+        });
+    }
 }

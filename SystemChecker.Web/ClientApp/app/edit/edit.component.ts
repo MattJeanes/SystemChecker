@@ -2,17 +2,23 @@ import { Location } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
-import * as later from "later";
 
 import { ICheckDetail, ICheckSchedule, ICheckType, ICheckTypeOption, ISettings } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
 import { AppService, MessageService, UtilService } from "../services";
 
-const cronValidRegex = /^(\*|((\*\/)?[1-5]?[0-9])) (\*|((\*\/)?[1-5]?[0-9])) (\*|((\*\/)?(1?[0-9]|2[0-3]))) (\*|((\*\/)?([1-9]|[12][0-9]|3[0-1]))) (\*|((\*\/)?([1-9]|1[0-2]))) (\*|((\*\/)?[0-6]))$/;
-
-export function cronValidator(): ValidatorFn {
+export function cronValidator(appService: AppService): ValidatorFn {
     return async (control: AbstractControl): Promise<ValidationErrors | null> => {
-        if (!cronValidRegex.test(control.value)) {
+        let valid = true;
+        try {
+            const validate = await appService.validateCronExpression(control.value, true);
+            if (!validate.valid) {
+                valid = false;
+            }
+        } catch (e) {
+            valid = false;
+        }
+        if (!valid) {
             return { invalidCron: { value: control.value } };
         } else {
             return null;
@@ -91,8 +97,9 @@ export class EditComponent implements OnInit {
     }
     public addSchedule() {
         this.schedules.push(this.formBuilder.group({
-            expression: ["", Validators.required, cronValidator()],
+            expression: ["", Validators.required, cronValidator(this.appService)],
             active: true,
+            next: { value: "", disabled: true },
         }));
         this.form.markAsDirty();
     }
@@ -100,17 +107,28 @@ export class EditComponent implements OnInit {
         this.schedules.removeAt(index);
         this.form.markAsDirty();
     }
-    public validateExpression(index: number) {
+    public async validateExpression(index: number | AbstractControl) {
+        let nextField: AbstractControl | null = null;
+        let value: string = "";
         try {
-            const schedule = this.schedules.get(index.toString());
-            if (!schedule) { return "Invalid schedule"; }
+            const schedule = typeof (index) === "number" ? this.schedules.get(index.toString()) : index;
+            if (!schedule) { throw new Error("Invalid schedule"); }
             const expression = schedule.get("expression")!.value;
-            if (!expression || !cronValidRegex.test(expression)) { return "Invalid cron expression"; }
-            const data = later.parse.cron(expression, true);
-            const next = later.schedule(data).next(5).map(x => x.toLocaleString()).join("<br />");
-            return next;
+            if (!expression) { throw new Error("Expression is required"); }
+            nextField = schedule.get("next")!;
+            const validate = await this.appService.validateCronExpression(expression);
+            if (validate.valid && validate.next) {
+                value = validate.next;
+            } else if (validate.error) {
+                value = validate.error;
+            } else {
+                value = "Unknown error";
+            }
         } catch (e) {
-            return e.toString();
+            value = e.toString();
+        }
+        if (nextField) {
+            nextField.setValue(value);
         }
     }
     public updateForm() {
@@ -122,8 +140,9 @@ export class EditComponent implements OnInit {
 
         const scheduleGroups = this.check.Schedules.map(schedule => this.formBuilder.group({
             id: schedule.ID,
-            expression: [schedule.Expression ? schedule.Expression : "", Validators.required, cronValidator()],
+            expression: [schedule.Expression ? schedule.Expression : "", Validators.required, cronValidator(this.appService)],
             active: schedule.Active,
+            next: { value: "", disabled: true },
         }));
 
         // Workaround, using `this.form.setControl("schedules", this.formBuilder.array([]));` seems to break stuff
@@ -132,6 +151,10 @@ export class EditComponent implements OnInit {
         }
         for (const group of scheduleGroups) {
             this.schedules.push(group);
+        }
+
+        for (const control of this.schedules.controls) {
+            this.validateExpression(control);
         }
 
         const type = this.types.find(x => x.ID === this.check.TypeID);
