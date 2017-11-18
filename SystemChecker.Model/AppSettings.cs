@@ -8,6 +8,7 @@ namespace SystemChecker.Model
 {
     public class AppSettings
     {
-        public int UpdateInterval { get; set; }
+        public string EncryptionKey { get; set; }
+        public int EncryptionKeySize { get; set; }
     }
 }

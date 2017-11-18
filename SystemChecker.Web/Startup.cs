@@ -63,6 +63,7 @@ namespace SystemChecker.Web
             services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
             services.AddSingleton<ISchedulerManager, SchedulerManager>();
             services.AddSingleton<IJobFactory, JobFactory>();
+            services.AddSingleton<IEncryptionHelper, EncryptionHelper>();
 
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));

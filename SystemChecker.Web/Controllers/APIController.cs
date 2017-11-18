@@ -12,6 +12,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 using SystemChecker.Model;
+using SystemChecker.Model.Helpers;
 
 namespace SystemChecker.Web.Controllers
 {
@@ -21,11 +22,13 @@ namespace SystemChecker.Web.Controllers
         private readonly ICheckerUow _uow;
         private readonly IMapper _mapper;
         private readonly ISchedulerManager _manager;
-        public APIController(ICheckerUow uow, IMapper mapper, ISchedulerManager manager)
+        private readonly IEncryptionHelper _encryptionHelper;
+        public APIController(ICheckerUow uow, IMapper mapper, ISchedulerManager manager, IEncryptionHelper encryptionHelper)
         {
             _uow = uow;
             _mapper = mapper;
             _manager = manager;
+            _encryptionHelper = encryptionHelper;
         }
 
         [HttpGet]
@@ -53,7 +56,15 @@ namespace SystemChecker.Web.Controllers
         public async Task<Settings> GetSettings()
         {
             var logins = await _uow.Logins.GetAll().ToListAsync();
+            foreach (var login in logins)
+            {
+                login.Password = _encryptionHelper.Decrypt(login.Password);
+            }
             var connStrings = await _uow.ConnStrings.GetAll().ToListAsync();
+            foreach (var connString in connStrings)
+            {
+                connString.Value = _encryptionHelper.Decrypt(connString.Value);
+            }
             return new Settings
             {
                 Logins = _mapper.Map<List<LoginDTO>>(logins),
@@ -71,8 +82,12 @@ namespace SystemChecker.Web.Controllers
             }
             else
             {
-                check = new Check();
+                check = new Check
+                {
+                    Schedules = new List<CheckSchedule>()
+                };
             }
+
             foreach (var schedule in check.Schedules)
             {
                 if (!value.Schedules.Exists(x => x.ID == schedule.ID))
@@ -95,6 +110,7 @@ namespace SystemChecker.Web.Controllers
             {
                 _uow.Checks.Add(check);
             }
+
             foreach (var schedule in check.Schedules)
             {
                 if (schedule.ID > 0)
@@ -106,26 +122,88 @@ namespace SystemChecker.Web.Controllers
                     _uow.CheckSchedules.Add(schedule);
                 }
             }
+
             await _uow.Commit();
             _manager.UpdateSchedule(check);
             return await GetDetails(check.ID);
         }
 
         [HttpPost("settings")]
-        public Settings SetSettings([FromBody]Settings value)
+        public async Task<Settings> SetSettings([FromBody]Settings value)
         {
-            return value;
+            var logins = await _uow.Logins.GetAll().ToListAsync();
+            foreach (var login in logins)
+            {
+                if (!value.Logins.Exists(x => x.ID == login.ID))
+                {
+                    _uow.Logins.Delete(login);
+                }
+                else
+                {
+                    _uow.Logins.Detach(login);
+                }
+            }
+            _mapper.Map(value.Logins, logins);
+            foreach (var login in logins)
+            {
+                login.Password = _encryptionHelper.Encrypt(login.Password);
+                if (login.ID > 0)
+                {
+                    _uow.Logins.Update(login);
+                }
+                else
+                {
+                    _uow.Logins.Add(login);
+                }
+            }
+
+            var connStrings = await _uow.ConnStrings.GetAll().ToListAsync();
+            foreach (var connString in connStrings)
+            {
+                if (!value.ConnStrings.Exists(x => x.ID == connString.ID))
+                {
+                    _uow.ConnStrings.Delete(connString);
+                }
+                else
+                {
+                    _uow.ConnStrings.Detach(connString);
+                }
+            }
+            _mapper.Map(value.ConnStrings, connStrings);
+            foreach (var connString in connStrings)
+            {
+                connString.Value = _encryptionHelper.Encrypt(connString.Value);
+                if (connString.ID > 0)
+                {
+                    _uow.ConnStrings.Update(connString);
+                }
+                else
+                {
+                    _uow.ConnStrings.Add(connString);
+                }
+            }
+
+            await _uow.Commit();
+            return await GetSettings();
         }
 
         [HttpPost("run/{id:int}")]
-        public bool StartRun(int id)
+        public async Task<bool> StartRun(int id)
         {
             return true;
         }
 
         [HttpDelete("{id:int}")]
-        public bool Delete(int id)
+        public async Task<bool> Delete(int id)
         {
+            var check = await _uow.Checks.GetDetails(id);
+            foreach (var schedule in check.Schedules)
+            {
+                _uow.CheckSchedules.Delete(schedule);
+            }
+            _uow.Checks.Delete(check);
+            _manager.RemoveSchedule(check);
+            await _uow.Commit();
             return true;
         }
 

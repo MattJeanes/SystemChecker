@@ -23,6 +23,7 @@ namespace SystemChecker.Model
         Task UpdateSchedules();
         Task UpdateSchedule(int id);
         void UpdateSchedule(Check check);
+        void RemoveSchedule(Check check);
     }
 
     public class SchedulerManager : ISchedulerManager
@@ -31,6 +32,7 @@ namespace SystemChecker.Model
         private readonly IScheduler _scheduler;
         private readonly AppSettings _appSettings;
         private readonly ICheckerUow _uow;
+        private readonly ILogger _logger;
         public SchedulerManager(ISchedulerFactory factory, IJobFactory jobFactory, IOptions<AppSettings> appSettings, ICheckerUow uow, ILogger<SchedulerManager> logger)
         {
             _factory = factory;
@@ -40,7 +42,9 @@ namespace SystemChecker.Model
             _scheduler.ListenerManager.AddSchedulerListener(new GlobalSchedulerListener(logger));
             _appSettings = appSettings.Value;
             _uow = uow;
+            _logger = logger;
         }
+
         public void Start()
         {
             _scheduler.Start();
@@ -54,7 +58,7 @@ namespace SystemChecker.Model
 
         public async Task UpdateSchedules()
         {
-            var checks = await _uow.Checks.GetDetails();
+            var checks = await _uow.Checks.GetDetails(true);
             foreach (var check in checks)
             {
                 UpdateSchedule(check);
@@ -73,11 +77,8 @@ namespace SystemChecker.Model
 
         public void UpdateSchedule(Check check)
         {
-            var existing = _scheduler.GetJobDetail(GetJobKeyForCheck(check));
-            if (existing != null)
-            {
-                _scheduler.DeleteJob(existing.Key);
-            }
+            RemoveSchedule(check);
+            if (!check.Active) { return; }
             var type = GetJobForCheck(check);
             IDictionary<string, object> data = new Dictionary<string, object>
             {
@@ -90,7 +91,7 @@ namespace SystemChecker.Model
 
             _scheduler.AddJob(job, false, true);
 
-            foreach (var schedule in check.Schedules)
+            foreach (var schedule in check.Schedules.Where(x => x.Active))
             {
                 if (CronExpression.IsValidExpression(schedule.Expression))
                 {
@@ -102,8 +103,22 @@ namespace SystemChecker.Model
 
                     _scheduler.ScheduleJob(trigger);
                 }
+                else
+                {
+                    _logger.LogError($"Failed to create schedule for ID {schedule.ID} on check {check.Name} ({check.ID}): {schedule.Expression}");
+                }
             }
         }
+
+        public void RemoveSchedule(Check check)
+        {
+            var existing = _scheduler.GetJobDetail(GetJobKeyForCheck(check));
+            if (existing != null)
+            {
+                _scheduler.DeleteJob(existing.Key);
+            }
+        }
+
 
         private TriggerKey GetTriggerKeyForSchedule(CheckSchedule schedule)
         {
@@ -117,7 +132,7 @@ namespace SystemChecker.Model
 
         private Type GetJobForCheck(Check check)
         {
-            switch (check.Type.Type)
+            switch ((Enums.CheckType)check.TypeID)
             {
                 case Enums.CheckType.WebRequest:
                     return typeof(WebRequestChecker);

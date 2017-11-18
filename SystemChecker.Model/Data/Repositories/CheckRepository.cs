@@ -20,10 +20,15 @@ namespace SystemChecker.Model.Data.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<List<Check>> GetDetails()
+        public async Task<List<Check>> GetDetails(bool activeOnly = false)
         {
-            return await GetDetailsQuery()
-                .ToListAsync();
+            var query = GetDetailsQuery();
+            if (activeOnly)
+            {
+                query = query.Where(x => x.Active);
+
+            }
+            return await query.ToListAsync();
         }
 
         private IQueryable<Check> GetDetailsQuery()
