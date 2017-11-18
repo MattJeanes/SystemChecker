@@ -53,23 +53,9 @@ namespace SystemChecker.Web.Controllers
         }
 
         [HttpGet("settings")]
-        public async Task<Settings> GetSettings()
+        public async Task<ISettings> GetSettings()
         {
-            var logins = await _uow.Logins.GetAll().ToListAsync();
-            foreach (var login in logins)
-            {
-                login.Password = _encryptionHelper.Decrypt(login.Password);
-            }
-            var connStrings = await _uow.ConnStrings.GetAll().ToListAsync();
-            foreach (var connString in connStrings)
-            {
-                connString.Value = _encryptionHelper.Decrypt(connString.Value);
-            }
-            return new Settings
-            {
-                Logins = _mapper.Map<List<LoginDTO>>(logins),
-                ConnStrings = _mapper.Map<List<ConnStringDTO>>(connStrings)
-            };
+            return await _manager.GetSettings();
         }
 
         [HttpPost]
@@ -124,12 +110,12 @@ namespace SystemChecker.Web.Controllers
             }
 
             await _uow.Commit();
-            _manager.UpdateSchedule(check);
+            await _manager.UpdateSchedule(check);
             return await GetDetails(check.ID);
         }
 
         [HttpPost("settings")]
-        public async Task<Settings> SetSettings([FromBody]Settings value)
+        public async Task<ISettings> SetSettings([FromBody]Settings value)
         {
             var logins = await _uow.Logins.GetAll().ToListAsync();
             foreach (var login in logins)
@@ -188,9 +174,10 @@ namespace SystemChecker.Web.Controllers
         }
 
         [HttpPost("run/{id:int}")]
-        public async Task<bool> StartRun(int id)
+        public async Task<List<RunLog>> Run(int id)
         {
-            return true;
+            var check = await _uow.Checks.GetDetails(id);
+            return await _manager.RunCheck(check);
         }
 
         [HttpDelete("{id:int}")]
@@ -202,7 +189,7 @@ namespace SystemChecker.Web.Controllers
                 _uow.CheckSchedules.Delete(schedule);
             }
             _uow.Checks.Delete(check);
-            _manager.RemoveSchedule(check);
+            await _manager.RemoveSchedule(check);
             await _uow.Commit();
             return true;
         }

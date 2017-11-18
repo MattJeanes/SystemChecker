@@ -13,6 +13,11 @@ using SystemChecker.Model.Data.Entities;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SystemChecker.Model.Listeners;
+using SystemChecker.Model.Helpers;
+using SystemChecker.Model.Loggers;
+using SystemChecker.Model.Data;
+using AutoMapper;
+using SystemChecker.Model.DTO;
 
 namespace SystemChecker.Model
 {
@@ -22,8 +27,10 @@ namespace SystemChecker.Model
         void Stop();
         Task UpdateSchedules();
         Task UpdateSchedule(int id);
-        void UpdateSchedule(Check check);
-        void RemoveSchedule(Check check);
+        Task UpdateSchedule(Check check);
+        Task RemoveSchedule(Check check);
+        Task<List<RunLog>> RunCheck(Check check);
+        Task<ISettings> GetSettings();
     }
 
     public class SchedulerManager : ISchedulerManager
@@ -33,27 +40,39 @@ namespace SystemChecker.Model
         private readonly AppSettings _appSettings;
         private readonly ICheckerUow _uow;
         private readonly ILogger _logger;
-        public SchedulerManager(ISchedulerFactory factory, IJobFactory jobFactory, IOptions<AppSettings> appSettings, ICheckerUow uow, ILogger<SchedulerManager> logger)
+        private readonly IServiceProvider _container;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly ICheckLogger _checkLogger;
+        private readonly IEncryptionHelper _encryptionHelper;
+        private readonly IMapper _mapper;
+        public SchedulerManager(ISchedulerFactory factory, IJobFactory jobFactory, IOptions<AppSettings> appSettings, ICheckerUow uow,
+            ILogger<SchedulerManager> logger, IServiceProvider container, ILoggerFactory loggerFactory, ICheckLogger checkLogger,
+            IEncryptionHelper encryptionHelper, IMapper mapper)
         {
             _factory = factory;
-            _scheduler = factory.GetScheduler();
+            _scheduler = factory.GetScheduler().Result;
             _scheduler.JobFactory = jobFactory;
-            _scheduler.ListenerManager.AddJobListener(new GlobalJobListener(logger), GroupMatcher<JobKey>.AnyGroup());
-            _scheduler.ListenerManager.AddSchedulerListener(new GlobalSchedulerListener(logger));
+            _scheduler.ListenerManager.AddJobListener(new GlobalJobListener(loggerFactory.CreateLogger<GlobalJobListener>()), GroupMatcher<JobKey>.AnyGroup());
+            _scheduler.ListenerManager.AddSchedulerListener(new GlobalSchedulerListener(loggerFactory.CreateLogger<GlobalSchedulerListener>()));
             _appSettings = appSettings.Value;
             _uow = uow;
             _logger = logger;
+            _container = container;
+            _loggerFactory = loggerFactory;
+            _checkLogger = checkLogger;
+            _encryptionHelper = encryptionHelper;
+            _mapper = mapper;
         }
 
         public void Start()
         {
-            _scheduler.Start();
+            _scheduler.Start().Wait();
             UpdateSchedules().Wait();
         }
 
         public void Stop()
         {
-            _scheduler.Shutdown(true);
+            _scheduler.Shutdown(true).Wait();
         }
 
         public async Task UpdateSchedules()
@@ -61,7 +80,7 @@ namespace SystemChecker.Model
             var checks = await _uow.Checks.GetDetails(true);
             foreach (var check in checks)
             {
-                UpdateSchedule(check);
+                await UpdateSchedule(check);
             }
         }
 
@@ -72,24 +91,25 @@ namespace SystemChecker.Model
             {
                 throw new InvalidOperationException($"Check {id} does not exist");
             }
-            UpdateSchedule(check);
+            await UpdateSchedule(check);
         }
 
-        public void UpdateSchedule(Check check)
+        public async Task UpdateSchedule(Check check)
         {
-            RemoveSchedule(check);
+            await RemoveSchedule(check);
             if (!check.Active) { return; }
             var type = GetJobForCheck(check);
             IDictionary<string, object> data = new Dictionary<string, object>
             {
-                ["Check"] = check
+                ["Check"] = check,
+                ["Logger"] = _checkLogger
             };
             var job = JobBuilder.Create(type)
                 .WithIdentity(GetJobKeyForCheck(check))
                 .SetJobData(new JobDataMap(data))
                 .Build();
 
-            _scheduler.AddJob(job, false, true);
+            await _scheduler.AddJob(job, false, true);
 
             foreach (var schedule in check.Schedules.Where(x => x.Active))
             {
@@ -101,7 +121,7 @@ namespace SystemChecker.Model
                         .ForJob(job)
                         .Build();
 
-                    _scheduler.ScheduleJob(trigger);
+                    await _scheduler.ScheduleJob(trigger);
                 }
                 else
                 {
@@ -110,15 +130,48 @@ namespace SystemChecker.Model
             }
         }
 
-        public void RemoveSchedule(Check check)
+        public async Task RemoveSchedule(Check check)
         {
-            var existing = _scheduler.GetJobDetail(GetJobKeyForCheck(check));
+            var existing = await _scheduler.GetJobDetail(GetJobKeyForCheck(check));
             if (existing != null)
             {
-                _scheduler.DeleteJob(existing.Key);
+                await _scheduler.DeleteJob(existing.Key);
             }
         }
 
+        public async Task<List<RunLog>> RunCheck(Check check)
+        {
+            var type = GetJobForCheck(check);
+            var checker = _container.GetService(type) as BaseChecker;
+            var logger = new ManualRunLogger();
+            await checker.Run(check, logger);
+            return logger.GetLog();
+        }
+
+        public async Task<ISettings> GetSettings()
+        {
+            var logins = await _uow.Logins.GetAll().ToListAsync();
+            
+            var connStrings = await _uow.ConnStrings.GetAll().ToListAsync();
+            
+            var settings = new Settings
+            {
+                Logins = _mapper.Map<List<LoginDTO>>(logins),
+                ConnStrings = _mapper.Map<List<ConnStringDTO>>(connStrings)
+            };
+
+            foreach (var login in settings.Logins)
+            {
+                login.Password = _encryptionHelper.Decrypt(login.Password);
+            }
+
+            foreach (var connString in settings.ConnStrings)
+            {
+                connString.Value = _encryptionHelper.Decrypt(connString.Value);
+            }
+
+            return settings;
+        }
 
         private TriggerKey GetTriggerKeyForSchedule(CheckSchedule schedule)
         {

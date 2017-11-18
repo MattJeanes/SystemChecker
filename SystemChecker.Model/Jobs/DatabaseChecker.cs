@@ -5,20 +5,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SystemChecker.Model.Data;
 using SystemChecker.Model.Data.Entities;
+using SystemChecker.Model.Enums;
+using SystemChecker.Model.Loggers;
 
 namespace SystemChecker.Model.Jobs
 {
     public class DatabaseChecker : BaseChecker
     {
-        private readonly ILogger _logger;
-        public DatabaseChecker(ILogger<DatabaseChecker> logger)
+        public DatabaseChecker(ISchedulerManager manager) : base(manager) { }
+        public async override Task<ICheckResult> PerformCheck(Check check, ISettings settings, ICheckLogger logger)
         {
-            _logger = logger;
-        }
-        public override void PerformCheck(Check check)
-        {
-            _logger.LogInformation($"Running '{check.Name}' check");
+            var result = new CheckResult { Status = CheckResultStatus.Success };
+            return result;
         }
     }
 }

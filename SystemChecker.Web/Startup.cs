@@ -24,6 +24,7 @@ using SystemChecker.Model;
 using Quartz.Spi;
 using SystemChecker.Model.Jobs;
 using SystemChecker.Model.Helpers;
+using SystemChecker.Model.Loggers;
 
 namespace SystemChecker.Web
 {
@@ -64,6 +65,7 @@ namespace SystemChecker.Web
             services.AddSingleton<ISchedulerManager, SchedulerManager>();
             services.AddSingleton<IJobFactory, JobFactory>();
             services.AddSingleton<IEncryptionHelper, EncryptionHelper>();
+            services.AddSingleton<ICheckLogger, CheckLogger>();
 
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));

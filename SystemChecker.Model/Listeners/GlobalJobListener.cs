@@ -4,14 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SystemChecker.Model.Listeners
 {
     public class GlobalJobListener : IJobListener
     {
-        private ILogger _logger;
-        public GlobalJobListener(ILogger logger)
+        private readonly ILogger _logger;
+        public GlobalJobListener(ILogger<GlobalJobListener> logger)
         {
             _logger = logger;
         }
@@ -21,17 +22,17 @@ namespace SystemChecker.Model.Listeners
             get { return "MainJobListener"; }
         }
 
-        public void JobToBeExecuted(IJobExecutionContext context)
+        public Task JobToBeExecuted(IJobExecutionContext context, CancellationToken token)
         {
-
+            return Task.CompletedTask;
         }
 
-        public void JobExecutionVetoed(IJobExecutionContext context)
+        public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken token)
         {
-
+            return Task.CompletedTask;
         }
 
-        public void JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException)
+        public Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException, CancellationToken token)
         {
             if (jobException != null)
             {
@@ -42,6 +43,7 @@ namespace SystemChecker.Model.Listeners
             {
                 _logger.LogInformation($"Job Executed : {context.JobDetail.Description} ({context.JobDetail.Key}) Result ({context.Result ?? "null"}) Next run at {context.NextFireTimeUtc}");
             }
+            return Task.CompletedTask;
         }
     }
 }

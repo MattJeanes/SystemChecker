@@ -12,6 +12,7 @@ namespace SystemChecker.Model.Data.Repositories
         {
             DbContext = dbContext ?? throw new ArgumentNullException("dbContext");
             DbSet = DbContext.Set<T>();
+            DbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         protected DbContext DbContext { get; set; }
@@ -60,6 +61,10 @@ namespace SystemChecker.Model.Data.Repositories
         public virtual void Delete(T entity)
         {
             var dbEntityEntry = DbContext.Entry(entity);
+            if (dbEntityEntry.State == EntityState.Detached)
+            {
+                DbSet.Attach(entity);
+            }
             if (dbEntityEntry.State != EntityState.Deleted)
             {
                 dbEntityEntry.State = EntityState.Deleted;

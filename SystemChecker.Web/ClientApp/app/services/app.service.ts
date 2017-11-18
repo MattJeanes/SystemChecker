@@ -2,7 +2,7 @@
 import { Http } from "@angular/http";
 import { MatDialog } from "@angular/material";
 // import { RequestType, ResponseType } from "../app.enums";
-import { ICheck, ICheckDetail, ICheckType, ISettings } from "../app.interfaces";
+import { ICheck, ICheckDetail, ICheckType, IRunLog, ISettings } from "../app.interfaces";
 
 import { BaseWebService } from "***REMOVED***";
 
@@ -42,7 +42,7 @@ export class AppService {
         return await this.webService.post<ISettings>({ path: "settings", data: settings });
     }
     public async startRun(id: number) {
-        return await this.webService.post<boolean>(`run/${id}`);
+        return await this.webService.post<IRunLog[]>(`run/${id}`);
     }
     public run(component: any, check: ICheck) {
         return this.dialogService.open(component, {

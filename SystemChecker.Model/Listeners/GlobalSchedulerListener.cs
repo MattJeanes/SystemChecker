@@ -4,117 +4,142 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SystemChecker.Model.Listeners
 {
-    internal class GlobalSchedulerListener : ISchedulerListener
+    public class GlobalSchedulerListener : ISchedulerListener
     {
-        private ILogger _logger;
-
-        public GlobalSchedulerListener(ILogger logger)
+        private readonly ILogger _logger;
+        public GlobalSchedulerListener(ILogger<GlobalSchedulerListener> logger)
         {
             _logger = logger;
         }
 
-        public void JobAdded(IJobDetail jobDetail)
+        public Task JobAdded(IJobDetail jobDetail, CancellationToken token)
         {
             _logger.LogDebug($"Job added: {jobDetail.Key.Group} - {jobDetail.Key.Name}");
+            return Task.CompletedTask;
         }
 
-        public void JobDeleted(JobKey jobKey)
+        public Task JobDeleted(JobKey jobKey, CancellationToken token)
         {
             _logger.LogDebug($"Job deleted: {jobKey.Group} - {jobKey.Name}");
+            return Task.CompletedTask;
         }
 
-        public void JobPaused(JobKey jobKey)
+        public Task JobInterrupted(JobKey jobKey, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task JobPaused(JobKey jobKey, CancellationToken token)
         {
             _logger.LogDebug($"Job paused: {jobKey.Group} - {jobKey.Name}");
+            return Task.CompletedTask;
         }
 
-        public void JobResumed(JobKey jobKey)
+        public Task JobResumed(JobKey jobKey, CancellationToken token)
         {
             _logger.LogDebug($"Job resumed: {jobKey.Group} - {jobKey.Name}");
+            return Task.CompletedTask;
         }
 
-        public void JobScheduled(ITrigger trigger)
+        public Task JobScheduled(ITrigger trigger, CancellationToken token)
         {
             _logger.LogDebug($"Job scheduled: {trigger.Key.Group} - {trigger.Key.Name}");
+            return Task.CompletedTask;
         }
 
-        public void JobsPaused(string jobGroup)
+        public Task JobsPaused(string jobGroup, CancellationToken token)
         {
             _logger.LogDebug($"Jobs paused: {jobGroup}");
+            return Task.CompletedTask;
         }
 
-        public void JobsResumed(string jobGroup)
+        public Task JobsResumed(string jobGroup, CancellationToken token)
         {
             _logger.LogDebug($"Jobs resumed: {jobGroup}");
+            return Task.CompletedTask;
         }
 
-        public void JobUnscheduled(TriggerKey triggerKey)
+        public Task JobUnscheduled(TriggerKey triggerKey, CancellationToken token)
         {
             _logger.LogDebug($"Job unscheduled: {triggerKey.Group} - {triggerKey.Name}");
+            return Task.CompletedTask;
         }
 
-        public void SchedulerError(string msg, SchedulerException cause)
+        public Task SchedulerError(string msg, SchedulerException cause, CancellationToken token)
         {
             _logger.LogError($"Scheduler error: {msg}: {cause.Message}");
+            return Task.CompletedTask;
         }
 
-        public void SchedulerInStandbyMode()
+        public Task SchedulerInStandbyMode(CancellationToken token)
         {
             _logger.LogDebug("Scheduler standby");
+            return Task.CompletedTask;
         }
 
-        public void SchedulerShutdown()
+        public Task SchedulerShutdown(CancellationToken token)
         {
             _logger.LogDebug("Scheduler shutdown");
+            return Task.CompletedTask;
         }
 
-        public void SchedulerShuttingdown()
+        public Task SchedulerShuttingdown(CancellationToken token)
         {
             _logger.LogDebug("Scheduler shutting down");
+            return Task.CompletedTask;
         }
 
-        public void SchedulerStarted()
+        public Task SchedulerStarted(CancellationToken token)
         {
             _logger.LogDebug("Scheduler started");
+            return Task.CompletedTask;
         }
 
-        public void SchedulerStarting()
+        public Task SchedulerStarting(CancellationToken token)
         {
             _logger.LogDebug("Scheduler starting");
+            return Task.CompletedTask;
         }
 
-        public void SchedulingDataCleared()
+        public Task SchedulingDataCleared(CancellationToken token)
         {
             _logger.LogDebug("Scheduling data cleared");
+            return Task.CompletedTask;
         }
 
-        public void TriggerFinalized(ITrigger trigger)
+        public Task TriggerFinalized(ITrigger trigger, CancellationToken token)
         {
             _logger.LogDebug($"Trigger finalized: {trigger.Key.Group} - {trigger.Key.Name}");
+            return Task.CompletedTask;
         }
 
-        public void TriggerPaused(TriggerKey triggerKey)
+        public Task TriggerPaused(TriggerKey triggerKey, CancellationToken token)
         {
             _logger.LogDebug($"Trigger paused: {triggerKey.Group} - {triggerKey.Name}");
+            return Task.CompletedTask;
         }
 
-        public void TriggerResumed(TriggerKey triggerKey)
+        public Task TriggerResumed(TriggerKey triggerKey, CancellationToken token)
         {
             _logger.LogDebug($"Trigger resumed: {triggerKey.Group} - {triggerKey.Name}");
+            return Task.CompletedTask;
         }
 
-        public void TriggersPaused(string triggerGroup)
+        public Task TriggersPaused(string triggerGroup, CancellationToken token)
         {
             _logger.LogDebug($"Triggers paused: {triggerGroup}");
+            return Task.CompletedTask;
         }
 
-        public void TriggersResumed(string triggerGroup)
+        public Task TriggersResumed(string triggerGroup, CancellationToken token)
         {
             _logger.LogDebug($"Triggers resumed: {triggerGroup}");
+            return Task.CompletedTask;
         }
     }
 
