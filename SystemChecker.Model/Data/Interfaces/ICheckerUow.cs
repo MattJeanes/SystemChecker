@@ -10,5 +10,6 @@ namespace SystemChecker.Model.Data.Interfaces
         IRepository<ConnString> ConnStrings { get; }
         ICheckTypeRepository CheckTypes { get; }
         IRepository<CheckSchedule> CheckSchedules { get; }
+        IRepository<CheckData> CheckData { get; }
     }
 }

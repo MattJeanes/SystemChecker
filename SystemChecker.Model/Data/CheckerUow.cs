@@ -16,5 +16,6 @@ namespace SystemChecker.Model.Data
         public IRepository<ConnString> ConnStrings { get { return GetStandardRepo<ConnString>(); } }
         public ICheckTypeRepository CheckTypes { get { return GetRepo<ICheckTypeRepository>(); } }
         public IRepository<CheckSchedule> CheckSchedules { get { return GetStandardRepo<CheckSchedule>(); } }
+        public IRepository<CheckData> CheckData { get { return GetStandardRepo<CheckData>(); } }
     }
 }

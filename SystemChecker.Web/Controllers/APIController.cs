@@ -97,6 +97,11 @@ namespace SystemChecker.Web.Controllers
                 _uow.Checks.Add(check);
             }
 
+            if (check.Data != null)
+            {
+                _uow.CheckData.Update(check.Data);
+            }
+
             foreach (var schedule in check.Schedules)
             {
                 if (schedule.ID > 0)
