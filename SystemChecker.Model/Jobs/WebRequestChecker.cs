@@ -22,6 +22,7 @@ namespace SystemChecker.Model.Jobs
             RequestUrl = 5,
             Authentication = 6,
         }
+
         public async override Task<ICheckResult> PerformCheck(Check check, ISettings settings, ICheckLogger logger)
         {
             ICredentials credentials = null;
