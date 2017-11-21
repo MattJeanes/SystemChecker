@@ -70,6 +70,7 @@ namespace SystemChecker.Model.Jobs
                     log($"TimeMS: {result.TimeMS}");
                 }
                 logger.Done("Check completed");
+                result.DTS = DateTime.Now;
 
                 try
                 {

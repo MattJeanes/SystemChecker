@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using SystemChecker.Model.Data.Entities;
@@ -14,6 +15,8 @@ namespace SystemChecker.Model.Data
         [Required]
         [ForeignKey("CheckID")]
         public Check Check { get; set; }
+
+        public DateTime DTS { get; set; }
 
         public CheckResultStatus Status { get; set; }
 
