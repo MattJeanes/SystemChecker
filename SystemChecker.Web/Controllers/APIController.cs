@@ -72,6 +72,7 @@ namespace SystemChecker.Web.Controllers
                 {
                     Schedules = new List<CheckSchedule>()
                 };
+                _uow.Checks.Add(check);
             }
 
             _mapper.Map(value, check);
