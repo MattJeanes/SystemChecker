@@ -24,7 +24,7 @@ namespace SystemChecker.Model.Data.Entities
 
         public int TypeID { get; set; }
 
-        public ICollection<CheckSchedule> Schedules { get; set; }
+        public List<CheckSchedule> Schedules { get; set; }
 
         public CheckData Data { get; set; }
     }

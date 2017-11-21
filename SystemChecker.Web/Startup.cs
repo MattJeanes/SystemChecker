@@ -25,6 +25,7 @@ using Quartz.Spi;
 using SystemChecker.Model.Jobs;
 using SystemChecker.Model.Helpers;
 using SystemChecker.Model.Loggers;
+using AutoMapper.EquivalencyExpression;
 
 namespace SystemChecker.Web
 {
@@ -60,12 +61,17 @@ namespace SystemChecker.Web
             var builder = new DbContextOptionsBuilder<CheckerContext>();
             builder.UseSqlServer(Configuration.GetConnectionString("SystemChecker"));
             services.AddScoped<ICheckerUow>(_ => new CheckerUow(new RepositoryProvider(new RepositoryFactories()), builder.Options));
-            services.AddSingleton<IMapper>(_ => new Mapper(new MapperConfiguration(x => x.AddProfile<MappingProfile>())));
+            services.AddSingleton<IMapper>(_ => new Mapper(new MapperConfiguration(cfg => {
+                cfg.AddProfile<MappingProfile>();
+                cfg.AddCollectionMappers();
+            })));
             services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
             services.AddSingleton<ISchedulerManager, SchedulerManager>();
             services.AddSingleton<IJobFactory, JobFactory>();
             services.AddSingleton<IEncryptionHelper, EncryptionHelper>();
             services.AddSingleton<ICheckLogger, CheckLogger>();
+            services.AddSingleton<ISettingsHelper, SettingsHelper>();
+            services.AddSingleton<ICheckerHelper, CheckerHelper>();
 
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));

@@ -11,5 +11,6 @@ namespace SystemChecker.Model.Data.Interfaces
         ICheckTypeRepository CheckTypes { get; }
         IRepository<CheckSchedule> CheckSchedules { get; }
         IRepository<CheckData> CheckData { get; }
+        IRepository<CheckResult> CheckResults { get; }
     }
 }

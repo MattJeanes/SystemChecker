@@ -4,6 +4,7 @@ using Quartz;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Dynamic;
 using System.Linq;
 using System.Text;
@@ -11,22 +12,22 @@ using System.Threading.Tasks;
 using SystemChecker.Model.Data;
 using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Enums;
+using SystemChecker.Model.Helpers;
 using SystemChecker.Model.Loggers;
 
 namespace SystemChecker.Model.Jobs
 {
     public class DatabaseChecker : BaseChecker
     {
-        public DatabaseChecker(ISchedulerManager manager) : base(manager) { }
+        public DatabaseChecker(ICheckerHelper helper) : base(helper) { }
         private enum Settings
         {
             ConnString = 7,
             Query = 8,
         }
 
-        public async override Task<ICheckResult> PerformCheck(Check check, ISettings settings, ICheckLogger logger)
+        public async override Task<CheckResult> PerformCheck(Check check, ISettings settings, ICheckLogger logger, CheckResult result)
         {
-            var result = new CheckResult { Status = CheckResultStatus.Success };
             int connStringId = check.Data.TypeOptions[((int)Settings.ConnString).ToString()];
             var connString = settings.ConnStrings.FirstOrDefault(x => x.ID == connStringId);
             string query = check.Data.TypeOptions[((int)Settings.Query).ToString()];
@@ -39,7 +40,11 @@ namespace SystemChecker.Model.Jobs
                 throw new Exception("Query invalid");
             }
             logger.Info($"Using connection string {connString.Name}: {connString.Value}");
+            var timer = new Stopwatch();
+            timer.Start();
             var results = await RetrieveFromSQL(connString.Value, query);
+            timer.Stop();
+            result.TimeMS = (int)timer.ElapsedMilliseconds;
             logger.Info(JsonConvert.SerializeObject(results, Formatting.Indented));
             return result;
         }

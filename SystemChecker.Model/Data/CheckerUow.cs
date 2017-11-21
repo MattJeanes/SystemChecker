@@ -17,5 +17,6 @@ namespace SystemChecker.Model.Data
         public ICheckTypeRepository CheckTypes { get { return GetRepo<ICheckTypeRepository>(); } }
         public IRepository<CheckSchedule> CheckSchedules { get { return GetStandardRepo<CheckSchedule>(); } }
         public IRepository<CheckData> CheckData { get { return GetStandardRepo<CheckData>(); } }
+        public IRepository<CheckResult> CheckResults { get { return GetStandardRepo<CheckResult>(); } }
     }
 }

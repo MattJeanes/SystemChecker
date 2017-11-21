@@ -12,7 +12,6 @@ namespace SystemChecker.Model.Data.Repositories
         {
             DbContext = dbContext ?? throw new ArgumentNullException("dbContext");
             DbSet = DbContext.Set<T>();
-            DbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         protected DbContext DbContext { get; set; }

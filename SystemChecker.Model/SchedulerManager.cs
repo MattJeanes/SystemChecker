@@ -30,7 +30,6 @@ namespace SystemChecker.Model
         Task UpdateSchedule(Check check);
         Task RemoveSchedule(Check check);
         Task<List<RunLog>> RunCheck(Check check);
-        Task<ISettings> GetSettings();
     }
 
     public class SchedulerManager : ISchedulerManager
@@ -43,7 +42,6 @@ namespace SystemChecker.Model
         private readonly IServiceProvider _container;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ICheckLogger _checkLogger;
-        private readonly IEncryptionHelper _encryptionHelper;
         private readonly IMapper _mapper;
         public SchedulerManager(ISchedulerFactory factory, IJobFactory jobFactory, IOptions<AppSettings> appSettings, ICheckerUow uow,
             ILogger<SchedulerManager> logger, IServiceProvider container, ILoggerFactory loggerFactory, ICheckLogger checkLogger,
@@ -60,7 +58,6 @@ namespace SystemChecker.Model
             _container = container;
             _loggerFactory = loggerFactory;
             _checkLogger = checkLogger;
-            _encryptionHelper = encryptionHelper;
             _mapper = mapper;
         }
 
@@ -146,31 +143,6 @@ namespace SystemChecker.Model
             var logger = new ManualRunLogger();
             await checker.Run(check, logger);
             return logger.GetLog();
-        }
-
-        public async Task<ISettings> GetSettings()
-        {
-            var logins = await _uow.Logins.GetAll().ToListAsync();
-            
-            var connStrings = await _uow.ConnStrings.GetAll().ToListAsync();
-            
-            var settings = new Settings
-            {
-                Logins = _mapper.Map<List<LoginDTO>>(logins),
-                ConnStrings = _mapper.Map<List<ConnStringDTO>>(connStrings)
-            };
-
-            foreach (var login in settings.Logins)
-            {
-                login.Password = _encryptionHelper.Decrypt(login.Password);
-            }
-
-            foreach (var connString in settings.ConnStrings)
-            {
-                connString.Value = _encryptionHelper.Decrypt(connString.Value);
-            }
-
-            return settings;
         }
 
         private TriggerKey GetTriggerKeyForSchedule(CheckSchedule schedule)

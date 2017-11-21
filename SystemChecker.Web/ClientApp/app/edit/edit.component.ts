@@ -72,8 +72,7 @@ export class EditComponent implements OnInit {
         try {
             if (this.form.invalid) { return; }
             this.saving = true;
-            this.prepareForSave();
-            this.check = await this.appService.edit(this.check);
+            this.check = await this.appService.edit(this.modelToCheck());
             this.updateForm();
             this.updateUrl();
             this.messageService.success("Saved check");
@@ -161,7 +160,11 @@ export class EditComponent implements OnInit {
         if (type) {
             this.changeType(type);
         }
-        this.form.markAsPristine();
+        if (this.utilService.equals(this.check, this.modelToCheck())) {
+            this.form.markAsPristine();
+        } else {
+            this.form.markAsDirty();
+        }
     }
     public changeType(type: ICheckType) {
         const optionGroups = type.Options.map(option => {
@@ -190,18 +193,24 @@ export class EditComponent implements OnInit {
     public run() {
         this.appService.run(RunCheckComponent, this.check);
     }
-    private prepareForSave() {
+    private modelToCheck() {
         const model = this.form.value;
-        this.check.Name = model.name;
-        this.check.Active = model.active;
-        this.check.TypeID = model.type;
-        this.check.Schedules = model.schedules.map((schedule: any): ICheckSchedule => ({
-            ID: schedule.id,
-            Expression: schedule.expression,
-            Active: schedule.active,
-        }));
-        this.check.Data.TypeOptions = {};
-        model.options.forEach((option: { value: any, option: ICheckTypeOption }) => this.check.Data.TypeOptions[option.option.ID] = option.value);
+        const check: ICheckDetail = {
+            ID: this.check.ID,
+            Name: model.name,
+            Active: model.active,
+            TypeID: model.type,
+            Schedules: model.schedules.map((schedule: any): ICheckSchedule => ({
+                ID: schedule.id,
+                Expression: schedule.expression,
+                Active: schedule.active,
+            })),
+            Data: {
+                TypeOptions: {},
+            },
+        };
+        model.options.forEach((option: { value: any, option: ICheckTypeOption }) => check.Data.TypeOptions[option.option.ID] = option.value);
+        return check;
     }
     private getNewCheck(loading?: boolean): ICheckDetail {
         return {

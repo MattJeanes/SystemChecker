@@ -14,6 +14,7 @@ namespace SystemChecker.Model.Data.Entities
         [Key]
         public int ID { get; set; }
 
+        [Required]
         [ForeignKey("CheckID")]
         public Check Check { get; set; }
 
