@@ -17,7 +17,8 @@ namespace SystemChecker.Model.Data
             CreateMap<CheckScheduleDTO, CheckSchedule>()
                 .EqualityComparison((odto, o) => odto.ID == o.ID)
                 .ForMember(d => d.Check, o => o.Ignore())
-                .ReverseMap();
+                .ReverseMap()
+                .ForMember(d => d.Check, o => o.Ignore());
             CreateMap<CheckDataDTO, CheckData>().ReverseMap();
             CreateMap<CheckDetailDTO, Check>().ReverseMap();
             CreateMap<CheckDTO, Check>().ReverseMap();
