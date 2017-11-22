@@ -1,7 +1,22 @@
 // Main
+
+declare global {
+    // tslint:disable-next-line:interface-name
+    interface Window { paceOptions: any; }
+}
+
+window.paceOptions = {
+    ajax: {
+        trackWebSockets: false, // Fix SignalR
+    },
+};
+
 import * as Pace from "pace-progress";
 
-Pace.start();
+Pace.start({
+    ajax: false,
+    restartOnRequestAfter: false,
+});
 
 import "./styles/main.scss";
 

@@ -58,6 +58,7 @@ module.exports = (env: any) => {
                 "core-js/es7/reflect",
                 "hammerjs",
                 "@swimlane/ngx-charts",
+                "@aspnet/signalr-client",
             ],
         },
         output: {
@@ -71,8 +72,7 @@ module.exports = (env: any) => {
         },
         plugins: [
             new webpack.ProvidePlugin({ $: "jquery", jQuery: "jquery", Hammer: "hammerjs/hammer" }), // Global identifiers
-            new webpack.ContextReplacementPlugin(/\@angular\b.*\b(bundles|linker)/, path.join(__dirname, "./ClientApp")), // Workaround for https://github.com/angular/angular/issues/11580
-            new webpack.ContextReplacementPlugin(/angular(\\|\/)core(\\|\/)@angular/, path.join(__dirname, "./ClientApp")), // Workaround for https://github.com/angular/angular/issues/14898
+            new webpack.ContextReplacementPlugin(/angular(\\|\/)core(\\|\/)/, path.join(__dirname, "./ClientApp")), // Workaround for https://github.com/angular/angular/issues/14898
             extractCSS,
             new webpack.DllPlugin({
                 path: path.join(__dirname, outputDir, "[name]-manifest.json"),

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 using SystemChecker.Model.Data;
 using SystemChecker.Model.Data.Interfaces;
 using SystemChecker.Model.DTO;
+using SystemChecker.Model.Hubs;
 
 namespace SystemChecker.Model.Helpers
 {
@@ -22,10 +24,12 @@ namespace SystemChecker.Model.Helpers
     {
         private readonly ICheckerUow _uow;
         private readonly ISettingsHelper _settingsHelper;
-        public CheckerHelper(ICheckerUow uow, IMapper mapper, ISettingsHelper settingsHelper)
+        private readonly IHubContext<DashboardHub> _hubContext;
+        public CheckerHelper(ICheckerUow uow, IMapper mapper, ISettingsHelper settingsHelper, IHubContext<DashboardHub> hubContext)
         {
             _uow = uow;
             _settingsHelper = settingsHelper;
+            _hubContext = hubContext;
         }
 
         public async Task<ISettings> GetSettings()
@@ -37,6 +41,7 @@ namespace SystemChecker.Model.Helpers
         {
             _uow.CheckResults.Add(result);
             await _uow.Commit();
+            await _hubContext.Clients.All.InvokeAsync("check");
         }
     }
 }

@@ -26,6 +26,7 @@ using SystemChecker.Model.Jobs;
 using SystemChecker.Model.Helpers;
 using SystemChecker.Model.Loggers;
 using AutoMapper.EquivalencyExpression;
+using SystemChecker.Model.Hubs;
 
 namespace SystemChecker.Web
 {
@@ -57,6 +58,7 @@ namespace SystemChecker.Web
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 });
 
+            services.AddSignalR();
 
             var builder = new DbContextOptionsBuilder<CheckerContext>();
             builder.UseSqlServer(Configuration.GetConnectionString("SystemChecker"));
@@ -99,6 +101,11 @@ namespace SystemChecker.Web
             }
 
             app.UseStaticFiles();
+
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<DashboardHub>("hub/dashboard");
+            });
 
             app.UseMvc(routes =>
             {

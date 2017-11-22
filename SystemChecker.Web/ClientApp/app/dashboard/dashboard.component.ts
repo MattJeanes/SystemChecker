@@ -1,15 +1,17 @@
-import { AfterViewInit, Component, ViewChild } from "@angular/core";
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { DataTable, SelectItem } from "primeng/primeng";
 
 import { ICheck } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
 import { AppService, MessageService } from "../services";
 
+import { HubConnection } from "@aspnet/signalr-client";
+
 @Component({
     templateUrl: "./dashboard.template.html",
     styleUrls: ["./dashboard.style.scss"],
 })
-export class DashboardComponent implements AfterViewInit {
+export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
     public successChart = {
         colorScheme: {
             domain: ["#5AA454", "#FBC02D", "#A10A28", "#E0E0E0"],
@@ -29,7 +31,12 @@ export class DashboardComponent implements AfterViewInit {
     ];
     public activeOption: boolean | null = true;
     @ViewChild("dt") private dataTable: DataTable;
-    constructor(private appService: AppService, private messageService: MessageService) { this.loadChecks(); }
+    private hub = new HubConnection("hub/dashboard");
+    private hubReady: boolean = false;
+    constructor(private appService: AppService, private messageService: MessageService, private changeDetectorRef: ChangeDetectorRef) {
+        this.loadChecks();
+        this.hub.on("check", this.loadChecks.bind(this));
+    }
     public async loadChecks() {
         try {
             this.checks = await this.appService.getAll();
@@ -41,13 +48,21 @@ export class DashboardComponent implements AfterViewInit {
     public ngAfterViewInit() {
         setImmediate(() => this.updateActiveFilter());
     }
+    public async ngOnInit() {
+        this.hub.start();
+        this.hubReady = true;
+    }
+    public ngOnDestroy() {
+        if (this.hubReady) {
+            this.hub.stop();
+        }
+    }
     public updateActiveFilter() {
         const col = this.dataTable.columns.find(x => x.header === "Active")!;
         this.dataTable.filter(this.activeOption, col.field, col.filterMatchMode);
     }
     public async run(check: ICheck) {
         await this.appService.run(RunCheckComponent, check);
-        await this.loadChecks();
     }
     public updateCharts() {
         let success = 0;
@@ -86,5 +101,6 @@ export class DashboardComponent implements AfterViewInit {
                 value: notRun,
             },
         ];
+        this.changeDetectorRef.detectChanges();
     }
 }
