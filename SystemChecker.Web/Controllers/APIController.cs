@@ -35,7 +35,13 @@ namespace SystemChecker.Web.Controllers
         public async Task<List<CheckDTO>> GetAll()
         {
             var checks = await _uow.Checks.GetAll().ToListAsync();
-            return _mapper.Map<List<CheckDTO>>(checks);
+            var dtos = _mapper.Map<List<CheckDTO>>(checks);
+            foreach (var check in dtos)
+            {
+                var result = await _uow.CheckResults.GetAll().Where(x => x.CheckID == check.ID).OrderByDescending(x => x.ID).FirstOrDefaultAsync();
+                check.LastResultStatus = result?.Status;
+            }
+            return dtos;
         }
 
         [HttpGet("{id:int}")]

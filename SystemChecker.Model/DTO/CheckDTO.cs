@@ -1,3 +1,5 @@
+using SystemChecker.Model.Enums;
+
 namespace SystemChecker.Model.DTO
 {
     public class CheckDTO
@@ -6,5 +8,6 @@ namespace SystemChecker.Model.DTO
         public string Name { get; set; }
         public bool Active { get; set; }
         public int TypeID { get; set; }
+        public CheckResultStatus? LastResultStatus { get; set; }
     }
 }

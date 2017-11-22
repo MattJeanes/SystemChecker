@@ -8,15 +8,16 @@
     }
   },
   "profiles": {
-    "IIS Express": {
-      "commandName": "IISExpress",
+    "Run (No Scheduler)": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 51114 --no-scheduler",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": ""
+      "applicationUrl": "http://localhost:51114/"
     },
-    "Executable": {
+    "Run (With Scheduler)": {
       "commandName": "Project",
       "commandLineArgs": "--port 51114",
       "launchBrowser": true,

@@ -6,6 +6,8 @@ import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { RouterModule, Routes } from "@angular/router";
 
+import { Autosize } from "./directives";
+
 import { OptionComponent, RunCheckComponent } from "./components";
 
 import { AppComponent } from "./app.component";
@@ -41,7 +43,9 @@ import {
     CovalentDialogsModule,
 } from "@covalent/core";
 
-import { Autosize } from "./directives";
+import {
+    NgxChartsModule,
+} from "@swimlane/ngx-charts";
 
 const routes: Routes = [
     { path: "", redirectTo: "dashboard", pathMatch: "full" },
@@ -74,6 +78,7 @@ const routes: Routes = [
         MatNativeDateModule,
         GrowlModule,
         CovalentDialogsModule,
+        NgxChartsModule,
     ],
     declarations: [
         AppComponent,

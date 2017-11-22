@@ -12,6 +12,8 @@ namespace SystemChecker.Model.Data
         [Key]
         public int ID { get; set; }
 
+        public int CheckID { get; set; }
+
         [Required]
         [ForeignKey("CheckID")]
         public Check Check { get; set; }

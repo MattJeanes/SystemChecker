@@ -34,7 +34,7 @@ namespace SystemChecker.Model.Jobs
         {
             CheckResult result = new CheckResult
             {
-                Check = check,
+                CheckID = check.ID,
                 Status = CheckResultStatus.Success
             };
             try

@@ -27,6 +27,7 @@ namespace SystemChecker.Web
             var port = 5000;
             var portArgument = app.Option("-p|--port", "Port to host on", CommandOptionType.SingleValue);
             var help = app.Option("-? | -h | --help", "Show help information", CommandOptionType.NoValue);
+            var noScheduler = app.Option("-n|--no-scheduler", "Launch without scheduler running", CommandOptionType.NoValue);
 
             app.Execute(args);
 
@@ -43,7 +44,7 @@ namespace SystemChecker.Web
 
             if (portArgument.Value() != null)
             {
-                if(!int.TryParse(portArgument.Value(), out port))
+                if (!int.TryParse(portArgument.Value(), out port))
                 {
                     Console.WriteLine("Invalid port");
                     return 1;
@@ -71,8 +72,11 @@ namespace SystemChecker.Web
             }
             else
             {
-                var schedulerManager = host.Services.GetRequiredService<ISchedulerManager>();
-                schedulerManager.Start();
+                if (noScheduler.Value() == null)
+                {
+                    var schedulerManager = host.Services.GetRequiredService<ISchedulerManager>();
+                    schedulerManager.Start();
+                }
                 host.Run();
             }
             return 0;

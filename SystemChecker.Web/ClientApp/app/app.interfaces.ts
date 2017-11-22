@@ -1,10 +1,11 @@
-﻿import { CheckLogType, CheckTypeOptionType } from "./app.enums";
+﻿import { CheckLogType, CheckResultStatus, CheckTypeOptionType } from "./app.enums";
 
 export interface ICheck {
     ID: number;
     Name: string;
     Active: boolean;
     TypeID?: number;
+    LastResultStatus?: CheckResultStatus;
 }
 
 export interface ICheckSchedule {

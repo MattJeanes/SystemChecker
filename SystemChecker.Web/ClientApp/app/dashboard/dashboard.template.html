@@ -8,7 +8,13 @@
                     <button mat-raised-button color="primary" routerLink="/edit/0">Add new</button>
                     <button mat-raised-button color="primary" routerLink="/settings">Settings</button>
                 </div>
-                <br />
+                <div class="ui-g">
+                    <ngx-charts-advanced-pie-chart class="ui-g-12 ui-lg-6 ui-xl-4" [view]="[550,300]"
+                                                   [scheme]="successChart.colorScheme"
+                                                   [results]="successChart.results"
+                                                   (select)="onSelect($event)">
+                    </ngx-charts-advanced-pie-chart>
+                </div>
                 <p-dataTable #dt [value]="checks" [paginator]="true" [rows]="10" [responsive]="true">
                     <p-column header="Name" field="Name" sortable="true" [filter]="true"></p-column>
                     <p-column header="Active" field="Active" sortable="true" [filter]="true" filterMatchMode="equals" [style]="{'overflow':'visible'}">
