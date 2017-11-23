@@ -27,5 +27,7 @@ namespace SystemChecker.Model.Data.Entities
         public List<CheckSchedule> Schedules { get; set; }
 
         public CheckData Data { get; set; }
+
+        public List<CheckResult> Results { get; set; }
     }
 }

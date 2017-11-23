@@ -39,7 +39,23 @@ namespace SystemChecker.Web.Controllers
             foreach (var check in dtos)
             {
                 var result = await _uow.CheckResults.GetAll().Where(x => x.CheckID == check.ID).OrderByDescending(x => x.ID).FirstOrDefaultAsync();
-                check.LastResultStatus = result?.Status;
+                var status = result?.Status;
+                if (status == null)
+                {
+                    check.LastResultStatus = CheckResultStatus.NotRun;
+                }
+                else if (status > CheckResultStatus.Success)
+                {
+                    check.LastResultStatus = CheckResultStatus.Warning;
+                }
+                else if (status == CheckResultStatus.Success)
+                {
+                    check.LastResultStatus = CheckResultStatus.Success;
+                }
+                else
+                {
+                    check.LastResultStatus = CheckResultStatus.Failed;
+                }
             }
             return dtos;
         }
@@ -105,7 +121,7 @@ namespace SystemChecker.Web.Controllers
         [HttpDelete("{id:int}")]
         public async Task<bool> Delete(int id)
         {
-            var check = await _uow.Checks.GetDetails(id);
+            var check = await _uow.Checks.GetDetails(id, true);
             _uow.Checks.Delete(check);
             await _manager.RemoveSchedule(check);
             await _uow.Commit();

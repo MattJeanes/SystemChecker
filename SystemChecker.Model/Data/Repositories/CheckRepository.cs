@@ -13,9 +13,9 @@ namespace SystemChecker.Model.Data.Repositories
         public CheckRepository(DbContext dbContext)
             : base(dbContext) { }
 
-        public async Task<Check> GetDetails(int id)
+        public async Task<Check> GetDetails(int id, bool includeResults = false)
         {
-            return await GetDetailsQuery()
+            return await GetDetailsQuery(includeResults)
                 .Where(x => x.ID == id)
                 .FirstOrDefaultAsync();
         }
@@ -31,12 +31,19 @@ namespace SystemChecker.Model.Data.Repositories
             return await query.ToListAsync();
         }
 
-        private IQueryable<Check> GetDetailsQuery()
+        private IQueryable<Check> GetDetailsQuery(bool includeResults = false)
         {
-            return GetAll()
+            var query = GetAll()
                 .Include(x => x.Schedules)
                 .Include(x => x.Data)
                 .Include(x => x.Type);
+
+            if (includeResults)
+            {
+                return query.Include(x => x.Results);
+            }
+
+            return query;
         }
     }
 }

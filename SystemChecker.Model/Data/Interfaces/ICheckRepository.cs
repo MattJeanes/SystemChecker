@@ -8,7 +8,7 @@ namespace SystemChecker.Model.Data.Interfaces
 {
     public interface ICheckRepository : IRepository<Check>
     {
-        Task<Check> GetDetails(int id);
+        Task<Check> GetDetails(int id, bool includeResults = false);
         Task<List<Check>> GetDetails(bool activeOnly = false);
     }
 }

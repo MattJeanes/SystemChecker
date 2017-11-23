@@ -15,10 +15,12 @@ export enum CheckLogType {
 }
 
 export enum CheckResultStatus {
-    TimeWarning = 2,
+    TimeWarning = 3,
+    Warning = 2,
     // Everything above this is a warning
     Success = 1,
-    Failed = 0,
+    NotRun = 0,
+    Failed = -1,
     // Everything below this is a failure
-    Timeout = -1,
+    Timeout = -2,
 }

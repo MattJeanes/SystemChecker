@@ -160,7 +160,7 @@ export class EditComponent implements OnInit {
         if (type) {
             this.changeType(type);
         }
-        if (this.utilService.equals(this.check, this.modelToCheck())) {
+        if (this.check.ID > 0 && this.utilService.equals(this.check, this.modelToCheck())) {
             this.form.markAsPristine();
         } else {
             this.form.markAsDirty();

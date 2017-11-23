@@ -12,7 +12,7 @@
                     <ngx-charts-advanced-pie-chart class="ui-g-12 ui-lg-6 ui-xl-4" [view]="[550,300]"
                                                    [scheme]="successChart.colorScheme"
                                                    [results]="successChart.results"
-                                                   (select)="onSelect($event)">
+                                                   (select)="onSuccessChartSelect($event)">
                     </ngx-charts-advanced-pie-chart>
                 </div>
                 <p-dataTable #dt [value]="checks" [paginator]="true" [rows]="10" [responsive]="true">
@@ -24,6 +24,15 @@
                         </ng-template>
                         <ng-template let-check="rowData" pTemplate="body">
                             {{check.Active ? "Yes" : "No"}}
+                        </ng-template>
+                    </p-column>
+                    <p-column header="Last Result Status" field="LastResultStatus" sortable="true" [filter]="true" filterMatchMode="equals" [style]="{'overflow':'visible'}">
+                        <ng-template pTemplate="filter" let-col>
+                            <p-dropdown [options]="resultOptions" [(ngModel)]="resultOption" [style]="{'width':'100%'}" (onChange)="updateResultFilter()"
+                                        styleClass="ui-column-filter"></p-dropdown>
+                        </ng-template>
+                        <ng-template let-check="rowData" pTemplate="body">
+                            {{CheckResultStatus[check.LastResultStatus]}}
                         </ng-template>
                     </p-column>
                     <p-column header="Options">
