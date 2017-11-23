@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { DataTable, SelectItem } from "primeng/primeng";
 
 import { CheckResultStatus } from "../app.enums";
@@ -13,25 +13,20 @@ import { HubConnection } from "@aspnet/signalr-client";
     styleUrls: ["./dashboard.style.scss"],
 })
 export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
-    public successChart: {
-        colorScheme: { domain: string[] },
-        results: Array<{
-            name: string,
-            value: number,
-            type: CheckResultStatus | null,
-        }>,
-    } = {
-        colorScheme: {
-            domain: ["#5AA454", "#FBC02D", "#A10A28", "#E0E0E0"],
-        },
-        results: [
-            {
-                name: "Loading",
-                value: 0,
-                type: null,
-            },
-        ],
+    public successChartColors = {
+        domain: ["#5AA454", "#FBC02D", "#A10A28", "#E0E0E0"],
     };
+    public successChartResults: Array<{
+        name: string,
+        value: number,
+        type: CheckResultStatus | null,
+    }> = [
+        {
+            name: "Loading",
+            value: 0,
+            type: null,
+        },
+    ];
     public checks: ICheck[] = [];
     public activeOptions: SelectItem[] = [
         { label: "Yes", value: true },
@@ -51,7 +46,7 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
     @ViewChild("dt") private dataTable: DataTable;
     private hub = new HubConnection("hub/dashboard");
     private hubReady: boolean = false;
-    constructor(private appService: AppService, private messageService: MessageService, private changeDetectorRef: ChangeDetectorRef) {
+    constructor(private appService: AppService, private messageService: MessageService, private ngZone: NgZone) {
         this.loadChecks();
         this.hub.on("check", this.loadChecks.bind(this));
     }
@@ -104,36 +99,37 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
                     break;
             }
         });
-        this.successChart.results = [
-            {
-                name: "Successful",
-                value: success,
-                type: CheckResultStatus.Success,
-            },
-            {
-                name: "Warning",
-                value: warning,
-                type: CheckResultStatus.Warning,
-            },
-            {
-                name: "Failed",
-                value: failed,
-                type: CheckResultStatus.Failed,
-            },
-            {
-                name: "Not run",
-                value: notRun,
-                type: CheckResultStatus.NotRun,
-            },
-        ];
-        this.changeDetectorRef.detectChanges();
+        this.ngZone.run(() => {
+            this.successChartResults = [
+                {
+                    name: "Successful",
+                    value: success,
+                    type: CheckResultStatus.Success,
+                },
+                {
+                    name: "Warning",
+                    value: warning,
+                    type: CheckResultStatus.Warning,
+                },
+                {
+                    name: "Failed",
+                    value: failed,
+                    type: CheckResultStatus.Failed,
+                },
+                {
+                    name: "Not run",
+                    value: notRun,
+                    type: CheckResultStatus.NotRun,
+                },
+            ];
+        });
     }
     public updateResultFilter() {
         const col = this.dataTable.columns.find(x => x.header === "Last Result Status")!;
         this.dataTable.filter(this.resultOption, col.field, col.filterMatchMode);
     }
     public onSuccessChartSelect(event: { name: string, value: number }) {
-        const selected = this.successChart.results.find(x => x.name === event.name);
+        const selected = this.successChartResults.find(x => x.name === event.name);
         if (selected) {
             this.resultOption = selected.type;
             this.updateResultFilter();

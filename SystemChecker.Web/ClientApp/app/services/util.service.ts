@@ -36,6 +36,9 @@ export class UtilService {
             .first()
             .toPromise() as Promise<boolean>;
     }
+    public wait(ms: number) {
+        return new Promise<void>((resolve, reject) => setTimeout(resolve, ms));
+    }
     public equals(x: any, y: any) {
         if (x === y) {
             return true;
