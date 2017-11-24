@@ -47,8 +47,12 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
     private hub = new HubConnection("hub/dashboard");
     private hubReady: boolean = false;
     constructor(private appService: AppService, private messageService: MessageService, private ngZone: NgZone) {
-        this.loadChecks();
-        this.hub.on("check", this.loadChecks.bind(this));
+        this.hub.on("check", () => {
+            // Because this is a call from the server, Angular change detection won't detect it so we must force ngZone to run
+            this.ngZone.run(async () => {
+                await this.loadChecks();
+            });
+        });
     }
     public async loadChecks() {
         try {
@@ -62,7 +66,8 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
         setImmediate(() => this.updateActiveFilter());
     }
     public async ngOnInit() {
-        this.hub.start();
+        await this.loadChecks();
+        await this.hub.start();
         this.hubReady = true;
     }
     public ngOnDestroy() {
@@ -99,30 +104,28 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
                     break;
             }
         });
-        this.ngZone.run(() => {
-            this.successChartResults = [
-                {
-                    name: "Successful",
-                    value: success,
-                    type: CheckResultStatus.Success,
-                },
-                {
-                    name: "Warning",
-                    value: warning,
-                    type: CheckResultStatus.Warning,
-                },
-                {
-                    name: "Failed",
-                    value: failed,
-                    type: CheckResultStatus.Failed,
-                },
-                {
-                    name: "Not run",
-                    value: notRun,
-                    type: CheckResultStatus.NotRun,
-                },
-            ];
-        });
+        this.successChartResults = [
+            {
+                name: "Successful",
+                value: success,
+                type: CheckResultStatus.Success,
+            },
+            {
+                name: "Warning",
+                value: warning,
+                type: CheckResultStatus.Warning,
+            },
+            {
+                name: "Failed",
+                value: failed,
+                type: CheckResultStatus.Failed,
+            },
+            {
+                name: "Not run",
+                value: notRun,
+                type: CheckResultStatus.NotRun,
+            },
+        ];
     }
     public updateResultFilter() {
         const col = this.dataTable.columns.find(x => x.header === "Last Result Status")!;
