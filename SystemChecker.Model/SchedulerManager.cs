@@ -29,7 +29,7 @@ namespace SystemChecker.Model
         Task UpdateSchedule(int id);
         Task UpdateSchedule(Check check);
         Task RemoveSchedule(Check check);
-        Task<List<RunLog>> RunCheck(Check check);
+        Task<List<RunLog>> RunManualUICheck(Check check);
     }
 
     public class SchedulerManager : ISchedulerManager
@@ -136,7 +136,7 @@ namespace SystemChecker.Model
             }
         }
 
-        public async Task<List<RunLog>> RunCheck(Check check)
+        public async Task<List<RunLog>> RunManualUICheck(Check check)
         {
             var type = GetJobForCheck(check);
             var checker = _container.GetService(type) as BaseChecker;
@@ -163,6 +163,8 @@ namespace SystemChecker.Model
                     return typeof(WebRequestChecker);
                 case Enums.CheckType.Database:
                     return typeof(DatabaseChecker);
+                case Enums.CheckType.Ping:
+                    return typeof(PingChecker);
                 default:
                     throw new InvalidOperationException("Invalid check type");
             }

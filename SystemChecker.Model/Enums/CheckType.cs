@@ -8,5 +8,6 @@ namespace SystemChecker.Model.Enums
     {
         WebRequest = 1,
         Database = 2,
+        Ping = 3
     }
 }

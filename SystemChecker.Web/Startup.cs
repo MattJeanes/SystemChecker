@@ -81,6 +81,7 @@ namespace SystemChecker.Web
             // Jobs
             services.AddTransient<DatabaseChecker>();
             services.AddTransient<WebRequestChecker>();
+            services.AddTransient<PingChecker>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
