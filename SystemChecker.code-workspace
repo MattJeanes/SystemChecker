@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "SystemChecker.Web"
+		},
+		{
+			"path": "SystemChecker.Model"
+		},
+		{
+			"path": "SystemChecker.Web.Proxy"
+		}
+	],
+	"settings": {
+		"typescript.tsdk": "node_modules\\typescript\\lib"
+	}
+}
