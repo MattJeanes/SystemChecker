@@ -22,10 +22,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Remove="ClientApp\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="wwwroot\dist\main.js" />
-    <None Include="wwwroot\dist\vendor.js" />
+    <Content Remove="wwwroot\dist\**" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SystemChecker.Model\SystemChecker.Model.csproj" />

@@ -1,23 +1,14 @@
 ﻿import { Injectable } from "@angular/core";
 import { Http } from "@angular/http";
 import { MatDialog } from "@angular/material";
-// import { RequestType, ResponseType } from "../app.enums";
-import { ICheck, ICheckDetail, ICheckType, IRunLog, ISettings } from "../app.interfaces";
+import { ICheck, ICheckDetail, ICheckType, IRunLog, ISettings, ISubCheckType } from "../app.interfaces";
 
 import { BaseWebService } from "***REMOVED***";
 
 @Injectable()
 export class AppService {
     private webService = new BaseWebService(this.http, "/api");
-    constructor(/*private socketService: SocketService, */private http: Http, private dialogService: MatDialog) {
-        // this.socketService.io.on(this.socketId, (data: any) => {
-        //     switch (data ? data.type : undefined as ResponseType | undefined) {
-        //         case ResponseType.Run:
-        //             this.emit("run", data.data);
-        //             return;
-        //     }
-        // });
-    }
+    constructor(private http: Http, private dialogService: MatDialog) { }
     public async getAll() {
         const checks = await this.webService.get<ICheck[]>();
         return checks;
@@ -43,6 +34,9 @@ export class AppService {
     }
     public async startRun(id: number) {
         return await this.webService.post<IRunLog[]>(`run/${id}`);
+    }
+    public async getSubCheckTypes(checkTypeID: number) {
+        return await this.webService.get<ISubCheckType[]>(`subchecktypes/${checkTypeID}`);
     }
     public run(component: any, check: ICheck) {
         return this.dialogService.open(component, {

@@ -128,6 +128,13 @@ namespace SystemChecker.Web.Controllers
             return true;
         }
 
+        [HttpGet("subchecktypes/{checkTypeID:int}")]
+        public async Task<List<SubCheckTypeDTO>> GetSubCheckTypes(int checkTypeID)
+        {
+            var subCheckTypes = await _uow.SubCheckTypes.GetAll().Where(x => x.CheckTypeID == checkTypeID).ToListAsync();
+            return _mapper.Map<List<SubCheckTypeDTO>>(subCheckTypes);
+        }
+
         [HttpPost("cron/{validateOnly:bool?}")]
         public object ValidateCronExpression(bool? validateOnly, [FromBody]string cron)
         {

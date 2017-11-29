@@ -10,5 +10,6 @@ namespace SystemChecker.Model.DTO
         public int TypeID { get; set; }
         public List<CheckScheduleDTO> Schedules { get; set; }
         public CheckDataDTO Data { get; set; }
+        public List<SubCheckDTO> SubChecks { get; set; }
     }
 }

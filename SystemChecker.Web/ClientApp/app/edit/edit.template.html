@@ -26,6 +26,31 @@
                                 </div>
                             </div>
                         </mat-tab>
+                        <mat-tab label="Sub-checks">
+                            <br />
+                            <button mat-raised-button color="primary" (click)="addSubCheck()">Add new</button>
+                            <div formArrayName="subChecks">
+                                <div *ngFor="let check of subChecks.controls; let i=index" [formGroupName]="i">
+                                    <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
+                                    <mat-form-field class="ui-g-12 full">
+                                        <input matInput placeholder="Name" formControlName="name">
+                                    </mat-form-field>
+                                    <mat-form-field class="ui-g-12 full">
+                                        <mat-select placeholder="Type" formControlName="type" (change)="onSubCheckTypeChange(i)">
+                                            <mat-option *ngFor="let type of subCheckTypes" [value]="type.ID">{{type.Name}}</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                    <div *ngIf="subChecks.controls[i].value.options" class="full" formArrayName="options">
+                                        <div class="header ui-g-12" *ngIf="subChecks.controls[i].value.options.length>0">Type settings</div>
+                                        <div class="ui-g-12" *ngFor="let subOption of subChecks.controls[i].value.options; let j=index; trackBy: trackSubOption" [formGroupName]="j">
+                                            <check-option class="full" [option]="subOption.option" formControlName="value"></check-option>
+                                        </div>
+                                    </div>
+                                    <button mat-raised-button color="warn" (click)="deleteSubCheck(i)">Delete</button>
+                                    <hr *ngIf="i < subChecks.controls.length-1" class="break">
+                                </div>
+                            </div>
+                        </mat-tab>
                         <mat-tab label="Schedules">
                             <br />
                             <button mat-raised-button color="primary" (click)="addSchedule()">Add new</button>
@@ -39,7 +64,7 @@
                                     </mat-form-field>
                                     <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
                                     <button mat-raised-button color="warn" (click)="deleteSchedule(i)">Delete</button>
-                                    <hr *ngIf="i < schedules.controls.length-1" class="schedule-break">
+                                    <hr *ngIf="i < schedules.controls.length-1" class="break">
                                 </div>
                             </div>
                         </mat-tab>

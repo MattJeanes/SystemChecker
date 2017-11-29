@@ -15,5 +15,6 @@ namespace SystemChecker.Model.Data
         public DbSet<ConnString> ConnStrings { get; set; }
         public DbSet<CheckData> CheckData { get; set; }
         public DbSet<CheckResult> CheckResults { get; set; }
+        public DbSet<SubCheckType> SubCheckTypes { get; set; }
     }
 }

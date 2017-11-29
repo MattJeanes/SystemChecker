@@ -14,6 +14,7 @@ namespace SystemChecker.Model.Data.Helpers
             {
                 { typeof(ICheckRepository), dbContext => new CheckRepository(dbContext) },
                 { typeof(ICheckTypeRepository), dbContext => new CheckTypeRepository(dbContext) },
+                { typeof(ISubCheckTypeRepository), dbContext => new SubCheckTypeRepository(dbContext) },
             };
         }
 

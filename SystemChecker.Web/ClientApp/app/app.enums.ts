@@ -1,10 +1,11 @@
-﻿export enum CheckTypeOptionType {
+﻿export enum OptionType {
     Boolean = 1,
     String = 2,
     Number = 3,
     Date = 4,
     Login = 5,
     ConnString = 6,
+    Text = 7,
 }
 
 export enum CheckLogType {

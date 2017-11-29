@@ -35,4 +35,9 @@
             </mat-select>
         </mat-form-field>
     </div>
+    <div *ngIf="option.OptionType === CheckTypeOptionType.Text">
+        <mat-form-field>
+            <textarea mat-textarea matInput autosize [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired"></textarea>
+        </mat-form-field>
+    </div>
 </div>

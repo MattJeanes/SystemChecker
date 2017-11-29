@@ -9,10 +9,10 @@ using SystemChecker.Model.Enums;
 
 namespace SystemChecker.Model.Data.Entities
 {
-    [Table("tblCheckTypeOption")]
-    public class CheckTypeOption : Option
+    [Table("tblSubCheckTypeOption")]
+    public class SubCheckTypeOption : Option
     {
-        [ForeignKey("CheckTypeID")]
-        public CheckType CheckType { get; set; }
+        [ForeignKey("SubCheckTypeID")]
+        public SubCheckType SubCheckType { get; set; }
     }
 }

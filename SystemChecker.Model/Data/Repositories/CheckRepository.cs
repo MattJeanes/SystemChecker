@@ -36,7 +36,8 @@ namespace SystemChecker.Model.Data.Repositories
             var query = GetAll()
                 .Include(x => x.Schedules)
                 .Include(x => x.Data)
-                .Include(x => x.Type);
+                .Include(x => x.Type)
+                .Include(x => x.SubChecks);
 
             if (includeResults)
             {

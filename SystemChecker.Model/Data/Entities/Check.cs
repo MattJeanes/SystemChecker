@@ -29,5 +29,7 @@ namespace SystemChecker.Model.Data.Entities
         public CheckData Data { get; set; }
 
         public List<CheckResult> Results { get; set; }
+
+        public List<SubCheck> SubChecks { get; set; }
     }
 }

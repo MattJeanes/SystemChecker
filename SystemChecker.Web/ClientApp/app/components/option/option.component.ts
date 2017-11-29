@@ -1,7 +1,7 @@
 import { Component, forwardRef, Input, OnDestroy, OnInit } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { CheckTypeOptionType } from "../../app.enums";
-import { ICheckTypeOption, ISettings } from "../../app.interfaces";
+import { OptionType } from "../../app.enums";
+import { IOption, ISettings } from "../../app.interfaces";
 import { AppService } from "../../services";
 
 @Component({
@@ -17,11 +17,11 @@ import { AppService } from "../../services";
     ],
 })
 export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy {
-    @Input() public option: ICheckTypeOption;
+    @Input() public option: IOption;
 
     public settings: ISettings;
 
-    public CheckTypeOptionType = CheckTypeOptionType;
+    public CheckTypeOptionType = OptionType;
 
     // tslint:disable-next-line:variable-name
     private _value: number = 0;
@@ -38,8 +38,8 @@ export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy 
     constructor(private appService: AppService) { }
 
     public async ngOnInit() {
-        if (this.option.OptionType === CheckTypeOptionType.Login
-        || this.option.OptionType === CheckTypeOptionType.ConnString) {
+        if (this.option.OptionType === OptionType.Login
+        || this.option.OptionType === OptionType.ConnString) {
             this.settings = await this.appService.getSettings();
         }
     }

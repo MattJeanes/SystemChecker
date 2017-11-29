@@ -3,7 +3,7 @@ import { Component, OnInit } from "@angular/core";
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 
-import { ICheckDetail, ICheckSchedule, ICheckType, ICheckTypeOption, ISettings } from "../app.interfaces";
+import { ICheckDetail, ICheckSchedule, ICheckType, IOption, ISettings, ISubCheck, ISubCheckType } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
 import { AppService, MessageService, UtilService } from "../services";
 
@@ -33,6 +33,7 @@ export function cronValidator(appService: AppService): ValidatorFn {
 export class EditComponent implements OnInit {
     public check: ICheckDetail = this.getNewCheck(true);
     public types: ICheckType[] = [];
+    public subCheckTypes: ISubCheckType[] = [];
     public settings: ISettings;
     public form: FormGroup;
     public saving: boolean = false;
@@ -41,6 +42,9 @@ export class EditComponent implements OnInit {
     }
     get options(): FormArray {
         return this.form.get("options") as FormArray;
+    }
+    get subChecks(): FormArray {
+        return this.form.get("subChecks") as FormArray;
     }
     constructor(
         private appService: AppService, private activatedRoute: ActivatedRoute,
@@ -61,7 +65,7 @@ export class EditComponent implements OnInit {
             }
             this.types = await this.appService.getTypes();
             this.settings = await this.appService.getSettings();
-            this.updateForm();
+            await this.updateForm();
             this.updateUrl();
         } catch (e) {
             this.messageService.error(`Failed to load: ${e.toString()}`);
@@ -73,7 +77,7 @@ export class EditComponent implements OnInit {
             if (this.form.invalid) { return; }
             this.saving = true;
             this.check = await this.appService.edit(this.modelToCheck());
-            this.updateForm();
+            await this.updateForm();
             this.updateUrl();
             this.messageService.success("Saved check");
         } catch (e) {
@@ -106,6 +110,19 @@ export class EditComponent implements OnInit {
         this.schedules.removeAt(index);
         this.form.markAsDirty();
     }
+    public addSubCheck() {
+        this.subChecks.push(this.formBuilder.group({
+            type: [undefined, Validators.required],
+            name: ["", Validators.required],
+            active: true,
+            options: this.formBuilder.array([]),
+        }));
+        this.form.markAsDirty();
+    }
+    public deleteSubCheck(index: number) {
+        this.subChecks.removeAt(index);
+        this.form.markAsDirty();
+    }
     public async validateExpression(index: number | AbstractControl) {
         let nextField: AbstractControl | null = null;
         let value: string = "";
@@ -130,7 +147,7 @@ export class EditComponent implements OnInit {
             nextField.setValue(value);
         }
     }
-    public updateForm() {
+    public async updateForm() {
         this.form.reset({
             name: this.check.Name,
             type: this.check.TypeID ? this.check.TypeID : null,
@@ -151,36 +168,66 @@ export class EditComponent implements OnInit {
         for (const group of scheduleGroups) {
             this.schedules.push(group);
         }
-
         for (const control of this.schedules.controls) {
             this.validateExpression(control);
         }
 
+        const subCheckGroups = this.check.SubChecks.map(subCheck => this.formBuilder.group({
+            id: subCheck.ID,
+            type: [subCheck.TypeID, Validators.required],
+            name: [subCheck.Name, Validators.required],
+            active: subCheck.Active,
+            options: this.formBuilder.array([]),
+        }));
+
+        while (this.subChecks.length) {
+            this.subChecks.removeAt(0);
+        }
+        for (const group of subCheckGroups) {
+            this.subChecks.push(group);
+        }
+
         const type = this.types.find(x => x.ID === this.check.TypeID);
         if (type) {
-            this.changeType(type);
+            await this.changeType(type);
         }
+
+        for (const key in this.check.SubChecks) {
+            if (!this.check.SubChecks.hasOwnProperty(key)) { continue; }
+            const subCheck = this.check.SubChecks[key];
+            const subCheckType = this.subCheckTypes.find(x => x.ID === subCheck.TypeID);
+            if (subCheckType) {
+                const control = this.subChecks.controls[key] as FormGroup;
+                this.changeSubCheckType(control.controls.options as FormArray, subCheckType, subCheck);
+            }
+        }
+
         if (this.check.ID > 0 && this.utilService.equals(this.check, this.modelToCheck())) {
             this.form.markAsPristine();
         } else {
             this.form.markAsDirty();
         }
     }
-    public changeType(type: ICheckType) {
-        const optionGroups = type.Options.map(option => {
-            const value = [];
-            const currentValue = this.check.Data.TypeOptions[option.ID];
-            value.push(currentValue !== undefined ? currentValue : option.DefaultValue);
-            if (option.IsRequired) {
-                value.push(Validators.required);
+    public async changeType(type: ICheckType) {
+        try {
+            const optionGroups = type.Options.map(option => {
+                const value = [];
+                const currentValue = this.check.Data.TypeOptions[option.ID];
+                value.push(currentValue !== undefined ? currentValue : option.DefaultValue);
+                if (option.IsRequired) {
+                    value.push(Validators.required);
+                }
+                return this.formBuilder.group({ value, option });
+            });
+            while (this.options.length) {
+                this.options.removeAt(0);
             }
-            return this.formBuilder.group({ value, option });
-        });
-        while (this.options.length) {
-            this.options.removeAt(0);
-        }
-        for (const group of optionGroups) {
-            this.options.push(group);
+            for (const group of optionGroups) {
+                this.options.push(group);
+            }
+            this.subCheckTypes = await this.appService.getSubCheckTypes(type.ID);
+        } catch (e) {
+            this.messageService.error("Failed to change type", e.toString());
         }
     }
     public onTypeChange() {
@@ -190,8 +237,41 @@ export class EditComponent implements OnInit {
             this.changeType(type);
         }
     }
+    public changeSubCheckType(options: FormArray, type: ISubCheckType, subCheck?: ISubCheck) {
+        try {
+            const optionGroups = type.Options.map(option => {
+                const value = [];
+                const currentValue = subCheck ? subCheck.Options[option.ID] : undefined;
+                value.push(currentValue !== undefined ? currentValue : option.DefaultValue);
+                if (option.IsRequired) {
+                    value.push(Validators.required);
+                }
+                return this.formBuilder.group({ value, option });
+            });
+            while (options.length) {
+                options.removeAt(0);
+            }
+            for (const group of optionGroups) {
+                options.push(group);
+            }
+        } catch (e) {
+            this.messageService.error("Failed to change sub-check type", e.toString());
+        }
+    }
+    public onSubCheckTypeChange(id: number) {
+        const control = this.subChecks.controls[id] as FormGroup;
+        const options = control.controls.options as FormArray;
+        const subCheckTypeID = control.value.type;
+        const subCheckType = this.subCheckTypes.find(x => x.ID === subCheckTypeID);
+        if (subCheckType) {
+            this.changeSubCheckType(options, subCheckType);
+        }
+    }
     public run() {
         this.appService.run(RunCheckComponent, this.check);
+    }
+    public trackSubOption(index: number, subOption: { value: any, option: IOption }) {
+        return subOption ? subOption.option : undefined;
     }
     private modelToCheck() {
         const model = this.form.value;
@@ -208,8 +288,19 @@ export class EditComponent implements OnInit {
             Data: {
                 TypeOptions: {},
             },
+            SubChecks: model.subChecks.map((subCheck: any): ISubCheck => ({
+                ID: subCheck.id,
+                CheckID: this.check.ID,
+                TypeID: subCheck.type,
+                Name: subCheck.name,
+                Active: subCheck.active,
+                Options: {},
+            })),
         };
-        model.options.forEach((option: { value: any, option: ICheckTypeOption }) => check.Data.TypeOptions[option.option.ID] = option.value);
+        model.options.forEach((option: { value: any, option: IOption }) => check.Data.TypeOptions[option.option.ID] = option.value);
+        model.subChecks.forEach((subCheck: any, index: number) => {
+            subCheck.options.forEach((option: { value: any, option: IOption }) => check.SubChecks[index].Options[option.option.ID] = option.value);
+        });
         return check;
     }
     private getNewCheck(loading?: boolean): ICheckDetail {
@@ -218,7 +309,10 @@ export class EditComponent implements OnInit {
             Active: true,
             Name: loading ? "Loading.." : "New Check",
             Schedules: [],
-            Data: { TypeOptions: {} },
+            Data: {
+                TypeOptions: {},
+            },
+            SubChecks: [],
         };
     }
     private updateUrl() {
@@ -235,6 +329,7 @@ export class EditComponent implements OnInit {
             active: false,
             schedules: this.formBuilder.array([]),
             options: this.formBuilder.array([]),
+            subChecks: this.formBuilder.array([]),
         });
     }
 }

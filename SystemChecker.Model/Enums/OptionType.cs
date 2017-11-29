@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SystemChecker.Model.Enums
 {
-    public enum CheckTypeOptionType
+    public enum OptionType
     {
         Boolean = 1,
         String = 2,
@@ -12,5 +12,6 @@ namespace SystemChecker.Model.Enums
         Date = 4,
         Login = 5,
         ConnString = 6,
+        Text = 7,
     }
 }

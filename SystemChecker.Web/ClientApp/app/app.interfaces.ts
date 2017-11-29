@@ -1,4 +1,4 @@
-﻿import { CheckLogType, CheckResultStatus, CheckTypeOptionType } from "./app.enums";
+﻿import { CheckLogType, CheckResultStatus, OptionType } from "./app.enums";
 
 export interface ICheck {
     ID: number;
@@ -22,17 +22,18 @@ export interface ICheckData {
 export interface ICheckDetail extends ICheck {
     Schedules: ICheckSchedule[];
     Data: ICheckData;
+    SubChecks: ISubCheck[];
 }
 
 export interface ICheckType {
     ID: number;
     Name: string;
-    Options: ICheckTypeOption[];
+    Options: IOption[];
 }
 
-export interface ICheckTypeOption {
+export interface IOption {
     ID: number;
-    OptionType: CheckTypeOptionType;
+    OptionType: OptionType;
     Label: string;
     DefaultValue?: string;
     IsRequired: boolean;
@@ -59,4 +60,19 @@ export interface ISettings {
 export interface IRunLog {
     Type: CheckLogType;
     Message: string;
+}
+
+export interface ISubCheckType {
+    ID: number;
+    Name: string;
+    Options: IOption[];
+}
+
+export interface ISubCheck {
+    ID: number;
+    CheckID: number;
+    TypeID: number;
+    Name: string;
+    Active: number;
+    Options: any;
 }
