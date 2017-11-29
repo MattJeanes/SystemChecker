@@ -115,7 +115,7 @@ namespace SystemChecker.Web.Controllers
         public async Task<List<RunLog>> Run(int id)
         {
             var check = await _uow.Checks.GetDetails(id);
-            return await _manager.RunCheck(check);
+            return await _manager.RunManualUICheck(check);
         }
 
         [HttpDelete("{id:int}")]
