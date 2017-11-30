@@ -60,10 +60,10 @@ namespace SystemChecker.Web.Controllers
             return dtos;
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<CheckDetailDTO> GetDetails(int id)
+        [HttpGet("{id:int}/{includeResults:bool?}")]
+        public async Task<CheckDetailDTO> GetDetails(int id, bool? includeResults = null)
         {
-            var check = await _uow.Checks.GetDetails(id);
+            var check = await _uow.Checks.GetDetails(id, includeResults ?? false);
             return _mapper.Map<CheckDetailDTO>(check);
         }
 

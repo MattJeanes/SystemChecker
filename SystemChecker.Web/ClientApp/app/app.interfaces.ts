@@ -19,10 +19,19 @@ export interface ICheckData {
     TypeOptions: any;
 }
 
+export interface ICheckResult {
+    ID: number;
+    CheckID: number;
+    DTS: string;
+    Status: CheckResultStatus;
+    TimeMS: number;
+}
+
 export interface ICheckDetail extends ICheck {
     Schedules: ICheckSchedule[];
     Data: ICheckData;
     SubChecks: ISubCheck[];
+    Results?: ICheckResult[];
 }
 
 export interface ICheckType {

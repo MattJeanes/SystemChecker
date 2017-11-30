@@ -1,4 +1,6 @@
 import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Router } from "@angular/router";
+
 import { DataTable, SelectItem } from "primeng/primeng";
 
 import { CheckResultStatus } from "../app.enums";
@@ -46,7 +48,7 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
     @ViewChild("dt") private dataTable: DataTable;
     private hub = new HubConnection("hub/dashboard");
     private hubReady: boolean = false;
-    constructor(private appService: AppService, private messageService: MessageService, private ngZone: NgZone) {
+    constructor(private appService: AppService, private messageService: MessageService, private ngZone: NgZone, private router: Router) {
         this.hub.on("check", () => {
             // Because this is a call from the server, Angular change detection won't detect it so we must force ngZone to run
             this.ngZone.run(async () => {
@@ -137,5 +139,8 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
             this.resultOption = selected.type;
             this.updateResultFilter();
         }
+    }
+    public onCheckSelected(event: { data: ICheck }) {
+        this.router.navigate(["/details", event.data.ID]);
     }
 }

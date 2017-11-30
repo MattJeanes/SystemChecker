@@ -83,4 +83,12 @@ export class UtilService {
         }
         return true;
     }
+    public group<T>(array: T[], key: (item: T) => any): Array<{ key: string, data: T[] }> {
+        const map = {};
+        array.map(e => ({ k: key(e), d: e })).forEach(e => {
+            map[e.k] = map[e.k] || [];
+            map[e.k].push(e.d);
+        });
+        return Object.keys(map).map(k => ({ key: k, data: map[k] }));
+    }
 }

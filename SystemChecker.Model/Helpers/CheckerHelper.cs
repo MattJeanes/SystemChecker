@@ -27,12 +27,14 @@ namespace SystemChecker.Model.Helpers
     {
         private readonly ICheckerUow _uow;
         private readonly ISettingsHelper _settingsHelper;
-        private readonly IHubContext<DashboardHub> _hubContext;
-        public CheckerHelper(ICheckerUow uow, IMapper mapper, ISettingsHelper settingsHelper, IHubContext<DashboardHub> hubContext)
+        private readonly IHubContext<DashboardHub> _dashboardHub;
+        private readonly IHubContext<DetailsHub> _detailsHub;
+        public CheckerHelper(ICheckerUow uow, IMapper mapper, ISettingsHelper settingsHelper, IHubContext<DashboardHub> dashboardHub, IHubContext<DetailsHub> detailsHub)
         {
             _uow = uow;
             _settingsHelper = settingsHelper;
-            _hubContext = hubContext;
+            _dashboardHub = dashboardHub;
+            _detailsHub = detailsHub;
         }
 
         public async Task<ISettings> GetSettings()
@@ -56,7 +58,8 @@ namespace SystemChecker.Model.Helpers
         {
             _uow.CheckResults.Add(result);
             await _uow.Commit();
-            await _hubContext.Clients.All.InvokeAsync("check");
+            await _dashboardHub.Clients.All.InvokeAsync("check", result.CheckID);
+            await _detailsHub.Clients.All.InvokeAsync("check", result.CheckID);
         }
     }
 }

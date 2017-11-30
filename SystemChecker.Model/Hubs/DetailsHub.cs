@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SystemChecker.Model.Hubs
 {
-    public class DashboardHub : Hub
+    public class DetailsHub : Hub
     {
 
     }

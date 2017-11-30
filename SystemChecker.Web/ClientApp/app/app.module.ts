@@ -12,6 +12,7 @@ import { OptionComponent, RunCheckComponent } from "./components";
 
 import { AppComponent } from "./app.component";
 import { DashboardComponent } from "./dashboard/dashboard.component";
+import { DetailsComponent } from "./details/details.component";
 import { EditComponent } from "./edit/edit.component";
 import { PageNotFoundComponent } from "./errors/not-found.component";
 import { SettingsComponent } from "./settings/settings.component";
@@ -23,6 +24,7 @@ import {
 } from "./services";
 
 import {
+    MAT_DATE_LOCALE,
     MatButtonModule,
     MatCardModule,
     MatCheckboxModule,
@@ -54,6 +56,7 @@ const routes: Routes = [
     { path: "edit/:id", component: EditComponent },
     { path: "edit/:id/:copy", component: EditComponent },
     { path: "settings", component: SettingsComponent },
+    { path: "details/:id", component: DetailsComponent },
     { path: "**", component: PageNotFoundComponent },
 ];
 
@@ -88,6 +91,7 @@ const routes: Routes = [
         SettingsComponent,
         RunCheckComponent,
         PageNotFoundComponent,
+        DetailsComponent,
         Autosize,
     ],
     exports: [
@@ -97,6 +101,7 @@ const routes: Routes = [
         AppService,
         MessageService,
         UtilService,
+        { provide: MAT_DATE_LOCALE, useValue: "en-GB" },
     ],
     entryComponents: [
         RunCheckComponent,

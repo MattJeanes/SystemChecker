@@ -106,6 +106,7 @@ namespace SystemChecker.Web
             app.UseSignalR(routes =>
             {
                 routes.MapHub<DashboardHub>("hub/dashboard");
+                routes.MapHub<DetailsHub>("hub/details");
             });
 
             app.UseMvc(routes =>

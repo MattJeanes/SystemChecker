@@ -1,0 +1,29 @@
+<div class="ui-g">
+    <div class="ui-g-0 ui-md-1 ui-xl-2"></div>
+    <div class="ui-g-12 ui-md-10 ui-xl-8">
+        <h1>Details for '{{check ? check.Name : 'Loading..'}}' check</h1>
+        <mat-card>
+            <mat-card-content>
+                <mat-form-field>
+                    <input matInput [matDatepicker]="picker" [(ngModel)]="date" [required]="true" (ngModelChange)="updateCharts()">
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+                <div class="container">
+                    <ngx-charts-line-chart [results]="chart"
+                                           [yAxis]="true"
+                                           yAxisLabel="Time (ms)"
+                                           [showYAxisLabel]="true"
+                                           [customColors]="customColors"
+                                           [legend]="true">
+                    </ngx-charts-line-chart>
+                </div>
+            </mat-card-content>
+            <mat-card-actions>
+                <button mat-raised-button routerLink="/dashboard">Back</button>
+                <button mat-raised-button color="primary" (click)="run()">Run</button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+    <div class="ui-g-0 ui-md-1 ui-xl-2"></div>
+</div>

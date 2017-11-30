@@ -13,8 +13,8 @@ export class AppService {
         const checks = await this.webService.get<ICheck[]>();
         return checks;
     }
-    public async getDetails(id: number) {
-        const check = await this.webService.get<ICheckDetail>(id.toString());
+    public async getDetails(id: number, includeResults?: boolean) {
+        const check = await this.webService.get<ICheckDetail>(id.toString() + (typeof includeResults !== "undefined" ? "/" + includeResults.toString() : ""));
         return check;
     }
     public async edit(check: ICheckDetail) {
