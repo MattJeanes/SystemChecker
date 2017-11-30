@@ -11,10 +11,8 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using SystemChecker.Model.Data;
-using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Enums;
 using SystemChecker.Model.Helpers;
-using SystemChecker.Model.Loggers;
 
 namespace SystemChecker.Model.Jobs
 {
@@ -27,16 +25,16 @@ namespace SystemChecker.Model.Jobs
             TimeoutMS = 13
         }
 
-        public async override Task<CheckResult> PerformCheck(Check check, ISettings settings, ICheckLogger logger, CheckResult result)
+        public async override Task<CheckResult> PerformCheck(CheckResult result)
         {
-            string server = check.Data.TypeOptions[((int)Settings.Server).ToString()];
-            int timeoutMS = check.Data.TypeOptions[((int)Settings.TimeoutMS).ToString()];
+            string server = _check.Data.TypeOptions[((int)Settings.Server).ToString()];
+            int timeoutMS = _check.Data.TypeOptions[((int)Settings.TimeoutMS).ToString()];
 
             if (string.IsNullOrEmpty(server))
             {
                 throw new Exception("Server invalid");
             }
-            logger.Info($"Pinging server {server}");
+            _logger.Info($"Pinging server {server}");
 
             var reply = await Ping(server, timeoutMS);
 
@@ -44,10 +42,10 @@ namespace SystemChecker.Model.Jobs
 
             if (reply.Status != IPStatus.Success)
             {
-                logger.Error($"Ping failed: {reply.Status.ToString()}");
+                _logger.Error($"Ping failed: {reply.Status.ToString()}");
                 if (reply.Status == IPStatus.TimedOut)
                 {
-                    logger.Error($"Timeout after {timeoutMS}ms");
+                    _logger.Error($"Timeout after {timeoutMS}ms");
                     result.Status = CheckResultStatus.Timeout;
                 }
                 else

@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Quartz;
 using System;
 using System.Collections.Generic;
@@ -12,7 +14,6 @@ using SystemChecker.Model.Data;
 using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Enums;
 using SystemChecker.Model.Helpers;
-using SystemChecker.Model.Loggers;
 
 namespace SystemChecker.Model.Jobs
 {
@@ -26,24 +27,39 @@ namespace SystemChecker.Model.Jobs
             TimeoutMS = 9,
             TimeWarnMS = 10,
         }
+        private enum SubChecks
+        {
+            ResponseContains = 1,
+            JSONProperty = 2,
+        }
+        private enum ResponseContains
+        {
+            Text = 1,
+        }
+        private enum JSONProperty
+        {
+            FieldName = 2,
+            Exists = 3,
+            ValueContains = 4,
+        }
 
-        public async override Task<CheckResult> PerformCheck(Check check, ISettings settings, ICheckLogger logger, CheckResult result)
+        public async override Task<CheckResult> PerformCheck(CheckResult result)
         {
             ICredentials credentials = null;
 
-            string url = check.Data.TypeOptions[((int)Settings.RequestUrl).ToString()];
-            int? authId = check.Data.TypeOptions[((int)Settings.Authentication).ToString()];
-            int timeoutMS = check.Data.TypeOptions[((int)Settings.TimeoutMS).ToString()];
-            int? timeWarnMS = check.Data.TypeOptions[((int)Settings.TimeWarnMS).ToString()];
+            string url = _check.Data.TypeOptions[((int)Settings.RequestUrl).ToString()];
+            int? authId = _check.Data.TypeOptions[((int)Settings.Authentication).ToString()];
+            int timeoutMS = _check.Data.TypeOptions[((int)Settings.TimeoutMS).ToString()];
+            int? timeWarnMS = _check.Data.TypeOptions[((int)Settings.TimeWarnMS).ToString()];
 
             if (authId.HasValue && authId.Value > 0)
             {
-                var login = settings.Logins.FirstOrDefault(x => x.ID == authId);
+                var login = _settings.Logins.FirstOrDefault(x => x.ID == authId);
                 if (login == null)
                 {
                     throw new Exception("Login not found");
                 }
-                logger.Info($"Using login {login.Username}");
+                _logger.Info($"Using login {login.Username}");
                 credentials = new NetworkCredential(login.Username, login.Password, login.Domain);
             }
 
@@ -60,6 +76,7 @@ namespace SystemChecker.Model.Jobs
 
                 try
                 {
+                    _logger.Info($"Calling {url}");
                     timer.Start();
                     var response = await client.GetAsync("");
                     timer.Stop();
@@ -68,18 +85,19 @@ namespace SystemChecker.Model.Jobs
                         result.Status = CheckResultStatus.TimeWarning;
                     }
                     response.EnsureSuccessStatusCode(); // Throw in not success
-                    logger.Info("Response headers:");
+                    _logger.Info("Response headers:");
                     foreach (var header in response.Headers)
                     {
-                        logger.Info($"\t{header.Key}: {String.Join(",", header.Value)}");
+                        _logger.Info($"\t{header.Key}: {String.Join(",", header.Value)}");
                     }
                     var responseText = await response.Content.ReadAsStringAsync();
-                    logger.Info("Response text (truncated to 2048 characters):");
-                    logger.Info(responseText.Substring(0, Math.Min(responseText.Length, 2048)));
+                    _logger.Info("Response text (truncated to 2048 characters):");
+                    _logger.Info(responseText.Substring(0, Math.Min(responseText.Length, 2048)));
+                    await _helper.RunSubChecks(_check, _logger, subCheck => RunSubCheck(subCheck, responseText, result));
                 }
                 catch (TaskCanceledException e) when (!e.CancellationToken.IsCancellationRequested)
                 {
-                    logger.Error($"Timeout after {timeoutMS}ms");
+                    _logger.Error($"Timeout after {timeoutMS}ms");
                     result.Status = CheckResultStatus.Timeout;
                 }
                 finally
@@ -92,6 +110,58 @@ namespace SystemChecker.Model.Jobs
                 }
             }
             return result;
+        }
+
+        private void RunSubCheck(SubCheck subCheck, string responseText, CheckResult result)
+        {
+            switch (subCheck.TypeID)
+            {
+                case (int)SubChecks.ResponseContains:
+                    string text = subCheck.Options[((int)ResponseContains.Text).ToString()];
+                    if (responseText.Contains(text))
+                    {
+                        _logger.Info($"Response contains '{text}'");
+                    }
+                    else
+                    {
+                        throw new SubCheckException($"Response does not contain '{text}'");
+                    }
+                    break;
+                case (int)SubChecks.JSONProperty:
+                    string fieldName = subCheck.Options[((int)JSONProperty.FieldName).ToString()];
+                    bool exists = subCheck.Options[((int)JSONProperty.Exists).ToString()];
+                    string valueContains = subCheck.Options[((int)JSONProperty.ValueContains).ToString()];
+                    var obj = JObject.Parse(responseText);
+                    var value = obj.SelectToken(fieldName)?.ToString();
+                    if (value == null && exists)
+                    {
+                        throw new SubCheckException($"Field '{fieldName}' does not exist");
+                    }
+                    else if (value != null && !exists)
+                    {
+                        throw new SubCheckException($"Field '{fieldName}' exists");
+                    }
+                    if (value != null)
+                    {
+                        _logger.Info(value);
+                        if (!string.IsNullOrWhiteSpace(valueContains))
+                        {
+                            if (value.Contains(valueContains))
+                            {
+
+                                _logger.Info($"Field '{fieldName}' contains '{valueContains}'");
+                            }
+                            else
+                            {
+                                throw new SubCheckException($"Field '{fieldName}' does not contain '{valueContains}'");
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    _logger.Warn($"Unknown sub-check type {subCheck.TypeID} - ignoring");
+                    break;
+            }
         }
     }
 }

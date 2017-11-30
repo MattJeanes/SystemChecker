@@ -10,10 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SystemChecker.Model.Data;
-using SystemChecker.Model.Data.Entities;
-using SystemChecker.Model.Enums;
 using SystemChecker.Model.Helpers;
-using SystemChecker.Model.Loggers;
 
 namespace SystemChecker.Model.Jobs
 {
@@ -26,11 +23,11 @@ namespace SystemChecker.Model.Jobs
             Query = 8,
         }
 
-        public async override Task<CheckResult> PerformCheck(Check check, ISettings settings, ICheckLogger logger, CheckResult result)
+        public async override Task<CheckResult> PerformCheck(CheckResult result)
         {
-            int connStringId = check.Data.TypeOptions[((int)Settings.ConnString).ToString()];
-            var connString = settings.ConnStrings.FirstOrDefault(x => x.ID == connStringId);
-            string query = check.Data.TypeOptions[((int)Settings.Query).ToString()];
+            int connStringId = _check.Data.TypeOptions[((int)Settings.ConnString).ToString()];
+            var connString = _settings.ConnStrings.FirstOrDefault(x => x.ID == connStringId);
+            string query = _check.Data.TypeOptions[((int)Settings.Query).ToString()];
             if (connString == null || string.IsNullOrEmpty(connString.Value))
             {
                 throw new Exception("Connection string invalid");
@@ -39,13 +36,13 @@ namespace SystemChecker.Model.Jobs
             {
                 throw new Exception("Query invalid");
             }
-            logger.Info($"Using connection string {connString.Name}: {connString.Value}");
+            _logger.Info($"Using connection string {connString.Name}: {connString.Value}");
             var timer = new Stopwatch();
             timer.Start();
             var results = await RetrieveFromSQL(connString.Value, query);
             timer.Stop();
             result.TimeMS = (int)timer.ElapsedMilliseconds;
-            logger.Info(JsonConvert.SerializeObject(results, Formatting.Indented));
+            _logger.Info(JsonConvert.SerializeObject(results, Formatting.Indented));
             return result;
         }
 

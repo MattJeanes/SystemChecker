@@ -18,7 +18,10 @@ namespace SystemChecker.Model.Jobs
 {
     public abstract class BaseChecker : IJob
     {
-        private readonly ICheckerHelper _helper;
+        protected readonly ICheckerHelper _helper;
+        protected ICheckLogger _logger;
+        protected Check _check;
+        protected ISettings _settings;
         public BaseChecker(ICheckerHelper helper)
         {
             _helper = helper;
@@ -32,6 +35,9 @@ namespace SystemChecker.Model.Jobs
 
         public async Task Run(Check check, ICheckLogger logger)
         {
+            _logger = logger;
+            _check = check;
+
             CheckResult result = new CheckResult
             {
                 CheckID = check.ID,
@@ -39,9 +45,15 @@ namespace SystemChecker.Model.Jobs
             };
             try
             {
-                var settings = await _helper.GetSettings();
+                _settings = await _helper.GetSettings();
                 logger.Info($"Starting check using {GetType().Name}");
-                result = await PerformCheck(check, settings, logger, result);
+                result = await PerformCheck(result);
+            }
+            catch (SubCheckException e)
+            {
+                result.Status = CheckResultStatus.SubCheckFailed;
+                logger.Error("Failed to run check - sub-check failed");
+                logger.Error(e.ToString());
             }
             catch (Exception e)
             {
@@ -84,6 +96,6 @@ namespace SystemChecker.Model.Jobs
             }
         }
 
-        public abstract Task<CheckResult> PerformCheck(Check check, ISettings settings, ICheckLogger logger, CheckResult result);
+        public abstract Task<CheckResult> PerformCheck(CheckResult result);
     }
 }

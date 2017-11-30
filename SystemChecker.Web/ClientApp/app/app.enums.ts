@@ -24,4 +24,5 @@ export enum CheckResultStatus {
     Failed = -1,
     // Everything below this is a failure
     Timeout = -2,
+    SubCheckFailed = -3,
 }
