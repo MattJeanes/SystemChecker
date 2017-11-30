@@ -59,6 +59,7 @@ module.exports = (env: any) => {
                 "hammerjs",
                 "@swimlane/ngx-charts",
                 "@aspnet/signalr-client",
+                "moment",
             ],
         },
         output: {
@@ -73,6 +74,7 @@ module.exports = (env: any) => {
         plugins: [
             new webpack.ProvidePlugin({ $: "jquery", jQuery: "jquery", Hammer: "hammerjs/hammer" }), // Global identifiers
             new webpack.ContextReplacementPlugin(/angular(\\|\/)core(\\|\/)/, path.join(__dirname, "./ClientApp")), // Workaround for https://github.com/angular/angular/issues/14898
+            new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
             extractCSS,
             new webpack.DllPlugin({
                 path: path.join(__dirname, outputDir, "[name]-manifest.json"),

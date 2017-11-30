@@ -16,13 +16,14 @@ export class DetailsComponent implements OnInit, OnDestroy {
     public check: ICheckDetail;
     public chart: Array<{
         name: string;
-        series: Array<{ value: number, name: string }>
+        series: Array<{ value: number, name: string | Date }>
     }> = [];
     public customColors: Array<{
         name: string;
         value: string;
     }> = [];
-    public date: Date = new Date();
+    public dateFrom: Date = new Date();
+    public dateTo: Date = new Date();
     private hub = new HubConnection("hub/details");
     private hubReady: boolean = false;
     private checkID?: number;
@@ -62,8 +63,17 @@ export class DetailsComponent implements OnInit, OnDestroy {
         }
     }
     public updateCharts() {
-        const date = this.date.toISOString().slice(0, 10);
-        const results = this.check.Results!.filter(x => x.DTS.slice(0, 10) === date);
+        this.dateFrom.setHours(0);
+        this.dateFrom.setMinutes(0);
+        this.dateFrom.setSeconds(0);
+        this.dateTo.setHours(23);
+        this.dateTo.setMinutes(59);
+        this.dateTo.setSeconds(59);
+        console.log(this.dateFrom, this.dateTo);
+        const results = this.check.Results!.filter(x => {
+            const date = new Date(x.DTS);
+            return date >= this.dateFrom && date < this.dateTo;
+        });
         const groups = this.utilService.group(results, x => x.Status);
         this.customColors = groups.map(group => ({
             name: CheckResultStatus[group.key],
@@ -73,7 +83,7 @@ export class DetailsComponent implements OnInit, OnDestroy {
             name: CheckResultStatus[group.key],
             series: group.data.map(x => ({
                 value: x.TimeMS,
-                name: x.DTS,
+                name: new Date(x.DTS),
             })),
         }));
     }

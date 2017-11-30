@@ -5,16 +5,25 @@
         <mat-card>
             <mat-card-content>
                 <mat-form-field>
-                    <input matInput [matDatepicker]="picker" [(ngModel)]="date" [required]="true" (ngModelChange)="updateCharts()">
-                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                    <mat-datepicker #picker></mat-datepicker>
+                    <input matInput placeholder="Date from" [matDatepicker]="pickerFrom" [(ngModel)]="dateFrom" [required]="true" (ngModelChange)="updateCharts()">
+                    <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerFrom></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field>
+                    <input matInput placeholder="Date to" [matDatepicker]="pickerTo" [(ngModel)]="dateTo" [required]="true" (ngModelChange)="updateCharts()">
+                    <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerTo></mat-datepicker>
                 </mat-form-field>
                 <div class="container">
                     <ngx-charts-line-chart [results]="chart"
                                            [yAxis]="true"
                                            yAxisLabel="Time (ms)"
+                                           [xAxis]="true"
+                                           xAxisLabel="DTS"
                                            [showYAxisLabel]="true"
                                            [customColors]="customColors"
+                                           [timeline]="true"
+                                           [autoScale]="true"
                                            [legend]="true">
                     </ngx-charts-line-chart>
                 </div>
