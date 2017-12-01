@@ -40,16 +40,19 @@ namespace SystemChecker.Model.Jobs
             foreach (var group in resultsToAggregate)
             {
                 var timeMSAverage = Convert.ToInt32(group.Average(x => x.TimeMS));
+                var ticks = group.Select(x => x.DTS.Ticks);
+                var avgTicks = ticks.Select(i => i / ticks.Count()).Sum() + ticks.Select(i => i % ticks.Count()).Sum() / ticks.Count();
+                var dateAverage = new DateTime(avgTicks);
                 _uow.CheckResults.Add(new CheckResult
                 {
                     CheckID = group.Key.CheckID,
-                    DTS = group.Key.Date.AddHours(group.Key.Hour),
+                    DTS = dateAverage,
                     Status = group.Key.Status,
                     TimeMS = timeMSAverage
                 });
-                _uow.CheckResults.DeleteRange(group);
             }
 
+            _uow.CheckResults.DeleteRange(resultsToAggregate.SelectMany(x => x));
             await _uow.Commit();
 
             var resultsToDelete = await _uow.CheckResults.GetAll()

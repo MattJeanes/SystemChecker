@@ -112,6 +112,14 @@ export class DetailsComponent implements OnInit, OnDestroy {
     public back() {
         this.location.back();
     }
+    public select(event: any) {
+        if (typeof event === "string") {
+            const selected = this.chart.find(x => x.name === event);
+            if (selected) {
+                this.chart = [selected];
+            }
+        }
+    }
     private getColorForStatus(status: CheckResultStatus) {
         if (status > CheckResultStatus.Success) {
             return "#FFEE58";

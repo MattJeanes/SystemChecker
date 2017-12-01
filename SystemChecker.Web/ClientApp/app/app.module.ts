@@ -1,5 +1,6 @@
-import { CommonModule } from "@angular/common";
-import { NgModule } from "@angular/core";
+import { CommonModule, registerLocaleData } from "@angular/common";
+import localeGB from "@angular/common/locales/en-GB";
+import { LOCALE_ID, NgModule } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { HttpModule } from "@angular/http";
 import { BrowserModule } from "@angular/platform-browser";
@@ -49,6 +50,8 @@ import {
 import {
     NgxChartsModule,
 } from "@swimlane/ngx-charts";
+
+registerLocaleData(localeGB);
 
 const routes: Routes = [
     { path: "", redirectTo: "dashboard", pathMatch: "full" },
@@ -103,6 +106,7 @@ const routes: Routes = [
         AppService,
         MessageService,
         UtilService,
+        { provide: LOCALE_ID, useValue: "en-GB" },
         { provide: MAT_DATE_LOCALE, useValue: "en-GB" },
     ],
     entryComponents: [
