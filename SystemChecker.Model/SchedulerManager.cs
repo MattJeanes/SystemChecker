@@ -65,11 +65,30 @@ namespace SystemChecker.Model
         {
             _scheduler.Start().Wait();
             UpdateSchedules().Wait();
+            SetupMaintenanceJobs().Wait();
         }
 
         public void Stop()
         {
             _scheduler.Shutdown(true).Wait();
+        }
+
+        public async Task SetupMaintenanceJobs()
+        {
+            var job = JobBuilder.Create<CleanupJob>()
+                .WithIdentity("cleanup")
+                .Build();
+
+            await _scheduler.AddJob(job, false, true);
+
+            var trigger = TriggerBuilder.Create()
+                .WithIdentity("cleanup")
+                .WithCronSchedule(_appSettings.CleanupSchedule)
+                .ForJob(job)
+                .Build();
+
+            await _scheduler.ScheduleJob(trigger);
+            //await _scheduler.TriggerJob(new JobKey("cleanup"));
         }
 
         public async Task UpdateSchedules()

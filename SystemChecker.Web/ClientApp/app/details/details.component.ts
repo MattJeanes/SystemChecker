@@ -1,3 +1,4 @@
+import { Location } from "@angular/common";
 import { Component, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 
@@ -22,13 +23,15 @@ export class DetailsComponent implements OnInit, OnDestroy {
         name: string;
         value: string;
     }> = [];
+    public dateMin: Date;
+    public dateMax: Date;
     public dateFrom: Date = new Date();
     public dateTo: Date = new Date();
     private hub = new HubConnection("hub/details");
     private hubReady: boolean = false;
     private checkID?: number;
     constructor(private appService: AppService, private messageService: MessageService, private ngZone: NgZone, private activatedRoute: ActivatedRoute,
-                private utilService: UtilService) {
+                private utilService: UtilService, private location: Location) {
         this.hub.on("check", (id: number) => {
             if (id !== this.checkID) { return; }
             // Because this is a call from the server, Angular change detection won't detect it so we must force ngZone to run
@@ -62,7 +65,23 @@ export class DetailsComponent implements OnInit, OnDestroy {
             this.messageService.error("Failed to load checks", e.toString());
         }
     }
+    public changeDateTo() {
+        this.dateTo = new Date(this.dateFrom.valueOf());
+    }
     public updateCharts() {
+        if (!this.check.Results || this.check.Results.length === 0) { return; }
+        this.dateMin = new Date(this.check.Results[0].DTS);
+        this.dateMax = new Date(this.check.Results[this.check.Results.length - 1].DTS);
+        if (this.dateFrom < this.dateMin) {
+            this.dateFrom = new Date(this.dateMin.valueOf());
+        } else if (this.dateFrom > this.dateMax) {
+            this.dateFrom = new Date(this.dateMax.valueOf());
+        }
+        if (this.dateTo < this.dateMin) {
+            this.dateTo = new Date(this.dateMin.valueOf());
+        } else if (this.dateTo > this.dateMax) {
+            this.dateTo = new Date(this.dateMax.valueOf());
+        }
         this.dateFrom.setHours(0);
         this.dateFrom.setMinutes(0);
         this.dateFrom.setSeconds(0);
@@ -70,7 +89,7 @@ export class DetailsComponent implements OnInit, OnDestroy {
         this.dateTo.setMinutes(59);
         this.dateTo.setSeconds(59);
         console.log(this.dateFrom, this.dateTo);
-        const results = this.check.Results!.filter(x => {
+        const results = this.check.Results.filter(x => {
             const date = new Date(x.DTS);
             return date >= this.dateFrom && date < this.dateTo;
         });
@@ -89,6 +108,9 @@ export class DetailsComponent implements OnInit, OnDestroy {
     }
     public async run() {
         await this.appService.run(RunCheckComponent, this.check);
+    }
+    public back() {
+        this.location.back();
     }
     private getColorForStatus(status: CheckResultStatus) {
         if (status > CheckResultStatus.Success) {

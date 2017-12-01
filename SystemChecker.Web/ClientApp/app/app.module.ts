@@ -33,6 +33,7 @@ import {
     MatNativeDateModule,
     MatSelectModule,
     MatTabsModule,
+    MatTooltipModule,
 } from "@angular/material";
 
 import {
@@ -82,6 +83,7 @@ const routes: Routes = [
         GrowlModule,
         CovalentDialogsModule,
         NgxChartsModule,
+        MatTooltipModule,
     ],
     declarations: [
         AppComponent,

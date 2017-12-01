@@ -13,5 +13,6 @@ namespace SystemChecker.Model.Data.Interfaces
         void Detach(T entity);
         void Delete(T entity);
         void Delete(int id);
+        void DeleteRange(IEnumerable<T> range);
     }
 }

@@ -10,5 +10,8 @@ namespace SystemChecker.Model
     {
         public string EncryptionKey { get; set; }
         public int EncryptionKeySize { get; set; }
+        public int ResultRetentionMonths { get; set; }
+        public int ResultAggregateDays { get; set; }
+        public string CleanupSchedule { get; set; }
     }
 }

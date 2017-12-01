@@ -3,6 +3,7 @@ using System.Linq;
 using SystemChecker.Model.Data.Interfaces;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace SystemChecker.Model.Data.Repositories
 {
@@ -73,6 +74,11 @@ namespace SystemChecker.Model.Data.Repositories
                 DbSet.Attach(entity);
                 DbSet.Remove(entity);
             }
+        }
+
+        public virtual void DeleteRange(IEnumerable<T> range)
+        {
+            DbSet.RemoveRange(range);
         }
 
         public async virtual void Delete(int id)

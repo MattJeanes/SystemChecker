@@ -273,6 +273,9 @@ export class EditComponent implements OnInit {
     public trackSubOption(index: number, subOption: { value: any, option: IOption }) {
         return subOption ? subOption.option : undefined;
     }
+    public back() {
+        this.location.back();
+    }
     private modelToCheck() {
         const model = this.form.value;
         const check: ICheckDetail = {
