@@ -15,6 +15,9 @@ export class AppService {
     }
     public async getDetails(id: number, includeResults?: boolean) {
         const check = await this.webService.get<ICheckDetail>(id.toString() + (typeof includeResults !== "undefined" ? "/" + includeResults.toString() : ""));
+        if (!includeResults) {
+            delete check.Results;
+        }
         return check;
     }
     public async edit(check: ICheckDetail) {

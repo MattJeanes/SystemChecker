@@ -30,8 +30,9 @@ export class DetailsComponent implements OnInit, OnDestroy {
     private hub = new HubConnection("hub/details");
     private hubReady: boolean = false;
     private checkID?: number;
+    private selectedKey?: number;
     constructor(private appService: AppService, private messageService: MessageService, private ngZone: NgZone, private activatedRoute: ActivatedRoute,
-                private utilService: UtilService, private location: Location) {
+        private utilService: UtilService, private location: Location) {
         this.hub.on("check", (id: number) => {
             if (id !== this.checkID) { return; }
             // Because this is a call from the server, Angular change detection won't detect it so we must force ngZone to run
@@ -93,7 +94,11 @@ export class DetailsComponent implements OnInit, OnDestroy {
             const date = new Date(x.DTS);
             return date >= this.dateFrom && date < this.dateTo;
         });
-        const groups = this.utilService.group(results, x => x.Status);
+        let groups = this.utilService.group(results, x => x.Status);
+        if (this.selectedKey) {
+            const key = this.selectedKey.toString();
+            groups = groups.filter(x => x.key === key);
+        }
         this.customColors = groups.map(group => ({
             name: CheckResultStatus[group.key],
             value: this.getColorForStatus(parseInt(group.key) as CheckResultStatus),
@@ -114,11 +119,16 @@ export class DetailsComponent implements OnInit, OnDestroy {
     }
     public select(event: any) {
         if (typeof event === "string") {
-            const selected = this.chart.find(x => x.name === event);
-            if (selected) {
-                this.chart = [selected];
+            this.selectedKey = CheckResultStatus[event];
+            const group = this.chart.find(x => x.name === event);
+            if (group) {
+                this.chart = [group];
             }
         }
+    }
+    public reset() {
+        delete this.selectedKey;
+        this.updateCharts();
     }
     private getColorForStatus(status: CheckResultStatus) {
         if (status > CheckResultStatus.Success) {
