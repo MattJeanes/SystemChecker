@@ -13,5 +13,6 @@ namespace SystemChecker.Model.Enums
         Login = 5,
         ConnString = 6,
         Text = 7,
+        Slack = 8,
     }
 }

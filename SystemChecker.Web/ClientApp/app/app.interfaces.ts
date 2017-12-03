@@ -32,6 +32,7 @@ export interface ICheckDetail extends ICheck {
     Data: ICheckData;
     SubChecks: ISubCheck[];
     Results?: ICheckResult[];
+    Notifications: ICheckNotification[];
 }
 
 export interface ICheckType {
@@ -84,4 +85,30 @@ export interface ISubCheck {
     Name: string;
     Active: number;
     Options: any;
+}
+
+export interface ICheckNotification {
+    ID: number;
+    TypeID: number;
+    CheckID: number;
+    Active: boolean;
+    Options: any;
+}
+
+export interface ICheckNotificationType {
+    ID: number;
+    Name: string;
+    Options: IOption[];
+}
+
+export interface ISlackChannel {
+    name: string;
+    creator: string;
+    is_archived: boolean;
+    is_member: boolean;
+    is_general: boolean;
+    is_channel: boolean;
+    is_group: boolean;
+    num_members: number;
+    members: string[];
 }

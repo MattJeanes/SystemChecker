@@ -25,7 +25,11 @@ namespace SystemChecker.Model.Data
             CreateMap<CheckTypeDTO, CheckType>().ReverseMap();
             CreateMap<CheckResultDTO, CheckResult>().ReverseMap();
             CreateMap<SubCheckTypeDTO, SubCheckType>().ReverseMap();
+            CreateMap<CheckNotificationTypeDTO, CheckNotificationType>().ReverseMap();
             CreateMap<SubCheckDTO, SubCheck>()
+                .EqualityComparison((odto, o) => odto.ID == o.ID)
+                .ReverseMap();
+            CreateMap<CheckNotificationDTO, CheckNotification>()
                 .EqualityComparison((odto, o) => odto.ID == o.ID)
                 .ReverseMap();
             CreateMap<OptionDTO, Option>().ReverseMap();

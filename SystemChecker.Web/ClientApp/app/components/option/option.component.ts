@@ -1,7 +1,7 @@
 import { Component, forwardRef, Input, OnDestroy, OnInit } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { OptionType } from "../../app.enums";
-import { IOption, ISettings } from "../../app.interfaces";
+import { IOption, ISettings, ISlackChannel } from "../../app.interfaces";
 import { AppService } from "../../services";
 
 @Component({
@@ -20,6 +20,7 @@ export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy 
     @Input() public option: IOption;
 
     public settings: ISettings;
+    public slackChannels: ISlackChannel[];
 
     public CheckTypeOptionType = OptionType;
 
@@ -41,6 +42,9 @@ export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy 
         if (this.option.OptionType === OptionType.Login
         || this.option.OptionType === OptionType.ConnString) {
             this.settings = await this.appService.getSettings();
+        }
+        if (this.option.OptionType === OptionType.Slack) {
+            this.slackChannels = await this.appService.getSlackChannels();
         }
     }
 

@@ -15,7 +15,7 @@ namespace SystemChecker.Model.Data.Repositories
         public override IQueryable<SubCheckType> GetAll()
         {
             return base.GetAll()
-                .Include("Options");
+                .Include(x => x.Options);
         }
     }
 }

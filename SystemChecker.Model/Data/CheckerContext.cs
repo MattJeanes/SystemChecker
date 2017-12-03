@@ -16,5 +16,6 @@ namespace SystemChecker.Model.Data
         public DbSet<CheckData> CheckData { get; set; }
         public DbSet<CheckResult> CheckResults { get; set; }
         public DbSet<SubCheckType> SubCheckTypes { get; set; }
+        public DbSet<CheckNotificationType> CheckNotificationTypes { get; set; }
     }
 }

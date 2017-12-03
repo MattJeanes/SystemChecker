@@ -27,6 +27,7 @@ using SystemChecker.Model.Helpers;
 using SystemChecker.Model.Loggers;
 using AutoMapper.EquivalencyExpression;
 using SystemChecker.Model.Hubs;
+using SystemChecker.Model.Notifiers;
 
 namespace SystemChecker.Web
 {
@@ -60,6 +61,9 @@ namespace SystemChecker.Web
 
             services.AddSignalR();
 
+            services.AddOptions();
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+
             var builder = new DbContextOptionsBuilder<CheckerContext>();
             builder.UseSqlServer(Configuration.GetConnectionString("SystemChecker"));
             services.AddScoped<ICheckerUow>(_ => new CheckerUow(new RepositoryProvider(new RepositoryFactories()), builder.Options));
@@ -72,17 +76,20 @@ namespace SystemChecker.Web
             services.AddSingleton<IJobFactory, JobFactory>();
             services.AddSingleton<IEncryptionHelper, EncryptionHelper>();
             services.AddSingleton<ICheckLogger, CheckLogger>();
+
+            // Helpers
             services.AddSingleton<ISettingsHelper, SettingsHelper>();
             services.AddSingleton<ICheckerHelper, CheckerHelper>();
-
-            services.AddOptions();
-            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+            services.AddSingleton<ISlackHelper, SlackHelper>();
 
             // Jobs
             services.AddTransient<DatabaseChecker>();
             services.AddTransient<WebRequestChecker>();
             services.AddTransient<PingChecker>();
             services.AddTransient<CleanupJob>();
+
+            // Notifiers
+            services.AddTransient<SlackNotifier>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

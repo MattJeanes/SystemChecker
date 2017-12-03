@@ -4,8 +4,8 @@ using System.Text;
 
 namespace SystemChecker.Model.Enums
 {
-    public enum SubCheckType
+    public enum CheckNotificationType
     {
-        // TODO
+        Slack = 1,
     }
 }

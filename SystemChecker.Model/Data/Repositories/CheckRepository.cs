@@ -37,7 +37,8 @@ namespace SystemChecker.Model.Data.Repositories
                 .Include(x => x.Schedules)
                 .Include(x => x.Data)
                 .Include(x => x.Type)
-                .Include(x => x.SubChecks);
+                .Include(x => x.SubChecks)
+                .Include(x => x.Notifications);
 
             if (includeResults)
             {

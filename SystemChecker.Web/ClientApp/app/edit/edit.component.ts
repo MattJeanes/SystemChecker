@@ -3,7 +3,7 @@ import { Component, OnInit } from "@angular/core";
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 
-import { ICheckDetail, ICheckSchedule, ICheckType, IOption, ISettings, ISubCheck, ISubCheckType } from "../app.interfaces";
+import { ICheckDetail, ICheckNotification, ICheckNotificationType, ICheckSchedule, ICheckType, IOption, ISettings, ISubCheck, ISubCheckType } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
 import { AppService, MessageService, UtilService } from "../services";
 
@@ -34,6 +34,7 @@ export class EditComponent implements OnInit {
     public check: ICheckDetail = this.getNewCheck(true);
     public types: ICheckType[] = [];
     public subCheckTypes: ISubCheckType[] = [];
+    public notificationTypes: ICheckNotificationType[] = [];
     public settings: ISettings;
     public form: FormGroup;
     public saving: boolean = false;
@@ -45,6 +46,9 @@ export class EditComponent implements OnInit {
     }
     get subChecks(): FormArray {
         return this.form.get("subChecks") as FormArray;
+    }
+    get notifications(): FormArray {
+        return this.form.get("notifications") as FormArray;
     }
     constructor(
         private appService: AppService, private activatedRoute: ActivatedRoute,
@@ -65,6 +69,7 @@ export class EditComponent implements OnInit {
             }
             this.types = await this.appService.getTypes();
             this.settings = await this.appService.getSettings();
+            this.notificationTypes = await this.appService.getCheckNotificationTypes();
             await this.updateForm();
             this.updateUrl();
         } catch (e) {
@@ -121,6 +126,18 @@ export class EditComponent implements OnInit {
     }
     public deleteSubCheck(index: number) {
         this.subChecks.removeAt(index);
+        this.form.markAsDirty();
+    }
+    public addNotification() {
+        this.notifications.push(this.formBuilder.group({
+            type: [undefined, Validators.required],
+            active: true,
+            options: this.formBuilder.array([]),
+        }));
+        this.form.markAsDirty();
+    }
+    public deleteNotification(index: number) {
+        this.notifications.removeAt(index);
         this.form.markAsDirty();
     }
     public async validateExpression(index: number | AbstractControl) {
@@ -187,6 +204,20 @@ export class EditComponent implements OnInit {
             this.subChecks.push(group);
         }
 
+        const notificationGroups = this.check.Notifications.map(notification => this.formBuilder.group({
+            id: notification.ID,
+            type: [notification.TypeID, Validators.required],
+            active: notification.Active,
+            options: this.formBuilder.array([]),
+        }));
+
+        while (this.notifications.length) {
+            this.notifications.removeAt(0);
+        }
+        for (const group of notificationGroups) {
+            this.notifications.push(group);
+        }
+
         const type = this.types.find(x => x.ID === this.check.TypeID);
         if (type) {
             await this.changeType(type);
@@ -199,6 +230,16 @@ export class EditComponent implements OnInit {
             if (subCheckType) {
                 const control = this.subChecks.controls[key] as FormGroup;
                 this.changeSubCheckType(control.controls.options as FormArray, subCheckType, subCheck);
+            }
+        }
+
+        for (const key in this.check.Notifications) {
+            if (!this.check.Notifications.hasOwnProperty(key)) { continue; }
+            const notification = this.check.Notifications[key];
+            const notificationType = this.notificationTypes.find(x => x.ID === notification.TypeID);
+            if (notificationType) {
+                const control = this.notifications.controls[key] as FormGroup;
+                this.changeNotificationType(control.controls.options as FormArray, notificationType, notification);
             }
         }
 
@@ -267,11 +308,41 @@ export class EditComponent implements OnInit {
             this.changeSubCheckType(options, subCheckType);
         }
     }
+    public changeNotificationType(options: FormArray, type: ICheckNotificationType, notification?: ICheckNotification) {
+        try {
+            const optionGroups = type.Options.map(option => {
+                const value = [];
+                const currentValue = notification ? notification.Options[option.ID] : undefined;
+                value.push(currentValue !== undefined ? currentValue : option.DefaultValue);
+                if (option.IsRequired) {
+                    value.push(Validators.required);
+                }
+                return this.formBuilder.group({ value, option });
+            });
+            while (options.length) {
+                options.removeAt(0);
+            }
+            for (const group of optionGroups) {
+                options.push(group);
+            }
+        } catch (e) {
+            this.messageService.error("Failed to change notification type", e.toString());
+        }
+    }
+    public onNotificationTypeChange(id: number) {
+        const control = this.notifications.controls[id] as FormGroup;
+        const options = control.controls.options as FormArray;
+        const notificationTypeID = control.value.type;
+        const notificationType = this.notificationTypes.find(x => x.ID === notificationTypeID);
+        if (notificationType) {
+            this.changeNotificationType(options, notificationType);
+        }
+    }
     public run() {
         this.appService.run(RunCheckComponent, this.check);
     }
-    public trackSubOption(index: number, subOption: { value: any, option: IOption }) {
-        return subOption ? subOption.option : undefined;
+    public track(index: number, option: { value: any, option: IOption }) {
+        return option ? option.option : undefined;
     }
     public back() {
         this.location.back();
@@ -299,10 +370,20 @@ export class EditComponent implements OnInit {
                 Active: subCheck.active,
                 Options: {},
             })),
+            Notifications: model.notifications.map((notification: any): ICheckNotification => ({
+                ID: notification.id,
+                CheckID: this.check.ID,
+                TypeID: notification.type,
+                Active: notification.active,
+                Options: {},
+            })),
         };
         model.options.forEach((option: { value: any, option: IOption }) => check.Data.TypeOptions[option.option.ID] = option.value);
         model.subChecks.forEach((subCheck: any, index: number) => {
             subCheck.options.forEach((option: { value: any, option: IOption }) => check.SubChecks[index].Options[option.option.ID] = option.value);
+        });
+        model.notifications.forEach((notification: any, index: number) => {
+            notification.options.forEach((option: { value: any, option: IOption }) => check.Notifications[index].Options[option.option.ID] = option.value);
         });
         return check;
     }
@@ -316,6 +397,7 @@ export class EditComponent implements OnInit {
                 TypeOptions: {},
             },
             SubChecks: [],
+            Notifications: [],
         };
     }
     private updateUrl() {
@@ -333,6 +415,7 @@ export class EditComponent implements OnInit {
             schedules: this.formBuilder.array([]),
             options: this.formBuilder.array([]),
             subChecks: this.formBuilder.array([]),
+            notifications: this.formBuilder.array([]),
         });
     }
 }

@@ -35,8 +35,8 @@ namespace SystemChecker.Model.Jobs
 
         public async Task Run(Check check, ICheckLogger logger)
         {
-            _logger = logger;
             _check = check;
+            _logger = logger;
 
             CheckResult result = new CheckResult
             {
@@ -81,7 +81,6 @@ namespace SystemChecker.Model.Jobs
                 {
                     log($"TimeMS: {result.TimeMS}");
                 }
-                logger.Done("Check completed");
                 result.DTS = DateTime.Now;
 
                 try
@@ -93,6 +92,10 @@ namespace SystemChecker.Model.Jobs
                     logger.Error("Failed to save check result");
                     logger.Error(e.ToString());
                 }
+
+                await _helper.RunNotifiers(check, logger);
+
+                logger.Done("Check completed");
             }
         }
 

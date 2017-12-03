@@ -40,4 +40,12 @@
             <textarea mat-textarea matInput autosize [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired"></textarea>
         </mat-form-field>
     </div>
+    <div *ngIf="option.OptionType === CheckTypeOptionType.Slack && slackChannels">
+        <mat-form-field>
+            <mat-select [placeholder]="option.Label" [(ngModel)]="value">
+                <mat-option [value]="undefined">None</mat-option>
+                <mat-option *ngFor="let channel of slackChannels" [value]="channel.id">#{{channel.name}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
 </div>

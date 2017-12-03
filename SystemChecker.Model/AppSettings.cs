@@ -13,5 +13,7 @@ namespace SystemChecker.Model
         public int ResultRetentionMonths { get; set; }
         public int ResultAggregateDays { get; set; }
         public string CleanupSchedule { get; set; }
+        public bool TestMode { get; set; }
+        public string SlackToken { get; set; }
     }
 }

@@ -13,5 +13,6 @@ namespace SystemChecker.Model.Data.Interfaces
         IRepository<CheckData> CheckData { get; }
         IRepository<CheckResult> CheckResults { get; }
         ISubCheckTypeRepository SubCheckTypes { get; }
+        ICheckNotificationTypeRepository CheckNotificationTypes { get; }
     }
 }

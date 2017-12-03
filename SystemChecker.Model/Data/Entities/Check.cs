@@ -31,5 +31,7 @@ namespace SystemChecker.Model.Data.Entities
         public List<CheckResult> Results { get; set; }
 
         public List<SubCheck> SubChecks { get; set; }
+
+        public List<CheckNotification> Notifications { get; set; }
     }
 }

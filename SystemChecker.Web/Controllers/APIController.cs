@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Quartz;
 using SystemChecker.Model;
 using SystemChecker.Model.Helpers;
+using SlackAPI;
 
 namespace SystemChecker.Web.Controllers
 {
@@ -23,12 +24,14 @@ namespace SystemChecker.Web.Controllers
         private readonly IMapper _mapper;
         private readonly ISchedulerManager _manager;
         private readonly ISettingsHelper _settingsHelper;
-        public APIController(ICheckerUow uow, IMapper mapper, ISchedulerManager manager, ISettingsHelper settingsHelper)
+        private readonly ISlackHelper _slackHelper;
+        public APIController(ICheckerUow uow, IMapper mapper, ISchedulerManager manager, ISettingsHelper settingsHelper, ISlackHelper slackHelper)
         {
             _uow = uow;
             _mapper = mapper;
             _manager = manager;
             _settingsHelper = settingsHelper;
+            _slackHelper = slackHelper;
         }
 
         [HttpGet]
@@ -133,6 +136,19 @@ namespace SystemChecker.Web.Controllers
         {
             var subCheckTypes = await _uow.SubCheckTypes.GetAll().Where(x => x.CheckTypeID == checkTypeID).ToListAsync();
             return _mapper.Map<List<SubCheckTypeDTO>>(subCheckTypes);
+        }
+
+        [HttpGet("checknotificationtypes")]
+        public async Task<List<CheckNotificationTypeDTO>> GetCheckNotificationTypes()
+        {
+            var checkNotificationTypes = await _uow.CheckNotificationTypes.GetAll().ToListAsync();
+            return _mapper.Map<List<CheckNotificationTypeDTO>>(checkNotificationTypes);
+        }
+
+        [HttpGet("slackchannels")]
+        public async Task<Channel[]> GetSlackChannels()
+        {
+            return await _slackHelper.GetChannels();
         }
 
         [HttpPost("cron/{validateOnly:bool?}")]

@@ -1,7 +1,7 @@
 ﻿import { Injectable } from "@angular/core";
 import { Http } from "@angular/http";
 import { MatDialog } from "@angular/material";
-import { ICheck, ICheckDetail, ICheckType, IRunLog, ISettings, ISubCheckType } from "../app.interfaces";
+import { ICheck, ICheckDetail, ICheckNotificationType, ICheckType, IRunLog, ISettings, ISlackChannel, ISubCheckType } from "../app.interfaces";
 
 import { BaseWebService } from "***REMOVED***";
 
@@ -21,7 +21,9 @@ export class AppService {
         return check;
     }
     public async edit(check: ICheckDetail) {
-        return await this.webService.post<ICheckDetail>({ data: check });
+        check = await this.webService.post<ICheckDetail>({ data: check });
+        delete check.Results;
+        return check;
     }
     public async delete(id: number) {
         return await this.webService.delete<boolean>(id.toString());
@@ -40,6 +42,12 @@ export class AppService {
     }
     public async getSubCheckTypes(checkTypeID: number) {
         return await this.webService.get<ISubCheckType[]>(`subchecktypes/${checkTypeID}`);
+    }
+    public async getCheckNotificationTypes() {
+        return await this.webService.get<ICheckNotificationType[]>("checknotificationtypes");
+    }
+    public async getSlackChannels() {
+        return await this.webService.get<ISlackChannel[]>("slackchannels");
     }
     public run(component: any, check: ICheck) {
         return this.dialogService.open(component, {

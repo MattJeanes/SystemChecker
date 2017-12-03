@@ -42,7 +42,7 @@
                                     </mat-form-field>
                                     <div *ngIf="subChecks.controls[i].value.options" class="full" formArrayName="options">
                                         <div class="header ui-g-12" *ngIf="subChecks.controls[i].value.options.length>0">Type settings</div>
-                                        <div class="ui-g-12" *ngFor="let subOption of subChecks.controls[i].value.options; let j=index; trackBy: trackSubOption" [formGroupName]="j">
+                                        <div class="ui-g-12" *ngFor="let subOption of subChecks.controls[i].value.options; let j=index; trackBy: track" [formGroupName]="j">
                                             <check-option class="full" [option]="subOption.option" formControlName="value"></check-option>
                                         </div>
                                     </div>
@@ -65,6 +65,28 @@
                                     <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
                                     <button mat-raised-button color="warn" (click)="deleteSchedule(i)">Delete</button>
                                     <hr *ngIf="i < schedules.controls.length-1" class="break">
+                                </div>
+                            </div>
+                        </mat-tab>
+                        <mat-tab label="Notifications">
+                            <br />
+                            <button mat-raised-button color="primary" (click)="addNotification()">Add new</button>
+                            <div formArrayName="notifications">
+                                <div *ngFor="let check of notifications.controls; let i=index" [formGroupName]="i">
+                                    <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
+                                    <mat-form-field class="ui-g-12 full">
+                                        <mat-select placeholder="Type" formControlName="type" (change)="onNotificationTypeChange(i)">
+                                            <mat-option *ngFor="let type of notificationTypes" [value]="type.ID">{{type.Name}}</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                    <div *ngIf="notifications.controls[i].value.options" class="full" formArrayName="options">
+                                        <div class="header ui-g-12" *ngIf="subChecks.controls[i].value.options.length>0">Type settings</div>
+                                        <div class="ui-g-12" *ngFor="let notification of notifications.controls[i].value.options; let j=index; trackBy: track" [formGroupName]="j">
+                                            <check-option class="full" [option]="notification.option" formControlName="value"></check-option>
+                                        </div>
+                                    </div>
+                                    <button mat-raised-button color="warn" (click)="deleteNotification(i)">Delete</button>
+                                    <hr *ngIf="i < notifications.controls.length-1" class="break">
                                 </div>
                             </div>
                         </mat-tab>

@@ -8,22 +8,17 @@ using System.Threading.Tasks;
 
 namespace SystemChecker.Model.Data.Entities
 {
-    [Table("tblSubCheckType")]
-    public class SubCheckType
+    [Table("tblCheckNotificationType")]
+    public class CheckNotificationType
     {
         [Key]
         public int ID { get; set; }
 
         [Column("ID")]
-        public int Type { get; set; }
-
-        [Column("CheckTypeID")]
-        public CheckType CheckType { get; set; }
-
-        public int CheckTypeID { get; set; }
+        public Enums.CheckNotificationType Type { get; set; }
 
         public string Name { get; set; }
 
-        public List<SubCheckTypeOption> Options { get; set; }
+        public List<CheckNotificationTypeOption> Options { get; set; }
     }
 }

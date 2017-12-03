@@ -31,7 +31,8 @@ export class DetailsComponent implements OnInit, OnDestroy {
     private hubReady: boolean = false;
     private checkID?: number;
     private selectedKey?: number;
-    constructor(private appService: AppService, private messageService: MessageService, private ngZone: NgZone, private activatedRoute: ActivatedRoute,
+    constructor(
+        private appService: AppService, private messageService: MessageService, private ngZone: NgZone, private activatedRoute: ActivatedRoute,
         private utilService: UtilService, private location: Location) {
         this.hub.on("check", (id: number) => {
             if (id !== this.checkID) { return; }

@@ -12,5 +12,6 @@ namespace SystemChecker.Model.DTO
         public CheckDataDTO Data { get; set; }
         public List<SubCheckDTO> SubChecks { get; set; }
         public List<CheckResultDTO> Results { get; set; }
+        public List<CheckNotificationDTO> Notifications { get; set; }
     }
 }
