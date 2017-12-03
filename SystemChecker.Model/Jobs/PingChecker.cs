@@ -10,7 +10,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
-using SystemChecker.Model.Data;
+using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Enums;
 using SystemChecker.Model.Helpers;
 

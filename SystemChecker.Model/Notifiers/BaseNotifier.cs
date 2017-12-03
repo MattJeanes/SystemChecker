@@ -12,11 +12,13 @@ namespace SystemChecker.Model.Notifiers
     {
         protected Check _check;
         protected CheckNotification _notification;
+        protected CheckResult _result;
         protected ICheckLogger _logger;
-        public async Task Run(Check check, CheckNotification notification, ICheckLogger logger)
+        public async Task Run(Check check, CheckNotification notification, CheckResult result, ICheckLogger logger)
         {
             _check = check;
             _notification = notification;
+            _result = result;
             _logger = logger;
             await SendNotification();
         }

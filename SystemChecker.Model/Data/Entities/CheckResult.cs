@@ -1,10 +1,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Enums;
 
-namespace SystemChecker.Model.Data
+namespace SystemChecker.Model.Data.Entities
 {
     [Table("tblCheckResult")]
     public class CheckResult

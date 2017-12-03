@@ -23,7 +23,7 @@ namespace SystemChecker.Model.Helpers
         Task<ISettings> GetSettings();
         Task SaveResult(CheckResult result);
         Task RunSubChecks(Check check, ICheckLogger logger, Action<SubCheck> action);
-        Task RunNotifiers(Check check, ICheckLogger logger);
+        Task RunNotifiers(Check check, CheckResult result, ICheckLogger logger);
     }
     public class CheckerHelper : ICheckerHelper
     {
@@ -67,7 +67,7 @@ namespace SystemChecker.Model.Helpers
             await _detailsHub.Clients.All.InvokeAsync("check", result.CheckID);
         }
 
-        public async Task RunNotifiers(Check check, ICheckLogger logger)
+        public async Task RunNotifiers(Check check, CheckResult result, ICheckLogger logger)
         {
             if (!check.Notifications.Any())
             {
@@ -83,7 +83,7 @@ namespace SystemChecker.Model.Helpers
                     continue;
                 }
                 var notifier = GetNotifier((Enums.CheckNotificationType)notification.TypeID);
-                await notifier.Run(check, notification, logger);
+                await notifier.Run(check, notification, result, logger);
             }
         }
 

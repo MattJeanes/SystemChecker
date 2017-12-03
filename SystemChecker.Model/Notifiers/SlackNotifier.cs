@@ -23,7 +23,7 @@ namespace SystemChecker.Model.Notifiers
         {
             _logger.Info("Sending slack notification");
             string channelID = _notification.Options[((int)Options.ChannelId).ToString()];
-            await _slackHelper.SendMessage(channelID, $"Check {_check.Name} completed");
+            await _slackHelper.SendMessage(channelID, $"Check {_check.Name} completed in {_result.TimeMS}ms with result: {_result.Status.ToString()}");
         }
     }
 }

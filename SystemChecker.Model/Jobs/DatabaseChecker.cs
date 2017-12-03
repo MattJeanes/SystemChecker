@@ -9,7 +9,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SystemChecker.Model.Data;
+using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Helpers;
 
 namespace SystemChecker.Model.Jobs

@@ -30,7 +30,7 @@
                             <br />
                             <button mat-raised-button color="primary" (click)="addSubCheck()">Add new</button>
                             <div formArrayName="subChecks">
-                                <div *ngFor="let check of subChecks.controls; let i=index" [formGroupName]="i">
+                                <div *ngFor="let subcheck of subChecks.controls; let i=index" [formGroupName]="i">
                                     <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
                                     <mat-form-field class="ui-g-12 full">
                                         <input matInput placeholder="Name" formControlName="name">
@@ -40,9 +40,9 @@
                                             <mat-option *ngFor="let type of subCheckTypes" [value]="type.ID">{{type.Name}}</mat-option>
                                         </mat-select>
                                     </mat-form-field>
-                                    <div *ngIf="subChecks.controls[i].value.options" class="full" formArrayName="options">
-                                        <div class="header ui-g-12" *ngIf="subChecks.controls[i].value.options.length>0">Type settings</div>
-                                        <div class="ui-g-12" *ngFor="let subOption of subChecks.controls[i].value.options; let j=index; trackBy: track" [formGroupName]="j">
+                                    <div *ngIf="subcheck.value.options" class="full" formArrayName="options">
+                                        <div class="header ui-g-12" *ngIf="subcheck.value.options.length>0">Type settings</div>
+                                        <div class="ui-g-12" *ngFor="let subOption of subcheck.value.options; let j=index; trackBy: track" [formGroupName]="j">
                                             <check-option class="full" [option]="subOption.option" formControlName="value"></check-option>
                                         </div>
                                     </div>
@@ -72,15 +72,15 @@
                             <br />
                             <button mat-raised-button color="primary" (click)="addNotification()">Add new</button>
                             <div formArrayName="notifications">
-                                <div *ngFor="let check of notifications.controls; let i=index" [formGroupName]="i">
+                                <div *ngFor="let notification of notifications.controls; let i=index" [formGroupName]="i">
                                     <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
                                     <mat-form-field class="ui-g-12 full">
                                         <mat-select placeholder="Type" formControlName="type" (change)="onNotificationTypeChange(i)">
                                             <mat-option *ngFor="let type of notificationTypes" [value]="type.ID">{{type.Name}}</mat-option>
                                         </mat-select>
                                     </mat-form-field>
-                                    <div *ngIf="notifications.controls[i].value.options" class="full" formArrayName="options">
-                                        <div class="header ui-g-12" *ngIf="subChecks.controls[i].value.options.length>0">Type settings</div>
+                                    <div *ngIf="notification.value.options" class="full" formArrayName="options">
+                                        <div class="header ui-g-12" *ngIf="notification.value.options.length>0">Type settings</div>
                                         <div class="ui-g-12" *ngFor="let notification of notifications.controls[i].value.options; let j=index; trackBy: track" [formGroupName]="j">
                                             <check-option class="full" [option]="notification.option" formControlName="value"></check-option>
                                         </div>

@@ -93,7 +93,15 @@ namespace SystemChecker.Model.Jobs
                     logger.Error(e.ToString());
                 }
 
-                await _helper.RunNotifiers(check, logger);
+                try
+                {
+                    await _helper.RunNotifiers(check, result, logger);
+                }
+                catch (Exception e)
+                {
+                    logger.Error("Failed to run notifiers");
+                    logger.Error(e.ToString());
+                }
 
                 logger.Done("Check completed");
             }
