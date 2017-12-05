@@ -35,5 +35,11 @@ namespace SystemChecker.Model.Data.Entities
 
         [Column("Options")]
         public string OptionsJSON { get; set; }
+
+        public DateTime? Sent { get; set; }
+
+        public int? FailCount { get; set; }
+
+        public int? FailMinutes { get; set; }
     }
 }

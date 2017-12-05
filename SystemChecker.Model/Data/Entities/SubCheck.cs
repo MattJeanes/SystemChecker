@@ -27,8 +27,6 @@ namespace SystemChecker.Model.Data.Entities
 
         public int CheckID { get; set; }
 
-        public string Name { get; set; }
-
         public bool Active { get; set; }
 
         [NotMapped]

@@ -66,7 +66,7 @@ namespace SystemChecker.Web
 
             var builder = new DbContextOptionsBuilder<CheckerContext>();
             builder.UseSqlServer(Configuration.GetConnectionString("SystemChecker"));
-            services.AddScoped<ICheckerUow>(_ => new CheckerUow(new RepositoryProvider(new RepositoryFactories()), builder.Options));
+            services.AddTransient<ICheckerUow>(_ => new CheckerUow(new RepositoryProvider(new RepositoryFactories()), builder.Options));
             services.AddSingleton<IMapper>(_ => new Mapper(new MapperConfiguration(cfg => {
                 cfg.AddProfile<MappingProfile>();
                 cfg.AddCollectionMappers();
@@ -78,9 +78,9 @@ namespace SystemChecker.Web
             services.AddSingleton<ICheckLogger, CheckLogger>();
 
             // Helpers
-            services.AddSingleton<ISettingsHelper, SettingsHelper>();
-            services.AddSingleton<ICheckerHelper, CheckerHelper>();
-            services.AddSingleton<ISlackHelper, SlackHelper>();
+            services.AddTransient<ISettingsHelper, SettingsHelper>();
+            services.AddTransient<ICheckerHelper, CheckerHelper>();
+            services.AddTransient<ISlackHelper, SlackHelper>();
 
             // Jobs
             services.AddTransient<DatabaseChecker>();

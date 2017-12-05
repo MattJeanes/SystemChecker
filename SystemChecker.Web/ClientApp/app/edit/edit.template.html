@@ -33,9 +33,6 @@
                                 <div *ngFor="let subcheck of subChecks.controls; let i=index" [formGroupName]="i">
                                     <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
                                     <mat-form-field class="ui-g-12 full">
-                                        <input matInput placeholder="Name" formControlName="name">
-                                    </mat-form-field>
-                                    <mat-form-field class="ui-g-12 full">
                                         <mat-select placeholder="Type" formControlName="type" (change)="onSubCheckTypeChange(i)">
                                             <mat-option *ngFor="let type of subCheckTypes" [value]="type.ID">{{type.Name}}</mat-option>
                                         </mat-select>
@@ -56,13 +53,13 @@
                             <button mat-raised-button color="primary" (click)="addSchedule()">Add new</button>
                             <div formArrayName="schedules">
                                 <div *ngFor="let schedule of schedules.controls; let i=index" [formGroupName]="i">
+                                    <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
                                     <mat-form-field class="ui-g-12 full">
                                         <input matInput (keyup)="validateExpression(i)" placeholder="second minute hour day-of-month month day-of-week" formControlName="expression">
                                     </mat-form-field>
                                     <mat-form-field class="ui-g-12 full">
                                         <textarea autosize matInput formControlName="next"></textarea>
                                     </mat-form-field>
-                                    <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
                                     <button mat-raised-button color="warn" (click)="deleteSchedule(i)">Delete</button>
                                     <hr *ngIf="i < schedules.controls.length-1" class="break">
                                 </div>
@@ -74,6 +71,14 @@
                             <div formArrayName="notifications">
                                 <div *ngFor="let notification of notifications.controls; let i=index" [formGroupName]="i">
                                     <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
+                                    <div [ngClass]="{'mat-form-field-invalid': notification.controls.conditions.invalid}" formGroupName="conditions" class="ui-g-12 full">
+                                        <mat-form-field class="full">
+                                            <input type="number" matInput placeholder="Fail Count" formControlName="failCount">
+                                        </mat-form-field>
+                                        <mat-form-field class="full">
+                                            <input type="number" matInput placeholder="Fail Minutes" formControlName="failMinutes">
+                                        </mat-form-field>
+                                    </div>
                                     <mat-form-field class="ui-g-12 full">
                                         <mat-select placeholder="Type" formControlName="type" (change)="onNotificationTypeChange(i)">
                                             <mat-option *ngFor="let type of notificationTypes" [value]="type.ID">{{type.Name}}</mat-option>
@@ -92,8 +97,8 @@
                         </mat-tab>
                     </mat-tab-group>
                 </form>
-                 <!--<pre>{{check | json}}</pre>--> 
-                 <!--<pre>{{modelToCheck() | json}}</pre>--> 
+                <!--<pre>{{check | json}}</pre>-->
+                <pre><!--{{modelToCheck() | json}}--></pre> 
             </mat-card-content>
             <mat-card-actions>
                 <button mat-raised-button (click)="back()" [disabled]="saving">Back</button>

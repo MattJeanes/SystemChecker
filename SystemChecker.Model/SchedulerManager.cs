@@ -29,7 +29,7 @@ namespace SystemChecker.Model
         Task UpdateSchedule(int id);
         Task UpdateSchedule(Check check);
         Task RemoveSchedule(Check check);
-        Task<List<RunLog>> RunManualUICheck(Check check);
+        Task<ManualRunLogger> RunManualUICheck(Check check);
     }
 
     public class SchedulerManager : ISchedulerManager
@@ -117,7 +117,7 @@ namespace SystemChecker.Model
             var type = GetJobForCheck(check);
             IDictionary<string, object> data = new Dictionary<string, object>
             {
-                ["Check"] = check,
+                ["CheckID"] = check.ID,
                 ["Logger"] = _checkLogger
             };
             var job = JobBuilder.Create(type)
@@ -155,13 +155,13 @@ namespace SystemChecker.Model
             }
         }
 
-        public async Task<List<RunLog>> RunManualUICheck(Check check)
+        public async Task<ManualRunLogger> RunManualUICheck(Check check)
         {
             var type = GetJobForCheck(check);
             var checker = _container.GetService(type) as BaseChecker;
             var logger = new ManualRunLogger();
             await checker.Run(check, logger);
-            return logger.GetLog();
+            return logger;
         }
 
         private TriggerKey GetTriggerKeyForSchedule(CheckSchedule schedule)

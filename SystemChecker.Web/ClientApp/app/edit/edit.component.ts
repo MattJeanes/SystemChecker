@@ -26,6 +26,22 @@ export function cronValidator(appService: AppService): ValidatorFn {
     };
 }
 
+export function oneFilledOutValidator(): ValidatorFn {
+    return (group: FormGroup): ValidationErrors | null => {
+        const fields = [];
+        for (const field in group.controls) {
+            if (group.controls.hasOwnProperty(field)) {
+                fields.push(group.get(field)!.value);
+            }
+        }
+        const result = fields.filter(field => field !== null);
+        const valid = result.length !== 0;
+        return valid ? null : {
+            oneFilledOut: true,
+        };
+    };
+}
+
 @Component({
     templateUrl: "./edit.template.html",
     styleUrls: ["./edit.style.scss"],
@@ -118,7 +134,6 @@ export class EditComponent implements OnInit {
     public addSubCheck() {
         this.subChecks.push(this.formBuilder.group({
             type: [undefined, Validators.required],
-            name: ["", Validators.required],
             active: true,
             options: this.formBuilder.array([]),
         }));
@@ -133,6 +148,10 @@ export class EditComponent implements OnInit {
             type: [undefined, Validators.required],
             active: true,
             options: this.formBuilder.array([]),
+            conditions: this.formBuilder.group({
+                failCount: [undefined],
+                failMinutes: [undefined],
+            }, { validator: oneFilledOutValidator() }),
         }));
         this.form.markAsDirty();
     }
@@ -192,7 +211,6 @@ export class EditComponent implements OnInit {
         const subCheckGroups = this.check.SubChecks.map(subCheck => this.formBuilder.group({
             id: subCheck.ID,
             type: [subCheck.TypeID, Validators.required],
-            name: [subCheck.Name, Validators.required],
             active: subCheck.Active,
             options: this.formBuilder.array([]),
         }));
@@ -209,6 +227,10 @@ export class EditComponent implements OnInit {
             type: [notification.TypeID, Validators.required],
             active: notification.Active,
             options: this.formBuilder.array([]),
+            conditions: this.formBuilder.group({
+                failCount: [notification.FailCount],
+                failMinutes: [notification.FailMinutes],
+            }, { validator: oneFilledOutValidator() }),
         }));
 
         while (this.notifications.length) {
@@ -364,20 +386,29 @@ export class EditComponent implements OnInit {
             },
             SubChecks: model.subChecks.map((subCheck: any): ISubCheck => ({
                 ID: subCheck.id,
-                CheckID: this.check.ID,
                 TypeID: subCheck.type,
-                Name: subCheck.name,
+                CheckID: this.check.ID,
                 Active: subCheck.active,
                 Options: {},
             })),
             Notifications: model.notifications.map((notification: any): ICheckNotification => ({
                 ID: notification.id,
-                CheckID: this.check.ID,
                 TypeID: notification.type,
+                CheckID: this.check.ID,
                 Active: notification.active,
                 Options: {},
+                FailCount: notification.conditions.failCount,
+                FailMinutes: notification.conditions.failMinutes,
             })),
         };
+        for (const notification of check.Notifications) {
+            if (notification.FailCount === null) {
+                delete notification.FailCount;
+            }
+            if (notification.FailMinutes === null) {
+                delete notification.FailMinutes;
+            }
+        }
         model.options.forEach((option: { value: any, option: IOption }) => check.Data.TypeOptions[option.option.ID] = option.value);
         model.subChecks.forEach((subCheck: any, index: number) => {
             subCheck.options.forEach((option: { value: any, option: IOption }) => check.SubChecks[index].Options[option.option.ID] = option.value);

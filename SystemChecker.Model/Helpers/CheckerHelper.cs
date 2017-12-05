@@ -24,6 +24,8 @@ namespace SystemChecker.Model.Helpers
         Task SaveResult(CheckResult result);
         Task RunSubChecks(Check check, ICheckLogger logger, Action<SubCheck> action);
         Task RunNotifiers(Check check, CheckResult result, ICheckLogger logger);
+        Task<Check> GetDetails(int value);
+        Task Commit();
     }
     public class CheckerHelper : ICheckerHelper
     {
@@ -99,6 +101,16 @@ namespace SystemChecker.Model.Helpers
                     throw new Exception($"Invalid notification type: {notificationType}");
             }
             return _serviceProvider.GetService(type) as BaseNotifier;
+        }
+
+        public async Task<Check> GetDetails(int checkID)
+        {
+            return await _uow.Checks.GetDetails(checkID);
+        }
+
+        public async Task Commit()
+        {
+            await _uow.Commit();
         }
     }
 }

@@ -28,9 +28,19 @@ namespace SystemChecker.Model.Jobs
         }
         public async Task Execute(IJobExecutionContext context)
         {
-            var check = context.JobDetail.JobDataMap.Get("Check") as Check;
+            var checkID = context.JobDetail.JobDataMap.Get("CheckID") as int?;
+            var check = await _helper.GetDetails(checkID.Value);
             var logger = context.JobDetail.JobDataMap.Get("Logger") as ICheckLogger;
             await Run(check, logger);
+            try
+            {
+                await _helper.Commit();
+            }
+            catch (Exception e)
+            {
+                logger.Error("Failed to commit changes");
+                logger.Error(e.ToString());
+            }
         }
 
         public async Task Run(Check check, ICheckLogger logger)

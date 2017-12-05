@@ -118,7 +118,17 @@ namespace SystemChecker.Web.Controllers
         public async Task<List<RunLog>> Run(int id)
         {
             var check = await _uow.Checks.GetDetails(id);
-            return await _manager.RunManualUICheck(check);
+            var logger = await _manager.RunManualUICheck(check);
+            try
+            {
+                await _uow.Commit();
+            }
+            catch (Exception e)
+            {
+                logger.Error("Failed to commit changes");
+                logger.Error(e.ToString());
+            }
+            return logger.GetLog();
         }
 
         [HttpDelete("{id:int}")]

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SystemChecker.Model.Data.Interfaces;
 using SystemChecker.Model.Helpers;
 
 namespace SystemChecker.Model.Notifiers
@@ -14,16 +15,17 @@ namespace SystemChecker.Model.Notifiers
             ChannelId = 1
         }
         private readonly ISlackHelper _slackHelper;
-        public SlackNotifier(ISlackHelper slackHelper)
+        public SlackNotifier(ICheckerUow uow, ISlackHelper slackHelper) : base(uow)
         {
             _slackHelper = slackHelper;
         }
 
-        public override async Task SendNotification()
+        protected override async Task SendNotification(NotificationType type, string failedAfter = null)
         {
-            _logger.Info("Sending slack notification");
             string channelID = _notification.Options[((int)Options.ChannelId).ToString()];
-            await _slackHelper.SendMessage(channelID, $"Check {_check.Name} completed in {_result.TimeMS}ms with result: {_result.Status.ToString()}");
+            var message = $"Check {_check.Name} completed in {_result.TimeMS}ms with result: {_result.Status.ToString()}{(string.IsNullOrEmpty(failedAfter) ? "" :  $" - failed after {failedAfter}")}";
+            _logger.Info($"Sending slack notification to channel ID {channelID}: {message}");
+            await _slackHelper.SendMessage(channelID, message);
         }
     }
 }

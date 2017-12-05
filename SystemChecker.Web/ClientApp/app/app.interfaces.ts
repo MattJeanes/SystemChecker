@@ -82,7 +82,6 @@ export interface ISubCheck {
     ID: number;
     CheckID: number;
     TypeID: number;
-    Name: string;
     Active: number;
     Options: any;
 }
@@ -93,6 +92,8 @@ export interface ICheckNotification {
     CheckID: number;
     Active: boolean;
     Options: any;
+    FailCount?: number;
+    FailMinutes?: number;
 }
 
 export interface ICheckNotificationType {
