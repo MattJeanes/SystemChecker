@@ -58,7 +58,7 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
     }
     public async loadChecks() {
         try {
-            this.checks = await this.appService.getAll();
+            this.checks = await this.appService.getAll(true);
             this.updateCharts();
         } catch (e) {
             this.messageService.error("Failed to load checks", e.toString());

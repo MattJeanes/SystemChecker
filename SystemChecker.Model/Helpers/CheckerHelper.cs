@@ -33,14 +33,16 @@ namespace SystemChecker.Model.Helpers
         private readonly ISettingsHelper _settingsHelper;
         private readonly IHubContext<DashboardHub> _dashboardHub;
         private readonly IHubContext<DetailsHub> _detailsHub;
+        private readonly IHubContext<CheckHub> _checkHub;
         private readonly IServiceProvider _serviceProvider;
         public CheckerHelper(ICheckerUow uow, IMapper mapper, ISettingsHelper settingsHelper, IHubContext<DashboardHub> dashboardHub,
-            IHubContext<DetailsHub> detailsHub, IServiceProvider serviceProvider)
+            IHubContext<DetailsHub> detailsHub, IHubContext<CheckHub> checkHub, IServiceProvider serviceProvider)
         {
             _uow = uow;
             _settingsHelper = settingsHelper;
             _dashboardHub = dashboardHub;
             _detailsHub = detailsHub;
+            _checkHub = checkHub;
             _serviceProvider = serviceProvider;
         }
 
@@ -67,6 +69,7 @@ namespace SystemChecker.Model.Helpers
             await _uow.Commit();
             await _dashboardHub.Clients.All.InvokeAsync("check", result.CheckID);
             await _detailsHub.Clients.All.InvokeAsync("check", result.CheckID);
+            await _checkHub.Clients.All.InvokeAsync("check", result.CheckID);
         }
 
         public async Task RunNotifiers(Check check, CheckResult result, ICheckLogger logger)

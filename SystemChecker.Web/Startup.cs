@@ -115,6 +115,7 @@ namespace SystemChecker.Web
             {
                 routes.MapHub<DashboardHub>("hub/dashboard");
                 routes.MapHub<DetailsHub>("hub/details");
+                routes.MapHub<CheckHub>("hub/check");
             });
 
             app.UseMvc(routes =>

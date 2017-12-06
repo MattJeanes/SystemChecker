@@ -9,12 +9,12 @@ import { BaseWebService } from "***REMOVED***";
 export class AppService {
     private webService = new BaseWebService(this.http, "/api");
     constructor(private http: Http, private dialogService: MatDialog) { }
-    public async getAll() {
-        const checks = await this.webService.get<ICheck[]>();
+    public async getAll(simpleStatus?: boolean) {
+        const checks = await this.webService.get<ICheck[]>(typeof simpleStatus !== "undefined" ? simpleStatus.toString() : "");
         return checks;
     }
     public async getDetails(id: number, includeResults?: boolean) {
-        const check = await this.webService.get<ICheckDetail>(id.toString() + (typeof includeResults !== "undefined" ? "/" + includeResults.toString() : ""));
+        const check = await this.webService.get<ICheckDetail>("details/" + id.toString() + (typeof includeResults !== "undefined" ? "/" + includeResults.toString() : ""));
         if (!includeResults) {
             delete check.Results;
         }

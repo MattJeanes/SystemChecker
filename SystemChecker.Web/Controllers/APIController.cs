@@ -34,36 +34,54 @@ namespace SystemChecker.Web.Controllers
             _slackHelper = slackHelper;
         }
 
-        [HttpGet]
-        public async Task<List<CheckDTO>> GetAll()
+        [HttpGet("{simpleStatus:bool?}")]
+        public async Task<List<CheckDTO>> GetAll(bool? simpleStatus)
         {
             var checks = await _uow.Checks.GetAll().ToListAsync();
             var dtos = _mapper.Map<List<CheckDTO>>(checks);
             foreach (var check in dtos)
             {
-                var result = await _uow.CheckResults.GetAll().Where(x => x.CheckID == check.ID).OrderByDescending(x => x.ID).FirstOrDefaultAsync();
-                var status = result?.Status;
-                if (status == null)
-                {
-                    check.LastResultStatus = CheckResultStatus.NotRun;
-                }
-                else if (status > CheckResultStatus.Success)
-                {
-                    check.LastResultStatus = CheckResultStatus.Warning;
-                }
-                else if (status == CheckResultStatus.Success)
-                {
-                    check.LastResultStatus = CheckResultStatus.Success;
-                }
-                else
-                {
-                    check.LastResultStatus = CheckResultStatus.Failed;
-                }
+                await SetLastResultStatus(check, simpleStatus ?? false);
             }
             return dtos;
         }
 
-        [HttpGet("{id:int}/{includeResults:bool?}")]
+        [HttpGet("{id:int}/{simpleStatus:bool?}")]
+        public async Task<CheckDTO> GetByID(int id, bool? simpleStatus)
+        {
+            var check = await _uow.Checks.GetById(id);
+            var dto = _mapper.Map<CheckDTO>(check);
+            await SetLastResultStatus(dto, simpleStatus ?? false);
+            return dto;
+        }
+
+        private async Task SetLastResultStatus(CheckDTO check, bool simpleStatus = true)
+        {
+            var result = await _uow.CheckResults.GetAll().Where(x => x.CheckID == check.ID).OrderByDescending(x => x.ID).FirstOrDefaultAsync();
+            var status = result?.Status;
+            if (status == null)
+            {
+                check.LastResultStatus = CheckResultStatus.NotRun;
+            }
+            else if (!simpleStatus)
+            {
+                check.LastResultStatus = status;
+            }
+            else if (status > CheckResultStatus.Success)
+            {
+                check.LastResultStatus = CheckResultStatus.Warning;
+            }
+            else if (status == CheckResultStatus.Success)
+            {
+                check.LastResultStatus = CheckResultStatus.Success;
+            }
+            else
+            {
+                check.LastResultStatus = CheckResultStatus.Failed;
+            }
+        }
+
+        [HttpGet("details/{id:int}/{includeResults:bool?}")]
         public async Task<CheckDetailDTO> GetDetails(int id, bool? includeResults = null)
         {
             var check = await _uow.Checks.GetDetails(id, includeResults ?? false);
