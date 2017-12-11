@@ -1,15 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Quartz;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
-using System.Dynamic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using SystemChecker.Model.Data.Entities;
+using SystemChecker.Model.Extensions;
 using SystemChecker.Model.Helpers;
 
 namespace SystemChecker.Model.Jobs
@@ -17,51 +14,78 @@ namespace SystemChecker.Model.Jobs
     public class DatabaseChecker : BaseChecker
     {
         public DatabaseChecker(ICheckerHelper helper) : base(helper) { }
+
+        private const string column = "Column";
+
         private enum Settings
         {
             ConnString = 7,
             Query = 8,
         }
 
+        /// <summary>
+        /// This enum value MUST correlate to dbo.tblSubCheckType 'ID' column
+        /// </summary>
+        private enum SubCheckType
+        {
+            JSONProperty = 3,
+        }
+
+        /// <summary>
+        /// These enum values MUST correlate to dbo.tblSubCheckTypeOption 'ID' column
+        /// </summary>
+        private enum SubCheckTypeOption
+        {
+            ValueEqualsSingleRow = 6,
+            ColumnName = 7,
+            Exists = 8,
+            ValueEqualsMultipleRows = 9,
+        }
+
         public async override Task<CheckResult> PerformCheck(CheckResult result)
         {
+            // Get and validate db connection string
             int connStringId = _check.Data.TypeOptions[((int)Settings.ConnString).ToString()];
             var connString = _settings.ConnStrings.FirstOrDefault(x => x.ID == connStringId);
-            string query = _check.Data.TypeOptions[((int)Settings.Query).ToString()];
             if (connString == null || string.IsNullOrEmpty(connString.Value))
             {
                 throw new Exception("Connection string invalid");
             }
+            _logger.Info($"Using connection string {connString.Name}: {connString.Value}");
+
+            // Get and validate sequel query
+            string query = _check.Data.TypeOptions[((int)Settings.Query).ToString()];
             if (string.IsNullOrEmpty(query))
             {
                 throw new Exception("Query invalid");
             }
-            _logger.Info($"Using connection string {connString.Name}: {connString.Value}");
+
+            // Run sub check, within a timer
             var timer = new Stopwatch();
             timer.Start();
-            var results = await RetrieveFromSQL(connString.Value, query);
+            var jsonResult = await GetQueryResultAsJson(connString.Value, query);
+            await _helper.RunSubChecks(_check, _logger, subCheck => RunSubCheck(subCheck, jsonResult, result));
             timer.Stop();
             result.TimeMS = (int)timer.ElapsedMilliseconds;
-            _logger.Info(JsonConvert.SerializeObject(results, Formatting.Indented));
+
+            // Log and return
+            _logger.Info(JsonConvert.SerializeObject(jsonResult, Formatting.Indented));
             return result;
         }
 
-        protected async Task<IEnumerable<dynamic>> RetrieveFromSQL(string connectionString, string sql)
+        protected async Task<string> GetQueryResultAsJson(string connectionString, string query)
         {
-            var resultList = new List<dynamic>();
+            string jsonResult;
 
             using (var conn = new SqlConnection(connectionString))
             {
-                using (var cmd = new SqlCommand(sql, conn))
+                using (var sqlCommand = new SqlCommand(query, conn))
                 {
                     conn.Open();
                     try
                     {
-                        var reader = await cmd.ExecuteReaderAsync();
-                        while (await reader.ReadAsync())
-                        {
-                            resultList.Add(SqlDataReaderToExpando(reader));
-                        }
+                        var sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                        jsonResult = await sqlDataReader.ToJson();
                     }
                     finally
                     {
@@ -69,17 +93,52 @@ namespace SystemChecker.Model.Jobs
                     }
                 }
             }
-            return resultList;
+
+            return jsonResult;
         }
 
-        protected dynamic SqlDataReaderToExpando(SqlDataReader reader)
+        private void RunSubCheck(SubCheck subCheck, string jsonResult, CheckResult checkResult)
         {
-            var expandoObject = new ExpandoObject() as IDictionary<string, object>;
+            switch (subCheck.TypeID)
+            {
+                case (int)SubCheckType.JSONProperty:
 
-            for (var i = 0; i < reader.FieldCount; i++)
-                expandoObject.Add(reader.GetName(i), reader[i]);
+                    // Get & validate data identifiers
+                    string columnName = subCheck.Options[((int)SubCheckTypeOption.ColumnName).ToString()];
+                    bool exists = subCheck.Options[((int)SubCheckTypeOption.Exists).ToString()];
+                    if (string.IsNullOrEmpty(columnName) && exists)
+                    {
+                        throw new SubCheckException($"{column} '{columnName}' does not exist");
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(columnName) && !exists)
+                        {
+                            throw new SubCheckException($"{column} '{columnName}' exists");
+                        }
+                    }
 
-            return expandoObject;
+                    // Get dataset from query as json
+                    var jArray = JArray.Parse(jsonResult);
+                    dynamic jObject = JObject.Parse(jArray[0].ToString());//NOTE: GETTING FIRST ARRAY ENTRY ONLY AT THIS TIME
+                    string actualValue = jObject.SelectToken(columnName)?.ToString();
+                    _logger.Info(actualValue);
+
+                    // Perform actual check
+                    string expectedValue = subCheck.Options[((int)SubCheckTypeOption.ValueEqualsSingleRow).ToString()]; ;
+                    if (actualValue == expectedValue)
+                    {
+                        _logger.Info($"{column} '{columnName}' equals the expected value of '{expectedValue}'");
+                    }
+                    else
+                    {
+                        throw new SubCheckException($"{column} '{columnName}' does not equal the expected value of '{expectedValue}', the actual value is '{actualValue}'");
+                    }
+                    break;
+                default:
+                    _logger.Warn($"Unknown sub-check type {subCheck.TypeID} - ignoring");
+                    break;
+            }
         }
     }
 }
