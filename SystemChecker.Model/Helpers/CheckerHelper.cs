@@ -77,7 +77,7 @@ namespace SystemChecker.Model.Helpers
             var notifications = check.Notifications.Where(x => x.Active);
             if (!notifications.Any())
             {
-                logger.Info("No notifications configured");
+                logger.Info("No active notifications configured");
                 return;
             }
             logger.Info("Running notifiers");

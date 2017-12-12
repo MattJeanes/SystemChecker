@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SystemChecker.Migrations": {
+      "commandName": "Project",
+      "commandLineArgs": "--integrated --runLatest"
+    }
+  }
+}
