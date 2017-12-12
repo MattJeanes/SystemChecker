@@ -14,7 +14,9 @@
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Scripts\**" />
+    <Content Include="Scripts\**">
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
