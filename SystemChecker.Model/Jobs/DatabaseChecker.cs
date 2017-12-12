@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using SystemChecker.Model.Data.Entities;
+using SystemChecker.Model.DTO;
 using SystemChecker.Model.Extensions;
 using SystemChecker.Model.Helpers;
 
@@ -39,12 +40,35 @@ namespace SystemChecker.Model.Jobs
             ValueEqualsSingleRow = 6,
             ColumnName = 7,
             Exists = 8,
-            ValueEqualsMultipleRows = 9,
         }
 
         public async override Task<CheckResult> PerformCheck(CheckResult result)
         {
-            // Get and validate db connection string
+            var connStringDTO = GetConnStringDTO();
+            var query = GetQuery();
+
+            var timer = new Stopwatch();
+            try
+            {
+                timer.Start();
+                var jsonResult = await GetQueryResultAsJson(connStringDTO.Value, query);
+                timer.Stop();
+                await _helper.RunSubChecks(_check, _logger, subCheck => RunSubCheck(subCheck, jsonResult, result));
+                _logger.Info(JsonConvert.SerializeObject(jsonResult, Formatting.Indented));
+            }
+            finally
+            {
+                if (timer.IsRunning)
+                {
+                    timer.Stop();
+                }
+                result.TimeMS = (int)timer.ElapsedMilliseconds;
+            }
+            return result;
+        }
+
+        private ConnStringDTO GetConnStringDTO()
+        {
             int connStringId = _check.Data.TypeOptions[((int)Settings.ConnString).ToString()];
             var connString = _settings.ConnStrings.FirstOrDefault(x => x.ID == connStringId);
             if (connString == null || string.IsNullOrEmpty(connString.Value))
@@ -52,25 +76,18 @@ namespace SystemChecker.Model.Jobs
                 throw new Exception("Connection string invalid");
             }
             _logger.Info($"Using connection string {connString.Name}: {connString.Value}");
+            return connString;
+        }
 
-            // Get and validate sequel query
+        private string GetQuery()
+        {
             string query = _check.Data.TypeOptions[((int)Settings.Query).ToString()];
             if (string.IsNullOrEmpty(query))
             {
                 throw new Exception("Query invalid");
             }
 
-            // Run sub check, within a timer
-            var timer = new Stopwatch();
-            timer.Start();
-            var jsonResult = await GetQueryResultAsJson(connString.Value, query);
-            await _helper.RunSubChecks(_check, _logger, subCheck => RunSubCheck(subCheck, jsonResult, result));
-            timer.Stop();
-            result.TimeMS = (int)timer.ElapsedMilliseconds;
-
-            // Log and return
-            _logger.Info(JsonConvert.SerializeObject(jsonResult, Formatting.Indented));
-            return result;
+            return query;
         }
 
         protected async Task<string> GetQueryResultAsJson(string connectionString, string query)
@@ -102,43 +119,56 @@ namespace SystemChecker.Model.Jobs
             switch (subCheck.TypeID)
             {
                 case (int)SubCheckType.JSONProperty:
-
-                    // Get & validate data identifiers
-                    string columnName = subCheck.Options[((int)SubCheckTypeOption.ColumnName).ToString()];
-                    bool exists = subCheck.Options[((int)SubCheckTypeOption.Exists).ToString()];
-                    if (string.IsNullOrEmpty(columnName) && exists)
-                    {
-                        throw new SubCheckException($"{column} '{columnName}' does not exist");
-                    }
-                    else
-                    {
-                        if (!string.IsNullOrEmpty(columnName) && !exists)
-                        {
-                            throw new SubCheckException($"{column} '{columnName}' exists");
-                        }
-                    }
-
-                    // Get dataset from query as json
-                    var jArray = JArray.Parse(jsonResult);
-                    dynamic jObject = JObject.Parse(jArray[0].ToString());//NOTE: GETTING FIRST ARRAY ENTRY ONLY AT THIS TIME
-                    string actualValue = jObject.SelectToken(columnName)?.ToString();
-                    _logger.Info(actualValue);
-
-                    // Perform actual check
-                    string expectedValue = subCheck.Options[((int)SubCheckTypeOption.ValueEqualsSingleRow).ToString()]; ;
-                    if (actualValue == expectedValue)
-                    {
-                        _logger.Info($"{column} '{columnName}' equals the expected value of '{expectedValue}'");
-                    }
-                    else
-                    {
-                        throw new SubCheckException($"{column} '{columnName}' does not equal the expected value of '{expectedValue}', the actual value is '{actualValue}'");
-                    }
+                    var columnName = GetColumnName(subCheck.Options);
+                    var actualValue = GetActualValueFromColumn(jsonResult, columnName);
+                    string expectedValue = subCheck.Options[((int)SubCheckTypeOption.ValueEqualsSingleRow).ToString()];
+                    VerifyAreEquals(expectedValue, actualValue, columnName);
                     break;
                 default:
                     _logger.Warn($"Unknown sub-check type {subCheck.TypeID} - ignoring");
                     break;
             }
+        }
+
+        private void VerifyAreEquals(string expectedValue, string actualValue, string columnName)
+        {
+            if (actualValue == expectedValue)
+            {
+                _logger.Info($"{column} '{columnName}' equals the expected value of '{expectedValue}'");
+            }
+            else
+            {
+                throw new SubCheckException($"{column} '{columnName}' does not equal the expected value of '{expectedValue}', the actual value is '{actualValue}'");
+            }
+        }
+
+        private static string GetColumnName(dynamic subCheckOptions)
+        {
+            string columnName = subCheckOptions[((int)SubCheckTypeOption.ColumnName).ToString()];
+            bool exists = subCheckOptions[((int)SubCheckTypeOption.Exists).ToString()];
+
+            if (string.IsNullOrEmpty(columnName) && exists)
+            {
+                throw new SubCheckException($"{column} '{columnName}' does not exist");
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(columnName) && !exists)
+                {
+                    throw new SubCheckException($"{column} '{columnName}' exists");
+                }
+            }
+
+            return columnName;
+        }
+
+        private string GetActualValueFromColumn(string jsonResult, string columnName)
+        {
+            var jArray = JArray.Parse(jsonResult);
+            var jObject = JObject.Parse(jArray[0].ToString()); //NOTE: GETTING FIRST ARRAY ENTRY ONLY AT THIS TIME
+            var actualValue = jObject.SelectToken(columnName)?.ToString();
+
+            return actualValue;
         }
     }
 }
