@@ -74,13 +74,14 @@ namespace SystemChecker.Model.Helpers
 
         public async Task RunNotifiers(Check check, CheckResult result, ICheckLogger logger)
         {
-            if (!check.Notifications.Any())
+            var notifications = check.Notifications.Where(x => x.Active);
+            if (!notifications.Any())
             {
                 logger.Info("No notifications configured");
                 return;
             }
             logger.Info("Running notifiers");
-            foreach (var notification in check.Notifications)
+            foreach (var notification in notifications)
             {
                 if (!Enum.IsDefined(typeof(Enums.CheckNotificationType), notification.TypeID))
                 {
