@@ -51,8 +51,8 @@ namespace SystemChecker.Model.Jobs
                 timer.Start();
                 var jsonResult = await GetQueryResultAsJson(connStringDTO.Value, query);
                 timer.Stop();
-                await _helper.RunSubChecks(_check, _logger, subCheck => RunSubCheck(subCheck, jsonResult, result));
                 _logger.Info(JsonConvert.SerializeObject(jsonResult, Formatting.Indented));
+                await _helper.RunSubChecks(_check, _logger, subCheck => RunSubCheck(subCheck, jsonResult, result));
             }
             finally
             {
@@ -144,7 +144,7 @@ namespace SystemChecker.Model.Jobs
         {
             string fieldName = subCheckOptions[((int)SubCheckTypeOption.FieldName).ToString()];
             bool exists = subCheckOptions[((int)SubCheckTypeOption.Exists).ToString()];
-            var value = jsonResult.SelectToken(fieldName)?.ToString();
+            var value = jsonResult.SelectToken(fieldName);
 
             if (value == null && exists)
             {
