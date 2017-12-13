@@ -13,8 +13,7 @@ export class UtilService {
         this.router.events
             .filter((e: Event) => e instanceof NavigationEnd)
             .subscribe((e: NavigationEnd) => {
-                if (this.ignoreNavigation) { return; }
-                if (this.currentUrl) {
+                if (!this.ignoreNavigation && this.currentUrl) {
                     this.history.push(this.currentUrl);
                 }
                 this.currentUrl = e.urlAfterRedirects;
