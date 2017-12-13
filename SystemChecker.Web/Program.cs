@@ -9,6 +9,7 @@ using SystemChecker.Web.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using SystemChecker.Model;
 using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.AspNetCore.Server.HttpSys;
 
 namespace SystemChecker.Web
 {
@@ -59,9 +60,12 @@ namespace SystemChecker.Web
             }
 
             var host = new WebHostBuilder()
-                .UseKestrel()
+                .UseHttpSys(x =>
+                {
+                    x.Authentication.Schemes = AuthenticationSchemes.NTLM | AuthenticationSchemes.Negotiate;
+                    x.Authentication.AllowAnonymous = true;
+                })
                 .UseContentRoot(pathToContentRoot)
-                .UseIISIntegration()
                 .UseStartup<Startup>()
                 .UseUrls($"http://localhost:{port}")
                 .Build();

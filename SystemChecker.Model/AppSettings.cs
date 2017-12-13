@@ -15,5 +15,7 @@ namespace SystemChecker.Model
         public string CleanupSchedule { get; set; }
         public bool TestMode { get; set; }
         public string SlackToken { get; set; }
+        public string AuthenticationGroup { get; set; }
+        public string ApiKey { get; set; }
     }
 }

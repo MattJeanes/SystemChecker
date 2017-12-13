@@ -28,6 +28,7 @@ using SystemChecker.Model.Loggers;
 using AutoMapper.EquivalencyExpression;
 using SystemChecker.Model.Hubs;
 using SystemChecker.Model.Notifiers;
+using SystemChecker.Web.Helpers;
 
 namespace SystemChecker.Web
 {
@@ -67,7 +68,8 @@ namespace SystemChecker.Web
             var builder = new DbContextOptionsBuilder<CheckerContext>();
             builder.UseSqlServer(Configuration.GetConnectionString("SystemChecker"));
             services.AddTransient<ICheckerUow>(_ => new CheckerUow(new RepositoryProvider(new RepositoryFactories()), builder.Options));
-            services.AddSingleton<IMapper>(_ => new Mapper(new MapperConfiguration(cfg => {
+            services.AddSingleton<IMapper>(_ => new Mapper(new MapperConfiguration(cfg =>
+            {
                 cfg.AddProfile<MappingProfile>();
                 cfg.AddCollectionMappers();
             })));
@@ -97,6 +99,8 @@ namespace SystemChecker.Web
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+
+            app.UseAuthenticationMiddleware();
 
             app.UseErrorHandlingMiddleware();
 
