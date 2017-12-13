@@ -27,17 +27,25 @@ namespace SystemChecker.Model.Jobs
         /// </summary>
         private enum SubCheckType
         {
-            JSONProperty = 3,
+            FieldEqualTo = 3,
+            FieldNotEqualTo = 4,
         }
 
         /// <summary>
         /// These enum values MUST correlate to dbo.tblSubCheckTypeOption 'ID' column
         /// </summary>
-        private enum SubCheckTypeOption
+        private enum FieldEqualTo
         {
-            ValueEqualsSingleRow = 6,
+            Value = 6,
             FieldName = 7,
             Exists = 8,
+        }
+
+        private enum FieldNotEqualTo
+        {
+            FieldName = 9,
+            Value = 10,
+            Exists = 11,
         }
 
         public async override Task<CheckResult> PerformCheck(CheckResult result)
@@ -116,11 +124,19 @@ namespace SystemChecker.Model.Jobs
         {
             switch (subCheck.TypeID)
             {
-                case (int)SubCheckType.JSONProperty:
-                    var columnName = GetFieldName(subCheck.Options, jsonResult);
-                    var actualValue = jsonResult.SelectToken(columnName)?.ToString();
-                    string expectedValue = subCheck.Options[((int)SubCheckTypeOption.ValueEqualsSingleRow).ToString()];
-                    VerifyAreEquals(expectedValue, actualValue, columnName);
+                case (int)SubCheckType.FieldEqualTo:
+                    string fieldName = subCheck.Options[((int)FieldEqualTo.FieldName).ToString()];
+                    bool exists = subCheck.Options[((int)FieldEqualTo.Exists).ToString()];
+                    var actualValue = GetFieldValue(fieldName, exists, jsonResult);
+                    string expectedValue = subCheck.Options[((int)FieldEqualTo.Value).ToString()];
+                    VerifyAreEquals(expectedValue, actualValue, fieldName);
+                    break;
+                case (int)SubCheckType.FieldNotEqualTo:
+                    fieldName = subCheck.Options[((int)FieldNotEqualTo.FieldName).ToString()];
+                    exists = subCheck.Options[((int)FieldNotEqualTo.Exists).ToString()];
+                    actualValue = GetFieldValue(fieldName, exists, jsonResult);
+                    expectedValue = subCheck.Options[((int)FieldNotEqualTo.Value).ToString()];
+                    VerifyAreNotEquals(expectedValue, actualValue, fieldName);
                     break;
                 default:
                     _logger.Warn($"Unknown sub-check type {subCheck.TypeID} - ignoring");
@@ -140,10 +156,20 @@ namespace SystemChecker.Model.Jobs
             }
         }
 
-        private static string GetFieldName(dynamic subCheckOptions, JArray jsonResult)
+        private void VerifyAreNotEquals(string nonExpectedValue, string actualValue, string columnName)
         {
-            string fieldName = subCheckOptions[((int)SubCheckTypeOption.FieldName).ToString()];
-            bool exists = subCheckOptions[((int)SubCheckTypeOption.Exists).ToString()];
+            if (actualValue != nonExpectedValue)
+            {
+                _logger.Info($"Field '{columnName}' does not equal the non-expected value of '{nonExpectedValue}', the actual value is '{actualValue}'");
+            }
+            else
+            {
+                throw new SubCheckException($"Field '{columnName}' equals the non-expected value of '{nonExpectedValue}'");
+            }
+        }
+
+        private static string GetFieldValue(string fieldName, bool exists, JArray jsonResult)
+        {
             var value = jsonResult.SelectToken(fieldName);
 
             if (value == null && exists)
@@ -155,7 +181,7 @@ namespace SystemChecker.Model.Jobs
                 throw new SubCheckException($"Field '{fieldName}' exists");
             }
 
-            return fieldName;
+            return value?.ToString();
         }
     }
 }
