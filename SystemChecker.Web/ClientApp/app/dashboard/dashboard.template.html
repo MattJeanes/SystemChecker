@@ -15,7 +15,7 @@
                                                    (select)="onSuccessChartSelect($event)">
                     </ngx-charts-advanced-pie-chart>
                 </div>
-                <p-dataTable #dt [value]="checks" [paginator]="true" [rows]="10" [responsive]="true" selectionMode="single" (onRowSelect)="onCheckSelected($event)" >
+                <p-dataTable #dt [value]="checks" [paginator]="true" [rowsPerPageOptions]="[10,25,50,100]" [rows]="10" [responsive]="true" selectionMode="single" (onRowSelect)="onCheckSelected($event)" >
                     <p-column header="Name" field="Name" sortable="true" [filter]="true"></p-column>
                     <p-column header="Active" field="Active" sortable="true" [filter]="true" filterMatchMode="equals" [style]="{'overflow':'visible'}">
                         <ng-template pTemplate="filter" let-col>

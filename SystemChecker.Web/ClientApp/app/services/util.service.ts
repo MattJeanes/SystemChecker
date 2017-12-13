@@ -1,11 +1,41 @@
 // Util
 
 import { Injectable } from "@angular/core";
+import { Event, NavigationEnd, Router } from "@angular/router";
 import { TdDialogService } from "@covalent/core";
 
 @Injectable()
 export class UtilService {
-    constructor(private dialogService: TdDialogService) { }
+    private currentUrl: string;
+    private history: string[] = [];
+    private ignoreNavigation: boolean = false;
+    constructor(private dialogService: TdDialogService, private router: Router) {
+        this.router.events
+            .filter((e: Event) => e instanceof NavigationEnd)
+            .subscribe((e: NavigationEnd) => {
+                if (this.ignoreNavigation) { return; }
+                if (this.currentUrl) {
+                    this.history.push(this.currentUrl);
+                }
+                this.currentUrl = e.urlAfterRedirects;
+            });
+    }
+    public async back() {
+        if (this.history.length > 0) {
+            try {
+                this.ignoreNavigation = true;
+                const url = this.history[this.history.length - 1];
+                const success = await this.router.navigateByUrl(url);
+                if (success) {
+                    this.history.pop();
+                }
+            } finally {
+                this.ignoreNavigation = false;
+            }
+        } else {
+            this.router.navigate(["/"]);
+        }
+    }
     public alert(title: string, message: string) {
         return this.dialogService.openAlert({
             title,
@@ -31,10 +61,14 @@ export class UtilService {
         return this.dialogService.openConfirm({
             title: title ? title : "Confirm action",
             message: message ? message : "Please confirm action",
+            acceptButton: "Confirm",
         })
             .afterClosed()
             .first()
             .toPromise() as Promise<boolean>;
+    }
+    public async confirmNavigation() {
+        return this.confirm("Are you sure?", "You have unsaved changes, are you sure you want to navigate away?");
     }
     public wait(ms: number) {
         return new Promise<void>((resolve, reject) => setTimeout(resolve, ms));

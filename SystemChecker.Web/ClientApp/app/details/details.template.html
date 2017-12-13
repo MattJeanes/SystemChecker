@@ -14,7 +14,7 @@
                     <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
                     <mat-datepicker #pickerTo></mat-datepicker>
                 </mat-form-field>
-                <div class="container">
+                <div class="container" *tdLoading="loadingId; mode:'indeterminate'; type:'circle'; strategy:'overlay'; color:'accent'">
                     <ngx-charts-line-chart [results]="chart"
                                            [yAxis]="true"
                                            yAxisLabel="Time (MS)"

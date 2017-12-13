@@ -143,7 +143,6 @@ namespace SystemChecker.Model.Jobs
                     }
                     if (value != null)
                     {
-                        _logger.Info(value);
                         if (!string.IsNullOrWhiteSpace(valueContains))
                         {
                             if (value.Contains(valueContains))

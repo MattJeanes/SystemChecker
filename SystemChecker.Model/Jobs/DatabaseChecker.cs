@@ -16,8 +16,6 @@ namespace SystemChecker.Model.Jobs
     {
         public DatabaseChecker(ICheckerHelper helper) : base(helper) { }
 
-        private const string column = "Column";
-
         private enum Settings
         {
             ConnString = 7,
@@ -38,7 +36,7 @@ namespace SystemChecker.Model.Jobs
         private enum SubCheckTypeOption
         {
             ValueEqualsSingleRow = 6,
-            ColumnName = 7,
+            FieldName = 7,
             Exists = 8,
         }
 
@@ -90,9 +88,9 @@ namespace SystemChecker.Model.Jobs
             return query;
         }
 
-        protected async Task<string> GetQueryResultAsJson(string connectionString, string query)
+        protected async Task<JArray> GetQueryResultAsJson(string connectionString, string query)
         {
-            string jsonResult;
+            JArray jsonResult;
 
             using (var conn = new SqlConnection(connectionString))
             {
@@ -102,7 +100,7 @@ namespace SystemChecker.Model.Jobs
                     try
                     {
                         var sqlDataReader = await sqlCommand.ExecuteReaderAsync();
-                        jsonResult = await sqlDataReader.ToJson();
+                        jsonResult = await sqlDataReader.ToJArray();
                     }
                     finally
                     {
@@ -114,13 +112,13 @@ namespace SystemChecker.Model.Jobs
             return jsonResult;
         }
 
-        private void RunSubCheck(SubCheck subCheck, string jsonResult, CheckResult checkResult)
+        private void RunSubCheck(SubCheck subCheck, JArray jsonResult, CheckResult checkResult)
         {
             switch (subCheck.TypeID)
             {
                 case (int)SubCheckType.JSONProperty:
-                    var columnName = GetColumnName(subCheck.Options);
-                    var actualValue = GetActualValueFromColumn(jsonResult, columnName);
+                    var columnName = GetFieldName(subCheck.Options, jsonResult);
+                    var actualValue = jsonResult.SelectToken(columnName)?.ToString();
                     string expectedValue = subCheck.Options[((int)SubCheckTypeOption.ValueEqualsSingleRow).ToString()];
                     VerifyAreEquals(expectedValue, actualValue, columnName);
                     break;
@@ -134,41 +132,30 @@ namespace SystemChecker.Model.Jobs
         {
             if (actualValue == expectedValue)
             {
-                _logger.Info($"{column} '{columnName}' equals the expected value of '{expectedValue}'");
+                _logger.Info($"Field '{columnName}' equals the expected value of '{expectedValue}'");
             }
             else
             {
-                throw new SubCheckException($"{column} '{columnName}' does not equal the expected value of '{expectedValue}', the actual value is '{actualValue}'");
+                throw new SubCheckException($"Field '{columnName}' does not equal the expected value of '{expectedValue}', the actual value is '{actualValue}'");
             }
         }
 
-        private static string GetColumnName(dynamic subCheckOptions)
+        private static string GetFieldName(dynamic subCheckOptions, JArray jsonResult)
         {
-            string columnName = subCheckOptions[((int)SubCheckTypeOption.ColumnName).ToString()];
+            string fieldName = subCheckOptions[((int)SubCheckTypeOption.FieldName).ToString()];
             bool exists = subCheckOptions[((int)SubCheckTypeOption.Exists).ToString()];
+            var value = jsonResult.SelectToken(fieldName)?.ToString();
 
-            if (string.IsNullOrEmpty(columnName) && exists)
+            if (value == null && exists)
             {
-                throw new SubCheckException($"{column} '{columnName}' does not exist");
+                throw new SubCheckException($"Field '{fieldName}' does not exist");
             }
-            else
+            else if (value != null && !exists)
             {
-                if (!string.IsNullOrEmpty(columnName) && !exists)
-                {
-                    throw new SubCheckException($"{column} '{columnName}' exists");
-                }
+                throw new SubCheckException($"Field '{fieldName}' exists");
             }
 
-            return columnName;
-        }
-
-        private string GetActualValueFromColumn(string jsonResult, string columnName)
-        {
-            var jArray = JArray.Parse(jsonResult);
-            var jObject = JObject.Parse(jArray[0].ToString()); //NOTE: GETTING FIRST ARRAY ENTRY ONLY AT THIS TIME
-            var actualValue = jObject.SelectToken(columnName)?.ToString();
-
-            return actualValue;
+            return fieldName;
         }
     }
 }

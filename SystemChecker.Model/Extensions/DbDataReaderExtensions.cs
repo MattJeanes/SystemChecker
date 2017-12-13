@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading.Tasks;
@@ -18,6 +19,13 @@ namespace SystemChecker.Model.Extensions
             var json = JsonConvert.SerializeObject(serializedRows, Formatting.Indented);
 
             return json;
+        }
+
+        public async static Task<JArray> ToJArray(this DbDataReader dbDataReader)
+        {
+            var serializedRows = await dbDataReader.GetSerializedRows();
+
+            return JArray.FromObject(serializedRows);
         }
 
         private async static Task<IEnumerable<Dictionary<string, object>>> GetSerializedRows(this DbDataReader dbDataReader)

@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 
 import { ICheckDetail, ICheckNotification, ICheckNotificationType, ICheckSchedule, ICheckType, IOption, ISettings, ISubCheck, ISubCheckType } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
+import { ICanComponentDeactivate } from "../guards";
 import { AppService, MessageService, UtilService } from "../services";
 
 export function cronValidator(appService: AppService): ValidatorFn {
@@ -46,7 +47,7 @@ export function oneFilledOutValidator(): ValidatorFn {
     templateUrl: "./edit.template.html",
     styleUrls: ["./edit.style.scss"],
 })
-export class EditComponent implements OnInit {
+export class EditComponent implements OnInit, ICanComponentDeactivate {
     public check: ICheckDetail = this.getNewCheck(true);
     public types: ICheckType[] = [];
     public subCheckTypes: ISubCheckType[] = [];
@@ -92,6 +93,9 @@ export class EditComponent implements OnInit {
             this.messageService.error(`Failed to load: ${e.toString()}`);
             console.error(e);
         }
+    }
+    public async canDeactivate() {
+        return this.form.dirty ? await this.utilService.confirmNavigation() : true;
     }
     public async save() {
         try {
@@ -367,7 +371,7 @@ export class EditComponent implements OnInit {
         return option ? option.option : undefined;
     }
     public back() {
-        this.location.back();
+        this.utilService.back();
     }
     private modelToCheck() {
         const model = this.form.value;

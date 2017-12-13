@@ -1,13 +1,14 @@
 import { Component, OnInit } from "@angular/core";
 import { FormArray, FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { IConnString, ILogin, ISettings } from "../app.interfaces";
-import { AppService, MessageService } from "../services";
+import { ICanComponentDeactivate } from "../guards";
+import { AppService, MessageService, UtilService } from "../services";
 
 @Component({
     templateUrl: "./settings.template.html",
     styleUrls: ["./settings.style.scss"],
 })
-export class SettingsComponent implements OnInit {
+export class SettingsComponent implements OnInit, ICanComponentDeactivate {
     public form: FormGroup;
     public settings: ISettings;
     public saving: boolean = false;
@@ -19,6 +20,7 @@ export class SettingsComponent implements OnInit {
     }
     constructor(
         private messageService: MessageService, private appService: AppService, private formBuilder: FormBuilder,
+        private utilService: UtilService,
     ) { this.createForm(); }
     public async ngOnInit() {
         try {
@@ -28,6 +30,12 @@ export class SettingsComponent implements OnInit {
             this.messageService.error(`Failed to load: ${e.toString()}`);
             console.error(e);
         }
+    }
+    public async canDeactivate() {
+        return this.form.dirty ? await this.utilService.confirmNavigation() : true;
+    }
+    public back() {
+        this.utilService.back();
     }
     public updateForm() {
         this.form.reset();

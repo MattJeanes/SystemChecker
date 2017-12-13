@@ -1,11 +1,11 @@
-import { Location } from "@angular/common";
 import { Component, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
+import { HubConnection } from "@aspnet/signalr-client";
+import { TdLoadingService } from "@covalent/core";
 
 import { ICheckDetail } from "../app.interfaces";
 import { AppService, MessageService, UtilService } from "../services";
 
-import { HubConnection } from "@aspnet/signalr-client";
 import { CheckResultStatus } from "../app.enums";
 import { RunCheckComponent } from "../components";
 
@@ -27,13 +27,14 @@ export class DetailsComponent implements OnInit, OnDestroy {
     public dateMax: Date;
     public dateFrom: Date = new Date();
     public dateTo: Date = new Date();
+    public loadingId = "details-chart-loading";
     private hub = new HubConnection("hub/details");
     private hubReady: boolean = false;
     private checkID?: number;
     private selectedKey?: number;
     constructor(
         private appService: AppService, private messageService: MessageService, private ngZone: NgZone, private activatedRoute: ActivatedRoute,
-        private utilService: UtilService, private location: Location) {
+        private utilService: UtilService, private loadingService: TdLoadingService) {
         this.hub.on("check", (id: number) => {
             if (id !== this.checkID) { return; }
             // Because this is a call from the server, Angular change detection won't detect it so we must force ngZone to run
@@ -61,10 +62,13 @@ export class DetailsComponent implements OnInit, OnDestroy {
     public async loadCheck() {
         try {
             if (!this.checkID) { return; }
+            this.loadingService.register(this.loadingId);
             this.check = await this.appService.getDetails(this.checkID, true);
             this.updateCharts();
         } catch (e) {
             this.messageService.error("Failed to load checks", e.toString());
+        } finally {
+            this.loadingService.resolve(this.loadingId);
         }
     }
     public changeDateTo() {
@@ -90,7 +94,6 @@ export class DetailsComponent implements OnInit, OnDestroy {
         this.dateTo.setHours(23);
         this.dateTo.setMinutes(59);
         this.dateTo.setSeconds(59);
-        console.log(this.dateFrom, this.dateTo);
         const results = this.check.Results.filter(x => {
             const date = new Date(x.DTS);
             return date >= this.dateFrom && date < this.dateTo;
@@ -116,7 +119,7 @@ export class DetailsComponent implements OnInit, OnDestroy {
         await this.appService.run(RunCheckComponent, this.check);
     }
     public back() {
-        this.location.back();
+        this.utilService.back();
     }
     public select(event: any) {
         if (typeof event === "string") {

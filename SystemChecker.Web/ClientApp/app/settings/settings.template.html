@@ -46,7 +46,7 @@
                 <!-- <pre>{{form.value | json}}</pre> -->
             </mat-card-content>
             <mat-card-actions>
-                <button mat-raised-button routerLink="/dashboard" [disabled]="saving">Back</button>
+                <button mat-raised-button (click)="back()" [disabled]="saving">Back</button>
                 <button mat-raised-button color="primary" (click)="updateForm()" [disabled]="form.pristine || saving">Revert</button>
                 <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid || form.pristine || saving">Save</button>
             </mat-card-actions>

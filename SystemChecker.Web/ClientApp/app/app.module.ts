@@ -11,6 +11,8 @@ import { Autosize } from "./directives";
 
 import { OptionComponent, RunCheckComponent } from "./components";
 
+import { CanDeactivateGuard } from "./guards";
+
 import { AppComponent } from "./app.component";
 import { DashboardComponent } from "./dashboard/dashboard.component";
 import { DetailsComponent } from "./details/details.component";
@@ -45,6 +47,7 @@ import {
 
 import {
     CovalentDialogsModule,
+    CovalentLoadingModule,
 } from "@covalent/core";
 
 import {
@@ -63,6 +66,13 @@ const routes: Routes = [
     { path: "details/:id", component: DetailsComponent },
     { path: "**", component: PageNotFoundComponent },
 ];
+
+routes.forEach(x => {
+    if (!x.canDeactivate) {
+        x.canDeactivate = [];
+    }
+    x.canDeactivate.push(CanDeactivateGuard);
+});
 
 @NgModule({
     imports: [
@@ -87,6 +97,7 @@ const routes: Routes = [
         CovalentDialogsModule,
         NgxChartsModule,
         MatTooltipModule,
+        CovalentLoadingModule,
     ],
     declarations: [
         AppComponent,
@@ -106,6 +117,7 @@ const routes: Routes = [
         AppService,
         MessageService,
         UtilService,
+        CanDeactivateGuard,
         { provide: LOCALE_ID, useValue: "en-GB" },
         { provide: MAT_DATE_LOCALE, useValue: "en-GB" },
     ],
