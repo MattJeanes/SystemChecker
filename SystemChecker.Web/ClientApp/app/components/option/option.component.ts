@@ -1,4 +1,4 @@
-import { Component, forwardRef, Input, OnDestroy, OnInit } from "@angular/core";
+import { Component, forwardRef, Input, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { OptionType } from "../../app.enums";
 import { IConnString, IOption, ISettings, ISlackChannel } from "../../app.interfaces";
@@ -18,7 +18,8 @@ import { AppService } from "../../services";
 })
 export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy {
     @Input() public option: IOption;
-    @Input() public environmentID?: number;
+
+    public OptionType = OptionType;
 
     public settings: ISettings;
     public slackChannels?: ISlackChannel[];
@@ -35,10 +36,21 @@ export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy 
         }
     }
 
-    public OptionType = OptionType;
+    get environmentID() {
+        return this._environmentID;
+    }
 
-    // tslint:disable-next-line:variable-name
-    private _value: number = 0;
+    @Input() set environmentID(val) {
+        if (this._environmentID && val !== this._environmentID && this.option.OptionType === OptionType.ConnString) {
+            // ExpressionChangedAfterItHasBeenCheckedError is thrown if we change it now, so wait
+            setTimeout(() => {
+                this.ngZone.run(() => {
+                    this.writeValue(undefined);
+                });
+            }, 0);
+        }
+        this._environmentID = val;
+    }
 
     get value() {
         return this._value;
@@ -49,7 +61,13 @@ export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy 
         this.propagateChange(this._value);
     }
 
-    constructor(private appService: AppService) { }
+    // tslint:disable-next-line:variable-name
+    private _value?: number = 0;
+
+    // tslint:disable-next-line:variable-name
+    private _environmentID: number = 0;
+
+    constructor(private appService: AppService, private ngZone: NgZone) { }
 
     public async ngOnInit() {
         if (this.option.OptionType === OptionType.Login
