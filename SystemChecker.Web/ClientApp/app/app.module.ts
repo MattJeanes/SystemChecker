@@ -37,6 +37,7 @@ import {
     MatSelectModule,
     MatTabsModule,
     MatTooltipModule,
+    MatIconModule,
 } from "@angular/material";
 
 import {
@@ -98,6 +99,7 @@ routes.forEach(x => {
         NgxChartsModule,
         MatTooltipModule,
         CovalentLoadingModule,
+        MatIconModule,
     ],
     declarations: [
         AppComponent,

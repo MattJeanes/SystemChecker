@@ -4,7 +4,7 @@ import { Router } from "@angular/router";
 import { DataTable, SelectItem } from "primeng/primeng";
 
 import { CheckResultStatus } from "../app.enums";
-import { ICheck, IEnvironment, ISettings } from "../app.interfaces";
+import { ICheck, ICheckType, IEnvironment, ISettings } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
 import { AppService, MessageService } from "../services";
 
@@ -52,17 +52,23 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
         { label: "Not run", value: CheckResultStatus.NotRun },
     ];
     public environmentOptions: SelectItem[] = [];
+    public typeOptions: SelectItem[] = [];
     public activeOption: boolean | null = true;
     public resultOption: CheckResultStatus | null = null;
     public environmentOption: number | null = null;
+    public typeOption: number | null = null;
     public CheckResultStatus = CheckResultStatus;
     public settings: ISettings = {
         Logins: [],
         ConnStrings: [],
         Environments: [{ ID: 0, Name: "Loading" }],
     };
+    public types: ICheckType[] = [];
     public environmentLookup: {
         [key: string]: IEnvironment;
+    };
+    public typeLookup: {
+        [key: string]: ICheckType;
     };
     @ViewChild("dt") private dataTable: DataTable;
     private hub = new HubConnection("hub/dashboard");
@@ -78,17 +84,24 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
     public async loadChecks() {
         try {
             this.settings = await this.appService.getSettings();
+            this.types = await this.appService.getTypes();
+
             this.environmentLookup = {};
             this.environmentOptions = [{ label: "All", value: null }];
             this.settings.Environments.map(x => {
                 this.environmentLookup[x.ID] = x;
                 this.environmentOptions.push({ label: x.Name, value: x.ID });
             });
+
+            this.typeLookup = {};
+            this.typeOptions = [{ label: "All", value: null }];
+            this.types.map(x => {
+                this.typeLookup[x.ID] = x;
+                this.typeOptions.push({ label: x.Name, value: x.ID });
+            });
+
             this.checks = await this.appService.getAll(true);
             this.updateCharts();
-            this.updateActiveFilter();
-            this.updateEnvironmentFilter();
-            this.updateResultFilter();
         } catch (e) {
             this.messageService.error("Failed to load checks", e.toString());
         }
@@ -172,6 +185,10 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
     public updateEnvironmentFilter() {
         const col = this.dataTable.columns.find(x => x.header === "Environment")!;
         this.dataTable.filter(this.environmentOption, col.field, col.filterMatchMode);
+    }
+    public updateTypeFilter() {
+        const col = this.dataTable.columns.find(x => x.header === "Type")!;
+        this.dataTable.filter(this.typeOption, col.field, col.filterMatchMode);
     }
     public onChartSelect(results: IChart, event: { name: string, value: number }) {
         const selected = results.results.find(x => x.name === event.name);

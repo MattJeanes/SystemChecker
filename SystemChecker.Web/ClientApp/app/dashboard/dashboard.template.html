@@ -16,7 +16,7 @@
                     </ngx-charts-advanced-pie-chart>
                 </div>
                 <div class="ui-g-12">
-                    <p-dataTable #dt [value]="checks" [paginator]="true" [rowsPerPageOptions]="[10,25,50,100]" [rows]="10" [responsive]="true" selectionMode="single" (onRowSelect)="onCheckSelected($event)">
+                    <p-dataTable #dt [value]="checks" [paginator]="true" [rowsPerPageOptions]="[10,25,50,100]" [rows]="25" [responsive]="true" selectionMode="single" (onRowSelect)="onCheckSelected($event)">
                         <p-column header="Name" field="Name" sortable="true" [filter]="true"></p-column>
                         <p-column header="Active" field="Active" sortable="true" [filter]="true" filterMatchMode="equals" [style]="{'overflow':'visible'}">
                             <ng-template pTemplate="filter" let-col>
@@ -36,6 +36,15 @@
                                 {{environmentLookup[check.EnvironmentID].Name}}
                             </ng-template>
                         </p-column>
+                        <p-column header="Type" field="TypeID" sortable="true" [filter]="true" filterMatchMode="equals" [style]="{'overflow':'visible'}">
+                            <ng-template pTemplate="filter" let-col>
+                                <p-dropdown [options]="typeOptions" [(ngModel)]="typeOption" [style]="{'width':'100%'}" (onChange)="updateTypeFilter()"
+                                            styleClass="ui-column-filter"></p-dropdown>
+                            </ng-template>
+                            <ng-template let-check="rowData" pTemplate="body">
+                                {{typeLookup[check.TypeID].Name}}
+                            </ng-template>
+                        </p-column>
                         <p-column header="Last Result Status" field="LastResultStatus" sortable="true" [filter]="true" filterMatchMode="equals" [style]="{'overflow':'visible'}">
                             <ng-template pTemplate="filter" let-col>
                                 <p-dropdown [options]="resultOptions" [(ngModel)]="resultOption" [style]="{'width':'100%'}" (onChange)="updateResultFilter()"
@@ -48,9 +57,15 @@
                         <p-column header="Options">
                             <ng-template let-check="rowData" pTemplate="body">
                                 <div class="rowbuttons">
-                                    <button mat-raised-button color="primary" routerLink="/edit/{{check.ID}}">Edit</button>
-                                    <button mat-raised-button color="primary" routerLink="/edit/{{check.ID}}/copy">Copy</button>
-                                    <button mat-raised-button color="primary" (click)="run(check)">Run</button>
+                                    <button matTooltip="Edit" matTooltipPosition="above" mat-icon-button color="primary" routerLink="/edit/{{check.ID}}">
+                                        <mat-icon class="md-24">edit</mat-icon>
+                                    </button>
+                                    <button matTooltip="Copy" matTooltipPosition="above" mat-icon-button color="primary" routerLink="/edit/{{check.ID}}/copy">
+                                        <mat-icon class="md-24">content_copy</mat-icon>
+                                    </button>
+                                    <button matTooltip="Run" matTooltipPosition="above" mat-icon-button color="primary" (click)="run(check)">
+                                        <mat-icon class="md-24">play_arrow</mat-icon>
+                                    </button>
                                 </div>
                             </ng-template>
                         </p-column>
