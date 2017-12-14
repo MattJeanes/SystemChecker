@@ -6,4 +6,9 @@
 	[Name] [varchar] (255) NOT NULL
 	) ON [PRIMARY]
 
+
+END
+
+IF NOT EXISTS(SELECT 1 FROM tblEnvironment) BEGIN
+	INSERT INTO dbo.tblEnvironment (Name) VALUES ('Production')
 END
