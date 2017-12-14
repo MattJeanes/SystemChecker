@@ -188,4 +188,7 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
         this.updateEnvironmentFilter();
         this.updateResultFilter();
     }
+    public trackChart(index: number, chart: IChart) {
+        return chart ? chart.environmentID : undefined;
+    }
 }

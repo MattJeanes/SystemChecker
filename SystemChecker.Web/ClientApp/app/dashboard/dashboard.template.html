@@ -8,7 +8,7 @@
                     <button mat-raised-button color="primary" routerLink="/edit/0">Add new</button>
                     <button mat-raised-button color="primary" routerLink="/settings">Settings</button>
                 </div>
-                <div *ngFor="let results of chart" class="ui-g ui-g-12 ui-lg-6 ui-xl-4">
+                <div *ngFor="let results of chart; trackBy: trackChart" class="ui-g ui-g-12 ui-lg-6 ui-xl-4 chart">
                     <span class="environment" (click)="setEnvironment(results.environmentID)">{{results.name}}</span>
                     <ngx-charts-advanced-pie-chart [scheme]="chartColors"
                                                    [results]="results.results"
