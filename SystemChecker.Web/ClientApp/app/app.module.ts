@@ -32,12 +32,12 @@ import {
     MatCardModule,
     MatCheckboxModule,
     MatDatepickerModule,
+    MatIconModule,
     MatInputModule,
     MatNativeDateModule,
     MatSelectModule,
     MatTabsModule,
     MatTooltipModule,
-    MatIconModule,
 } from "@angular/material";
 
 import {
