@@ -8,6 +8,7 @@ namespace SystemChecker.Model.DTO
         public string Name { get; set; }
         public bool Active { get; set; }
         public int TypeID { get; set; }
+        public int EnvironmentID { get; set; }
         public List<CheckScheduleDTO> Schedules { get; set; }
         public CheckDataDTO Data { get; set; }
         public List<SubCheckDTO> SubChecks { get; set; }

@@ -14,6 +14,12 @@
                                 <input matInput placeholder="Name" formControlName="name">
                             </mat-form-field>
                             <mat-form-field class="ui-g-12 full">
+                                <mat-select placeholder="Environment" formControlName="environment">
+                                    <mat-option [value]="undefined">None</mat-option>
+                                    <mat-option *ngFor="let environment of settings ? settings.Environments : []" [value]="environment.ID">{{environment.Name}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="ui-g-12 full">
                                 <mat-select placeholder="Type" formControlName="type" (change)="onTypeChange()">
                                     <mat-option *ngFor="let type of types" [value]="type.ID">{{type.Name}}</mat-option>
                                 </mat-select>
@@ -22,7 +28,7 @@
                             <div class="full" formArrayName="options">
                                 <div class="header ui-g-12" *ngIf="options.controls.length>0">Type settings</div>
                                 <div class="ui-g-12" *ngFor="let option of options.controls; let i=index" [formGroupName]="i">
-                                    <check-option class="full" [option]="option.get('option')!.value" formControlName="value"></check-option>
+                                    <check-option class="full" [option]="option.get('option')!.value" [environmentID]="form.get('environment')!.value" formControlName="value"></check-option>
                                 </div>
                             </div>
                         </mat-tab>

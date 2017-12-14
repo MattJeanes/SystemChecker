@@ -5,22 +5,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SystemChecker.Model.Enums;
 
 namespace SystemChecker.Model.Data.Entities
 {
-    [Table("tblCheckConnString")]
-    public class ConnString
+    [Table("tblEnvironment")]
+    public class Environment
     {
         [Key]
         public int ID { get; set; }
 
         public string Name { get; set; }
-        
-        [Column("EnvironmentID")]
-        public Environment Environment { get; set; }
-
-        public int EnvironmentID { get; set; }
-
-        public string Value { get; set; }
     }
 }

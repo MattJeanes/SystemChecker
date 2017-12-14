@@ -7,6 +7,7 @@
     ConnString = 6,
     Text = 7,
     Slack = 8,
+    Environment = 9,
 }
 
 export enum CheckLogType {

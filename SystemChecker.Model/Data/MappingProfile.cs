@@ -1,11 +1,6 @@
 ﻿using AutoMapper;
 using SystemChecker.Model.DTO;
 using SystemChecker.Model.Data.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AutoMapper.EquivalencyExpression;
 
 namespace SystemChecker.Model.Data
@@ -37,6 +32,9 @@ namespace SystemChecker.Model.Data
                 .EqualityComparison((odto, o) => odto.ID == o.ID)
                 .ReverseMap();
             CreateMap<LoginDTO, Login>()
+                .EqualityComparison((odto, o) => odto.ID == o.ID)
+                .ReverseMap();
+            CreateMap<EnvironmentDTO, Environment>()
                 .EqualityComparison((odto, o) => odto.ID == o.ID)
                 .ReverseMap();
         }

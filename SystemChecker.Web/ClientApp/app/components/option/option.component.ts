@@ -1,7 +1,7 @@
 import { Component, forwardRef, Input, OnDestroy, OnInit } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { OptionType } from "../../app.enums";
-import { IOption, ISettings, ISlackChannel } from "../../app.interfaces";
+import { IConnString, IOption, ISettings, ISlackChannel } from "../../app.interfaces";
 import { AppService } from "../../services";
 
 @Component({
@@ -18,11 +18,24 @@ import { AppService } from "../../services";
 })
 export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy {
     @Input() public option: IOption;
+    @Input() public environmentID?: number;
 
     public settings: ISettings;
-    public slackChannels: ISlackChannel[];
+    public slackChannels?: ISlackChannel[];
 
-    public CheckTypeOptionType = OptionType;
+    get connStrings(): IConnString[] {
+        if (this.settings) {
+            if (this.environmentID) {
+                return this.settings.ConnStrings.filter(x => x.EnvironmentID === this.environmentID);
+            } else {
+                return this.settings.ConnStrings;
+            }
+        } else {
+            return [];
+        }
+    }
+
+    public OptionType = OptionType;
 
     // tslint:disable-next-line:variable-name
     private _value: number = 0;
@@ -40,7 +53,8 @@ export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy 
 
     public async ngOnInit() {
         if (this.option.OptionType === OptionType.Login
-        || this.option.OptionType === OptionType.ConnString) {
+            || this.option.OptionType === OptionType.ConnString
+            || this.option.OptionType === OptionType.Environment) {
             this.settings = await this.appService.getSettings();
         }
         if (this.option.OptionType === OptionType.Slack) {

@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { FormArray, FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { IConnString, ILogin, ISettings } from "../app.interfaces";
+import { IConnString, IEnvironment, ILogin, ISettings } from "../app.interfaces";
 import { ICanComponentDeactivate } from "../guards";
 import { AppService, MessageService, UtilService } from "../services";
 
@@ -17,6 +17,9 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
     }
     get connStrings(): FormArray {
         return this.form.get("connStrings") as FormArray;
+    }
+    get environments(): FormArray {
+        return this.form.get("environments") as FormArray;
     }
     constructor(
         private messageService: MessageService, private appService: AppService, private formBuilder: FormBuilder,
@@ -56,6 +59,7 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
         const connStringGroups = this.settings.ConnStrings.map(connString => this.formBuilder.group({
             id: connString.ID,
             name: [connString.Name, Validators.required],
+            environment: [connString.EnvironmentID, Validators.required],
             connString: [connString.Value, Validators.required],
         }));
         while (this.connStrings.length) {
@@ -65,14 +69,24 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
             this.connStrings.push(group);
         }
 
+        const environmentGroups = this.settings.Environments.map(environment => this.formBuilder.group({
+            id: environment.ID,
+            name: [environment.Name, Validators.required],
+        }));
+        while (this.environments.length) {
+            this.environments.removeAt(0);
+        }
+        for (const group of environmentGroups) {
+            this.environments.push(group);
+        }
+
         this.form.markAsPristine();
     }
     public async save() {
         try {
             if (this.form.invalid) { return; }
             this.saving = true;
-            this.prepareForSave();
-            this.settings = await this.appService.setSettings(this.settings);
+            this.settings = await this.appService.setSettings(this.modelToSettings());
             this.updateForm();
             this.messageService.success("Saved settings");
         } catch (e) {
@@ -96,6 +110,7 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
     public addConnString() {
         this.connStrings.push(this.formBuilder.group({
             name: ["", Validators.required],
+            environment: [undefined, Validators.required],
             connString: ["", Validators.required],
         }));
         this.form.markAsDirty();
@@ -104,24 +119,43 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
         this.connStrings.removeAt(index);
         this.form.markAsDirty();
     }
-    private prepareForSave() {
+    public addEnvironment() {
+        this.environments.push(this.formBuilder.group({
+            name: ["", Validators.required],
+        }));
+        this.form.markAsDirty();
+    }
+    public deleteEnvironment(index: number) {
+        this.environments.removeAt(index);
+        this.form.markAsDirty();
+    }
+    private modelToSettings() {
         const model = this.form.value;
-        this.settings.Logins = model.logins.map((login: any): ILogin => ({
-            ID: login.id,
-            Username: login.username,
-            Password: login.password,
-            Domain: login.domain,
-        }));
-        this.settings.ConnStrings = model.connStrings.map((connString: any): IConnString => ({
-            ID: connString.id,
-            Name: connString.name,
-            Value: connString.connString,
-        }));
+        const settings: ISettings = {
+            Logins: model.logins.map((login: any): ILogin => ({
+                ID: login.id,
+                Username: login.username,
+                Password: login.password,
+                Domain: login.domain,
+            })),
+            ConnStrings: model.connStrings.map((connString: any): IConnString => ({
+                ID: connString.id,
+                Name: connString.name,
+                EnvironmentID: connString.environment,
+                Value: connString.connString,
+            })),
+            Environments: model.environments.map((environment: any): IEnvironment => ({
+                ID: environment.id,
+                Name: environment.name,
+            })),
+        };
+        return settings;
     }
     private createForm() {
         this.form = this.formBuilder.group({
             logins: this.formBuilder.array([]),
             connStrings: this.formBuilder.array([]),
+            environments: this.formBuilder.array([]),
         });
     }
 }

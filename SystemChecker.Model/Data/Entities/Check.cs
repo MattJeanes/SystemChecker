@@ -28,6 +28,11 @@ namespace SystemChecker.Model.Data.Entities
 
         public CheckData Data { get; set; }
 
+        [Column("EnvironmentID")]
+        public Environment Environment { get; set; }
+
+        public int EnvironmentID { get; set; }
+
         public List<CheckResult> Results { get; set; }
 
         public List<SubCheck> SubChecks { get; set; }
