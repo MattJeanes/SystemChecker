@@ -21,5 +21,6 @@ namespace SystemChecker.Model.Data
         public ISubCheckTypeRepository SubCheckTypes { get { return GetRepo<ISubCheckTypeRepository>(); } }
         public ICheckNotificationTypeRepository CheckNotificationTypes { get { return GetRepo<ICheckNotificationTypeRepository>(); } }
         public IRepository<CheckNotification> CheckNotifications { get { return GetStandardRepo<CheckNotification>(); } }
+        public IRepository<Environment> Environments { get { return GetStandardRepo<Environment>(); } }
     }
 }

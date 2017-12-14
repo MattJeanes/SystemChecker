@@ -1,25 +1,25 @@
 <div class="container">
-    <div *ngIf="option.OptionType === CheckTypeOptionType.Boolean">
+    <div *ngIf="option.OptionType === OptionType.Boolean">
         <mat-checkbox type="checkbox" [(ngModel)]="value" [required]="option.IsRequired">{{option.Label}}</mat-checkbox>
     </div>
-    <div *ngIf="option.OptionType === CheckTypeOptionType.String">
+    <div *ngIf="option.OptionType === OptionType.String">
         <mat-form-field>
             <input matInput type="text" [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired" />
         </mat-form-field>
     </div>
-    <div *ngIf="option.OptionType === CheckTypeOptionType.Number">
+    <div *ngIf="option.OptionType === OptionType.Number">
         <mat-form-field>
             <input matInput type="number" [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired" />
         </mat-form-field>
     </div>
-    <div *ngIf="option.OptionType === CheckTypeOptionType.Date">
+    <div *ngIf="option.OptionType === OptionType.Date">
         <mat-form-field>
             <input matInput [matDatepicker]="picker" [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired">
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
     </div>
-    <div *ngIf="option.OptionType === CheckTypeOptionType.Login && settings">
+    <div *ngIf="option.OptionType === OptionType.Login && settings">
         <mat-form-field>
             <mat-select [placeholder]="option.Label" [(ngModel)]="value">
                 <mat-option [value]="undefined">None</mat-option>
@@ -27,24 +27,32 @@
             </mat-select>
         </mat-form-field>
     </div>
-    <div *ngIf="option.OptionType === CheckTypeOptionType.ConnString && settings">
+    <div *ngIf="option.OptionType === OptionType.ConnString && connStrings">
         <mat-form-field>
             <mat-select [placeholder]="option.Label" [(ngModel)]="value">
                 <mat-option [value]="undefined">None</mat-option>
-                <mat-option *ngFor="let connString of settings.ConnStrings" [value]="connString.ID">{{connString.Name}}</mat-option>
+                <mat-option *ngFor="let connString of connStrings" [value]="connString.ID">{{connString.Name}}</mat-option>
             </mat-select>
         </mat-form-field>
     </div>
-    <div *ngIf="option.OptionType === CheckTypeOptionType.Text">
+    <div *ngIf="option.OptionType === OptionType.Text">
         <mat-form-field>
             <textarea mat-textarea matInput autosize [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired"></textarea>
         </mat-form-field>
     </div>
-    <div *ngIf="option.OptionType === CheckTypeOptionType.Slack && slackChannels">
+    <div *ngIf="option.OptionType === OptionType.Slack && slackChannels">
         <mat-form-field>
             <mat-select [placeholder]="option.Label" [(ngModel)]="value">
                 <mat-option [value]="undefined">None</mat-option>
                 <mat-option *ngFor="let channel of slackChannels" [value]="channel.id">#{{channel.name}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+    <div *ngIf="option.OptionType === OptionType.Environment && settings">
+        <mat-form-field>
+            <mat-select [placeholder]="option.Label" [(ngModel)]="value">
+                <mat-option [value]="undefined">None</mat-option>
+                <mat-option *ngFor="let environment of settings.Environments" [value]="environment.ID">{{environment.Name}}</mat-option>
             </mat-select>
         </mat-form-field>
     </div>

@@ -32,13 +32,14 @@ namespace SystemChecker.Model.Helpers
         public async Task<ISettings> Get()
         {
             var logins = await _uow.Logins.GetAll().ToListAsync();
-
             var connStrings = await _uow.ConnStrings.GetAll().ToListAsync();
+            var environments = await _uow.Environments.GetAll().ToListAsync();
 
             var settings = new Settings
             {
                 Logins = _mapper.Map<List<LoginDTO>>(logins),
-                ConnStrings = _mapper.Map<List<ConnStringDTO>>(connStrings)
+                ConnStrings = _mapper.Map<List<ConnStringDTO>>(connStrings),
+                Environments = _mapper.Map<List<EnvironmentDTO>>(environments)
             };
 
             foreach (var login in settings.Logins)
@@ -89,6 +90,20 @@ namespace SystemChecker.Model.Helpers
                 if (login.ID == 0)
                 {
                     _uow.Logins.Add(login);
+                }
+            }
+
+            var environments = await _uow.Environments.GetAll().ToListAsync();
+            foreach (var environment in environments.Where(x => !settings.Environments.Exists(y => y.ID == x.ID)))
+            {
+                _uow.Environments.Delete(environment);
+            }
+            _mapper.Map(settings.Environments, environments);
+            foreach (var environment in environments)
+            {
+                if (environment.ID == 0)
+                {
+                    _uow.Environments.Add(environment);
                 }
             }
 

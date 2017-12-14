@@ -1,0 +1,9 @@
+﻿IF NOT EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='tblEnvironment') BEGIN
+
+	CREATE TABLE [dbo].[tblEnvironment]
+	(
+	[ID] [int] NOT NULL IDENTITY(1, 1) PRIMARY KEY,
+	[Name] [varchar] (255) NOT NULL
+	) ON [PRIMARY]
+
+END

@@ -1,13 +1,25 @@
-﻿.name{
-    font-size:2em;
+﻿.name {
+    font-size: 2em;
 }
 
-.rowbuttons{
-    display:flex;
-    justify-content:space-around;
+.rowbuttons {
+    display: flex;
+    justify-content: space-around;
 }
 
-.buttons{
-    display:flex;
-    justify-content:space-between;
+.buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+.environment {
+    font-size: 2em;
+    position: relative;
+    top: 45px;
+    cursor: pointer;
+}
+
+.layout-fix {
+    visibility:hidden;
+    font-size:1px;
 }

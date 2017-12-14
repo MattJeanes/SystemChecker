@@ -11,17 +11,18 @@
                             <button mat-raised-button color="primary" (click)="addLogin()">Add new</button>
                             <div formArrayName="logins">
                                 <div *ngFor="let control of logins.controls; let i=index" [formGroupName]="i">
-                                    <mat-form-field class="ui-g-12 full">
+                                    <mat-form-field class="ui-g-12 ui-lg-4 ui-xl-4">
                                         <input matInput placeholder="Username" formControlName="username">
                                     </mat-form-field>
-                                    <mat-form-field class="ui-g-12 full">
+                                    <mat-form-field class="ui-g-12 ui-md-6 ui-lg-3 ui-xl-4">
                                         <input type="password" matInput placeholder="Password" formControlName="password">
                                     </mat-form-field>
-                                    <mat-form-field class="ui-g-12 full">
+                                    <mat-form-field class="ui-g-12 ui-md-6 ui-lg-3 ui-xl-3">
                                         <input matInput placeholder="Domain" formControlName="domain">
                                     </mat-form-field>
-                                    <button mat-raised-button color="warn" (click)="deleteLogin(i)">Delete</button>
-                                    <hr *ngIf="i < logins.controls.length-1" class="break">
+                                    <div class="ui-g-12 ui-lg-2 ui-xl-1">
+                                        <button class="full" mat-raised-button color="warn" (click)="deleteLogin(i)">Delete</button>
+                                    </div>
                                 </div>
                             </div>
                         </mat-tab>
@@ -30,14 +31,35 @@
                             <button mat-raised-button color="primary" (click)="addConnString()">Add new</button>
                             <div formArrayName="connStrings">
                                 <div *ngFor="let control of connStrings.controls; let i=index" [formGroupName]="i">
-                                    <mat-form-field class="ui-g-12 full">
+                                    <mat-form-field class="ui-g-12 ui-md-6 ui-lg-3 ui-xl-2">
                                         <input matInput placeholder="Name" formControlName="name">
                                     </mat-form-field>
-                                    <mat-form-field class="ui-g-12 full">
+                                    <mat-form-field class="ui-g-12 ui-md-4 ui-lg-2">
+                                        <mat-select placeholder="Environment" formControlName="environment">
+                                            <mat-option [value]="undefined">None</mat-option>
+                                            <mat-option *ngFor="let environment of settings.Environments" [value]="environment.ID">{{environment.Name}}</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                    <mat-form-field class="ui-g-12 ui-lg-5 ui-xl-7">
                                         <input matInput placeholder="Connection String" formControlName="connString">
                                     </mat-form-field>
-                                    <button mat-raised-button color="warn" (click)="deleteConnString(i)">Delete</button>
-                                    <hr *ngIf="i < connStrings.controls.length-1" class="break">
+                                    <div class="ui-g-12 ui-lg-2 ui-xl-1">
+                                        <button class="full" mat-raised-button color="warn" (click)="deleteConnString(i)">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </mat-tab>
+                        <mat-tab label="Environments">
+                            <br />
+                            <button mat-raised-button color="primary" (click)="addEnvironment()">Add new</button>
+                            <div formArrayName="environments">
+                                <div *ngFor="let control of environments.controls; let i=index" [formGroupName]="i">
+                                    <mat-form-field class="ui-g-12 ui-md-10 ui-xl-11">
+                                        <input matInput placeholder="Name" formControlName="name">
+                                    </mat-form-field>
+                                    <div class="ui-g-12 ui-md-2 ui-xl-1">
+                                        <button class="full" mat-raised-button color="warn" (click)="deleteEnvironment(i)">Delete</button>
+                                    </div>
                                 </div>
                             </div>
                         </mat-tab>

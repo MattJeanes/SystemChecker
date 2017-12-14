@@ -1,0 +1,4 @@
+﻿IF NOT EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tblCheckConnString' AND COLUMN_NAME='EnvironmentID') BEGIN
+	ALTER TABLE dbo.tblCheckConnString ADD EnvironmentID INT NOT NULL CONSTRAINT Default_tblCheckConnString_TEMP DEFAULT 1
+	ALTER TABLE dbo.tblCheckConnString DROP CONSTRAINT Default_tblCheckConnString_TEMP
+END

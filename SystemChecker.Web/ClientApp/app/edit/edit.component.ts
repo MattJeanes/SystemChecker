@@ -79,6 +79,9 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
                 this.check = await this.appService.getDetails(id);
                 if (params.copy) {
                     this.check.ID = 0;
+                    this.check.Schedules.forEach(x => x.ID = 0);
+                    this.check.SubChecks.forEach(x => x.ID = 0);
+                    this.check.Notifications.forEach(x => x.ID = 0);
                     this.check.Name += " - copy";
                 }
             } else {
@@ -192,6 +195,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
             name: this.check.Name,
             type: this.check.TypeID ? this.check.TypeID : null,
             active: this.check.Active,
+            environment: this.check.EnvironmentID,
         });
 
         const scheduleGroups = this.check.Schedules.map(schedule => this.formBuilder.group({
@@ -380,6 +384,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
             Name: model.name,
             Active: model.active,
             TypeID: model.type,
+            EnvironmentID: model.environment,
             Schedules: model.schedules.map((schedule: any): ICheckSchedule => ({
                 ID: schedule.id,
                 Expression: schedule.expression,
@@ -445,6 +450,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
     private createForm() {
         this.form = this.formBuilder.group({
             name: ["", Validators.required],
+            environment: [undefined, Validators.required],
             type: [undefined, Validators.required],
             active: false,
             schedules: this.formBuilder.array([]),

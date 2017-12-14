@@ -6,6 +6,7 @@ export interface ICheck {
     Active: boolean;
     TypeID?: number;
     LastResultStatus?: CheckResultStatus;
+    EnvironmentID?: number;
 }
 
 export interface ICheckSchedule {
@@ -59,12 +60,14 @@ export interface ILogin {
 export interface IConnString {
     ID: number;
     Name: string;
+    EnvironmentID: number;
     Value: string;
 }
 
 export interface ISettings {
     Logins: ILogin[];
     ConnStrings: IConnString[];
+    Environments: IEnvironment[];
 }
 
 export interface IRunLog {
@@ -112,4 +115,9 @@ export interface ISlackChannel {
     is_group: boolean;
     num_members: number;
     members: string[];
+}
+
+export interface IEnvironment {
+    ID: number;
+    Name: string;
 }
