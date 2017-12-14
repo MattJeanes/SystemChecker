@@ -86,6 +86,9 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
             });
             this.checks = await this.appService.getAll(true);
             this.updateCharts();
+            this.updateActiveFilter();
+            this.updateEnvironmentFilter();
+            this.updateResultFilter();
         } catch (e) {
             this.messageService.error("Failed to load checks", e.toString());
         }
