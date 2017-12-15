@@ -73,8 +73,10 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
     @ViewChild("dt") private dataTable: DataTable;
     private hub = new HubConnection("hub/dashboard");
     private hubReady: boolean = false;
+    private loading: boolean = false;
     constructor(private appService: AppService, private messageService: MessageService, private ngZone: NgZone, private router: Router) {
         this.hub.on("check", () => {
+            if (this.loading) { return; }
             // Because this is a call from the server, Angular change detection won't detect it so we must force ngZone to run
             this.ngZone.run(async () => {
                 await this.loadChecks();
@@ -83,6 +85,8 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
     }
     public async loadChecks() {
         try {
+            if (this.loading) { return; }
+            this.loading = true;
             delete this.settings;
             this.settings = await this.appService.getSettings();
             delete this.types;
@@ -111,6 +115,8 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
             this.updateCharts();
         } catch (e) {
             this.messageService.error("Failed to load checks", e.toString());
+        } finally {
+            this.loading = false;
         }
     }
     public ngAfterViewInit() {

@@ -32,11 +32,12 @@ export class DetailsComponent implements OnInit, OnDestroy {
     private hubReady: boolean = false;
     private checkID?: number;
     private selectedKey?: number;
+    private loading: boolean = false;
     constructor(
         private appService: AppService, private messageService: MessageService, private ngZone: NgZone, private activatedRoute: ActivatedRoute,
         private utilService: UtilService, private loadingService: TdLoadingService) {
         this.hub.on("check", (id: number) => {
-            if (id !== this.checkID) { return; }
+            if (id !== this.checkID || this.loading) { return; }
             // Because this is a call from the server, Angular change detection won't detect it so we must force ngZone to run
             this.ngZone.run(async () => {
                 await this.loadCheck();
@@ -62,12 +63,15 @@ export class DetailsComponent implements OnInit, OnDestroy {
     public async loadCheck() {
         try {
             if (!this.checkID) { return; }
+            if (this.loading) { return; }
+            this.loading = true;
             this.loadingService.register(this.loadingId);
             this.check = await this.appService.getDetails(this.checkID, true);
             this.updateCharts();
         } catch (e) {
             this.messageService.error("Failed to load checks", e.toString());
         } finally {
+            this.loading = false;
             this.loadingService.resolve(this.loadingId);
         }
     }
