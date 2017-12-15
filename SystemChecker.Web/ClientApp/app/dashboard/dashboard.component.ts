@@ -83,23 +83,30 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
     }
     public async loadChecks() {
         try {
+            delete this.settings;
             this.settings = await this.appService.getSettings();
+            delete this.types;
             this.types = await this.appService.getTypes();
 
+            delete this.environmentLookup;
             this.environmentLookup = {};
+            delete this.environmentOptions;
             this.environmentOptions = [{ label: "All", value: null }];
             this.settings.Environments.map(x => {
                 this.environmentLookup[x.ID] = x;
                 this.environmentOptions.push({ label: x.Name, value: x.ID });
             });
 
+            delete this.typeLookup;
             this.typeLookup = {};
+            delete this.typeOptions;
             this.typeOptions = [{ label: "All", value: null }];
             this.types.map(x => {
                 this.typeLookup[x.ID] = x;
                 this.typeOptions.push({ label: x.Name, value: x.ID });
             });
 
+            delete this.checks;
             this.checks = await this.appService.getAll(true);
             this.updateCharts();
         } catch (e) {
