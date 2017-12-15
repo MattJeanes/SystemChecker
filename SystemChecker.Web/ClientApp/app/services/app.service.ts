@@ -1,7 +1,9 @@
 ﻿import { Injectable } from "@angular/core";
 import { Http } from "@angular/http";
 import { MatDialog } from "@angular/material";
-import { ICheck, ICheckDetail, ICheckNotificationType, ICheckType, IRunLog, ISettings, ISlackChannel, ISubCheckType } from "../app.interfaces";
+import { ICheck, ICheckDetail, ICheckNotificationType, ICheckResults, ICheckType, IRunLog, ISettings, ISlackChannel, ISubCheckType } from "../app.interfaces";
+
+import * as moment from "moment";
 
 import { BaseWebService } from "***REMOVED***";
 
@@ -9,6 +11,9 @@ import { BaseWebService } from "***REMOVED***";
 export class AppService {
     private webService = new BaseWebService(this.http, "/api");
     constructor(private http: Http, private dialogService: MatDialog) { }
+    public async get(id: number, simpleStatus?: boolean) {
+        return await this.webService.get<ICheck>(id.toString() + (typeof simpleStatus !== "undefined" ? "/" + simpleStatus.toString() : ""));
+    }
     public async getAll(simpleStatus?: boolean) {
         const checks = await this.webService.get<ICheck[]>(typeof simpleStatus !== "undefined" ? simpleStatus.toString() : "");
         return checks;
@@ -19,6 +24,13 @@ export class AppService {
             delete check.Results;
         }
         return check;
+    }
+    public async getResults(id: number): Promise<ICheckResults>;
+    public async getResults(id: number, dateFrom: Date, dateTo: Date): Promise<ICheckResults>;
+    public async getResults(id: number, dateFrom?: Date, dateTo?: Date) {
+        return await this.webService.get<ICheckResults>("results/" + id.toString()
+            + (typeof dateFrom !== "undefined" ? "/" + moment(dateFrom).format("YYYY-MM-DD") : "")
+            + (typeof dateTo !== "undefined" ? "/" + moment(dateTo).format("YYYY-MM-DD") : ""));
     }
     public async edit(check: ICheckDetail) {
         check = await this.webService.post<ICheckDetail>({ data: check });

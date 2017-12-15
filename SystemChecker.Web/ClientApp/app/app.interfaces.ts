@@ -121,3 +121,9 @@ export interface IEnvironment {
     ID: number;
     Name: string;
 }
+
+export interface ICheckResults {
+    MinDate: string;
+    MaxDate: string;
+    Results: ICheckResult[];
+}

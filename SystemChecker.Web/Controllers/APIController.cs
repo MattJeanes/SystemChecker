@@ -88,6 +88,24 @@ namespace SystemChecker.Web.Controllers
             return _mapper.Map<CheckDetailDTO>(check);
         }
 
+        [HttpGet("results/{id:int}/{dateFrom}/{dateTo}")]
+        public async Task<ICheckResults> GetCheckResults(int id, string dateFrom, string dateTo)
+        {
+            var from = DateTime.Parse(dateFrom);
+            from = from.Date + new TimeSpan(0, 0, 0);
+            var to = DateTime.Parse(dateTo);
+            to = to.Date + new TimeSpan(23, 59, 59);
+            var min = await _uow.CheckResults.GetAll().OrderBy(x => x.DTS).FirstOrDefaultAsync();
+            var max = await _uow.CheckResults.GetAll().OrderByDescending(x => x.DTS).FirstOrDefaultAsync();
+            var results = await _uow.CheckResults.GetAll().Where(x => x.CheckID == id && x.DTS >= from && x.DTS < to).ToListAsync();
+            return new CheckResults
+            {
+                MinDate = min?.DTS.ToString("yyyy-MM-dd"),
+                MaxDate = max?.DTS.ToString("yyyy-MM-dd"),
+                Results = _mapper.Map<List<CheckResultDTO>>(results),
+            };
+        }
+
         [HttpGet("types")]
         public async Task<List<CheckTypeDTO>> GetTypes()
         {

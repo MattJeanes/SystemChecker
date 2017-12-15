@@ -3,18 +3,21 @@ import { ActivatedRoute } from "@angular/router";
 import { HubConnection } from "@aspnet/signalr-client";
 import { TdLoadingService } from "@covalent/core";
 
-import { ICheckDetail } from "../app.interfaces";
+import { ICheck, ICheckResults } from "../app.interfaces";
 import { AppService, MessageService, UtilService } from "../services";
 
 import { CheckResultStatus } from "../app.enums";
 import { RunCheckComponent } from "../components";
+
+import * as moment from "moment";
 
 @Component({
     templateUrl: "./details.template.html",
     styleUrls: ["./details.style.scss"],
 })
 export class DetailsComponent implements OnInit, OnDestroy {
-    public check: ICheckDetail;
+    public check?: ICheck;
+    public results?: ICheckResults;
     public chart: Array<{
         name: string;
         series: Array<{ value: number, name: string | Date }>
@@ -37,10 +40,10 @@ export class DetailsComponent implements OnInit, OnDestroy {
         private appService: AppService, private messageService: MessageService, private ngZone: NgZone, private activatedRoute: ActivatedRoute,
         private utilService: UtilService, private loadingService: TdLoadingService) {
         this.hub.on("check", (id: number) => {
-            if (id !== this.checkID || this.loading) { return; }
+            if (id !== this.checkID || this.loading || !moment(this.dateTo).isSameOrAfter(moment(), "day")) { return; }
             // Because this is a call from the server, Angular change detection won't detect it so we must force ngZone to run
             this.ngZone.run(async () => {
-                await this.loadCheck();
+                await this.loadResults();
             });
         });
     }
@@ -48,7 +51,8 @@ export class DetailsComponent implements OnInit, OnDestroy {
         try {
             const params = await this.activatedRoute.params.first().toPromise();
             this.checkID = parseInt(params.id);
-            await this.loadCheck();
+            this.check = await this.appService.get(this.checkID);
+            await this.loadResults();
             await this.hub.start();
             this.hubReady = true;
         } catch (e) {
@@ -60,13 +64,14 @@ export class DetailsComponent implements OnInit, OnDestroy {
             this.hub.stop();
         }
     }
-    public async loadCheck() {
+    public async loadResults() {
         try {
             if (!this.checkID) { return; }
             if (this.loading) { return; }
             this.loading = true;
             this.loadingService.register(this.loadingId);
-            this.check = await this.appService.getDetails(this.checkID, true);
+            this.results = await this.appService.getResults(this.checkID, this.dateFrom, this.dateTo);
+            this.updateMinMax();
             this.updateCharts();
         } catch (e) {
             this.messageService.error("Failed to load checks", e.toString());
@@ -75,34 +80,27 @@ export class DetailsComponent implements OnInit, OnDestroy {
             this.loadingService.resolve(this.loadingId);
         }
     }
-    public changeDateTo() {
-        this.dateTo = new Date(this.dateFrom.valueOf());
-    }
-    public updateCharts() {
-        if (!this.check.Results || this.check.Results.length === 0) { return; }
-        this.dateMin = new Date(this.check.Results[0].DTS);
-        this.dateMax = new Date(this.check.Results[this.check.Results.length - 1].DTS);
+    public async changeDateFrom() {
         if (this.dateFrom < this.dateMin) {
             this.dateFrom = new Date(this.dateMin.valueOf());
         } else if (this.dateFrom > this.dateMax) {
             this.dateFrom = new Date(this.dateMax.valueOf());
         }
+        this.dateTo = new Date(this.dateFrom.valueOf());
+        this.changeDateTo();
+        await this.loadResults();
+    }
+    public async changeDateTo() {
         if (this.dateTo < this.dateMin) {
             this.dateTo = new Date(this.dateMin.valueOf());
         } else if (this.dateTo > this.dateMax) {
             this.dateTo = new Date(this.dateMax.valueOf());
         }
-        this.dateFrom.setHours(0);
-        this.dateFrom.setMinutes(0);
-        this.dateFrom.setSeconds(0);
-        this.dateTo.setHours(23);
-        this.dateTo.setMinutes(59);
-        this.dateTo.setSeconds(59);
-        const results = this.check.Results.filter(x => {
-            const date = new Date(x.DTS);
-            return date >= this.dateFrom && date < this.dateTo;
-        });
-        let groups = this.utilService.group(results, x => x.Status);
+        await this.loadResults();
+    }
+    public updateCharts() {
+        if (!this.results || !this.results.Results || this.results.Results.length === 0) { return; }
+        let groups = this.utilService.group(this.results.Results, x => x.Status);
         if (this.selectedKey) {
             const key = this.selectedKey.toString();
             groups = groups.filter(x => x.key === key);
@@ -120,6 +118,7 @@ export class DetailsComponent implements OnInit, OnDestroy {
         }));
     }
     public async run() {
+        if (!this.check) { return; }
         await this.appService.run(RunCheckComponent, this.check);
     }
     public back() {
@@ -146,5 +145,10 @@ export class DetailsComponent implements OnInit, OnDestroy {
         } else {
             return "#EF5350";
         }
+    }
+    private updateMinMax() {
+        if (!this.results) { return; }
+        this.dateMin = new Date(this.results.MinDate);
+        this.dateMax = new Date(this.results.MaxDate);
     }
 }

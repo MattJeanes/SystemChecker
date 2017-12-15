@@ -5,12 +5,12 @@
         <mat-card>
             <mat-card-content>
                 <mat-form-field>
-                    <input matInput placeholder="Date from" [matDatepicker]="pickerFrom" [(ngModel)]="dateFrom" [required]="true" (ngModelChange)="changeDateTo(); updateCharts()" [min]="dateMin" [max]="dateMax">
+                    <input matInput placeholder="Date from" [matDatepicker]="pickerFrom" [(ngModel)]="dateFrom" [required]="true" (ngModelChange)="changeDateFrom()" [min]="dateMin" [max]="dateMax">
                     <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
                     <mat-datepicker #pickerFrom></mat-datepicker>
                 </mat-form-field>
                 <mat-form-field>
-                    <input matInput placeholder="Date to" [matDatepicker]="pickerTo" [(ngModel)]="dateTo" [required]="true" (ngModelChange)="updateCharts()" [min]="dateFrom" [max]="dateMax">
+                    <input matInput placeholder="Date to" [matDatepicker]="pickerTo" [(ngModel)]="dateTo" [required]="true" (ngModelChange)="changeDateTo()" [min]="dateFrom" [max]="dateMax">
                     <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
                     <mat-datepicker #pickerTo></mat-datepicker>
                 </mat-form-field>
