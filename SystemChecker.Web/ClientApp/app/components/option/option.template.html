@@ -21,7 +21,7 @@
     </div>
     <div *ngIf="option.OptionType === OptionType.Login && settings">
         <mat-form-field>
-            <mat-select [placeholder]="option.Label" [(ngModel)]="value">
+            <mat-select [multiple]="option.Multiple" [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired">
                 <mat-option [value]="undefined">None</mat-option>
                 <mat-option *ngFor="let login of settings.Logins" [value]="login.ID">{{login.Username}}</mat-option>
             </mat-select>
@@ -29,7 +29,7 @@
     </div>
     <div *ngIf="option.OptionType === OptionType.ConnString && connStrings">
         <mat-form-field>
-            <mat-select [placeholder]="option.Label" [(ngModel)]="value">
+            <mat-select [multiple]="option.Multiple" [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired">
                 <mat-option [value]="undefined">None</mat-option>
                 <mat-option *ngFor="let connString of connStrings" [value]="connString.ID">{{connString.Name}}</mat-option>
             </mat-select>
@@ -42,7 +42,7 @@
     </div>
     <div *ngIf="option.OptionType === OptionType.Slack && slackChannels">
         <mat-form-field>
-            <mat-select [placeholder]="option.Label" [(ngModel)]="value">
+            <mat-select [multiple]="option.Multiple" [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired">
                 <mat-option [value]="undefined">None</mat-option>
                 <mat-option *ngFor="let channel of slackChannels" [value]="channel.id">#{{channel.name}}</mat-option>
             </mat-select>
@@ -50,9 +50,23 @@
     </div>
     <div *ngIf="option.OptionType === OptionType.Environment && settings">
         <mat-form-field>
-            <mat-select [placeholder]="option.Label" [(ngModel)]="value">
+            <mat-select [multiple]="option.Multiple" [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired">
                 <mat-option [value]="undefined">None</mat-option>
                 <mat-option *ngFor="let environment of settings.Environments" [value]="environment.ID">{{environment.Name}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+    <div *ngIf="option.OptionType === OptionType.Email && emails">
+        <mat-form-field>
+            <mat-select [multiple]="option.Multiple" [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired">
+                <mat-option *ngFor="let email of emails" [value]="email.ID">{{email.Name}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+    <div *ngIf="option.OptionType === OptionType.Phone && phones">
+        <mat-form-field>
+            <mat-select [multiple]="option.Multiple" [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired">
+                <mat-option *ngFor="let phone of phones" [value]="phone.ID">{{phone.Name}}</mat-option>
             </mat-select>
         </mat-form-field>
     </div>

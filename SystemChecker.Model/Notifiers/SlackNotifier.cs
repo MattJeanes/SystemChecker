@@ -20,10 +20,9 @@ namespace SystemChecker.Model.Notifiers
             _slackHelper = slackHelper;
         }
 
-        protected override async Task SendNotification(NotificationType type, string failedAfter = null)
+        protected override async Task SendNotification(NotificationType type, string message, string failedAfter = null)
         {
             string channelID = _notification.Options[((int)Options.ChannelId).ToString()];
-            var message = $"Check {_check.Name} completed in {_result.TimeMS}ms with result: {_result.Status.ToString()}{(string.IsNullOrEmpty(failedAfter) ? "" :  $" - failed after {failedAfter}")}";
             _logger.Info($"Sending slack notification to channel ID {channelID}: {message}");
             await _slackHelper.SendMessage(channelID, message);
         }

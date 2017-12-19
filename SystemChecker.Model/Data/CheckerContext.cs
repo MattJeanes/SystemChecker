@@ -19,5 +19,7 @@ namespace SystemChecker.Model.Data
         public DbSet<CheckNotificationType> CheckNotificationTypes { get; set; }
         public DbSet<CheckNotification> CheckNotifications { get; set; }
         public DbSet<Environment> Environments { get; set; }
+        public DbSet<Contact> Contacts { get; set; }
+        public DbSet<ContactType> ContactTypes { get; set; }
     }
 }

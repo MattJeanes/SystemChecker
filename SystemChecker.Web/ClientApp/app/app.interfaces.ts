@@ -68,6 +68,7 @@ export interface ISettings {
     Logins: ILogin[];
     ConnStrings: IConnString[];
     Environments: IEnvironment[];
+    Contacts: IContact[];
 }
 
 export interface IRunLog {
@@ -126,4 +127,16 @@ export interface ICheckResults {
     MinDate: string;
     MaxDate: string;
     Results: ICheckResult[];
+}
+
+export interface IContactType {
+    ID: string;
+    Name: string;
+}
+
+export interface IContact {
+    ID: string;
+    TypeID: number;
+    Name: string;
+    Value: string;
 }

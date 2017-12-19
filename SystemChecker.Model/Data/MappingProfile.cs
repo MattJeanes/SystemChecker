@@ -21,6 +21,7 @@ namespace SystemChecker.Model.Data
             CreateMap<CheckResultDTO, CheckResult>().ReverseMap();
             CreateMap<SubCheckTypeDTO, SubCheckType>().ReverseMap();
             CreateMap<CheckNotificationTypeDTO, CheckNotificationType>().ReverseMap();
+            CreateMap<ContactTypeDTO, ContactType>().ReverseMap();
             CreateMap<SubCheckDTO, SubCheck>()
                 .EqualityComparison((odto, o) => odto.ID == o.ID)
                 .ReverseMap();
@@ -35,6 +36,9 @@ namespace SystemChecker.Model.Data
                 .EqualityComparison((odto, o) => odto.ID == o.ID)
                 .ReverseMap();
             CreateMap<EnvironmentDTO, Environment>()
+                .EqualityComparison((odto, o) => odto.ID == o.ID)
+                .ReverseMap();
+            CreateMap<ContactDTO, Contact>()
                 .EqualityComparison((odto, o) => odto.ID == o.ID)
                 .ReverseMap();
         }

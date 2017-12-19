@@ -8,6 +8,8 @@
     Text = 7,
     Slack = 8,
     Environment = 9,
+    Email = 10,
+    Phone = 11,
 }
 
 export enum CheckLogType {
@@ -27,4 +29,9 @@ export enum CheckResultStatus {
     // Everything below this is a failure
     Timeout = -2,
     SubCheckFailed = -3,
+}
+
+export enum ContactType {
+    Email = 1,
+    Phone = 2,
 }

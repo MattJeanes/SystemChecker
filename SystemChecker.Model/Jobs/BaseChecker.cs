@@ -105,7 +105,7 @@ namespace SystemChecker.Model.Jobs
 
                 try
                 {
-                    await _helper.RunNotifiers(check, result, logger);
+                    await _helper.RunNotifiers(check, result, _settings, logger);
                 }
                 catch (Exception e)
                 {

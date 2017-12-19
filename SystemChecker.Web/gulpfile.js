@@ -70,6 +70,8 @@ gulp.task('clean', () => {
     del.sync(outputDir, { force: true });
 });
 
+gulp.task('lint', () => run("npm run lint").exec());
+
 gulp.task('build', callback => runSequence('vendor', 'main', callback));
 gulp.task('analyse', callback => runSequence('analyse_var', 'build'));
 gulp.task('full', callback => runSequence('clean', 'build'));

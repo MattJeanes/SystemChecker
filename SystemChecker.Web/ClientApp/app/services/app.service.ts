@@ -1,7 +1,7 @@
 ﻿import { Injectable } from "@angular/core";
 import { Http } from "@angular/http";
 import { MatDialog } from "@angular/material";
-import { ICheck, ICheckDetail, ICheckNotificationType, ICheckResults, ICheckType, IRunLog, ISettings, ISlackChannel, ISubCheckType } from "../app.interfaces";
+import { ICheck, ICheckDetail, ICheckNotificationType, ICheckResults, ICheckType, IContactType, IRunLog, ISettings, ISlackChannel, ISubCheckType } from "../app.interfaces";
 
 import * as moment from "moment";
 
@@ -60,6 +60,9 @@ export class AppService {
     }
     public async getSlackChannels() {
         return await this.webService.get<ISlackChannel[]>("slackchannels");
+    }
+    public async getContactTypes() {
+        return await this.webService.get<IContactType[]>("contacttypes");
     }
     public run(component: any, check: ICheck) {
         return this.dialogService.open(component, {

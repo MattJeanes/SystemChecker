@@ -95,8 +95,8 @@ namespace SystemChecker.Web.Controllers
             from = from.Date + new TimeSpan(0, 0, 0);
             var to = DateTime.Parse(dateTo);
             to = to.Date + new TimeSpan(23, 59, 59);
-            var min = await _uow.CheckResults.GetAll().OrderBy(x => x.DTS).FirstOrDefaultAsync();
-            var max = await _uow.CheckResults.GetAll().OrderByDescending(x => x.DTS).FirstOrDefaultAsync();
+            var min = await _uow.CheckResults.GetAll().Where(x => x.CheckID == id).OrderBy(x => x.DTS).FirstOrDefaultAsync();
+            var max = await _uow.CheckResults.GetAll().Where(x => x.CheckID == id).OrderByDescending(x => x.DTS).FirstOrDefaultAsync();
             var results = await _uow.CheckResults.GetAll().Where(x => x.CheckID == id && x.DTS >= from && x.DTS < to).ToListAsync();
             return new CheckResults
             {
@@ -195,6 +195,13 @@ namespace SystemChecker.Web.Controllers
         public async Task<Channel[]> GetSlackChannels()
         {
             return await _slackHelper.GetChannels();
+        }
+
+        [HttpGet("contacttypes")]
+        public async Task<List<ContactTypeDTO>> GetContactTypes()
+        {
+            var contactTypes = await _uow.ContactTypes.GetAll().ToListAsync();
+            return _mapper.Map<List<ContactTypeDTO>>(contactTypes);
         }
 
         [HttpPost("cron/{validateOnly:bool?}")]

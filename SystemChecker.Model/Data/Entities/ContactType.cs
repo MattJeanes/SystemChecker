@@ -9,20 +9,12 @@ using SystemChecker.Model.Enums;
 
 namespace SystemChecker.Model.Data.Entities
 {
-    public abstract class Option
+    [Table("tblContactType")]
+    public class ContactType
     {
         [Key]
         public int ID { get; set; }
 
-        [Column("OptionTypeID")]
-        public int OptionType { get; set; }
-
-        public string Label { get; set; }
-
-        public string DefaultValue { get; set; }
-
-        public bool IsRequired { get; set; }
-
-        public bool Multiple { get; set; }
+        public string Name { get; set; }
     }
 }

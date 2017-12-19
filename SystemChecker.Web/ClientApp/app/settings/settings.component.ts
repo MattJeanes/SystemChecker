@@ -1,8 +1,34 @@
 import { Component, OnInit } from "@angular/core";
-import { FormArray, FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { IConnString, IEnvironment, ILogin, ISettings } from "../app.interfaces";
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
+import { ContactType } from "../app.enums";
+import { IConnString, IContact, IContactType, IEnvironment, ILogin, ISettings } from "../app.interfaces";
 import { ICanComponentDeactivate } from "../guards";
 import { AppService, MessageService, UtilService } from "../services";
+
+const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const PHONE_REGEX = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/i;
+
+export const contactValidator: ValidatorFn = async (control: AbstractControl): Promise<ValidationErrors | null> => {
+    let valid = true;
+    if (!control.parent) { return null; }
+    switch (control.parent.value.type as ContactType) {
+        case ContactType.Email:
+            if (!EMAIL_REGEX.test(control.value)) {
+                valid = false;
+            }
+            break;
+        case ContactType.Phone:
+            if (!PHONE_REGEX.test(control.value)) {
+                valid = false;
+            }
+            break;
+    }
+    if (!valid) {
+        return { invalid: true };
+    } else {
+        return null;
+    }
+};
 
 @Component({
     templateUrl: "./settings.template.html",
@@ -11,6 +37,7 @@ import { AppService, MessageService, UtilService } from "../services";
 export class SettingsComponent implements OnInit, ICanComponentDeactivate {
     public form: FormGroup;
     public settings: ISettings;
+    public contactTypes: IContactType[];
     public saving: boolean = false;
     get logins(): FormArray {
         return this.form.get("logins") as FormArray;
@@ -21,12 +48,16 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
     get environments(): FormArray {
         return this.form.get("environments") as FormArray;
     }
+    get contacts(): FormArray {
+        return this.form.get("contacts") as FormArray;
+    }
     constructor(
         private messageService: MessageService, private appService: AppService, private formBuilder: FormBuilder,
         private utilService: UtilService,
     ) { this.createForm(); }
     public async ngOnInit() {
         try {
+            this.contactTypes = await this.appService.getContactTypes();
             this.settings = await this.appService.getSettings();
             this.updateForm();
         } catch (e) {
@@ -80,6 +111,19 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
             this.environments.push(group);
         }
 
+        const contactGroups = this.settings.Contacts.map(contact => this.formBuilder.group({
+            id: contact.ID,
+            type: [contact.TypeID, Validators.required],
+            name: [contact.Name, Validators.required],
+            value: [contact.Value, Validators.required, contactValidator],
+        }));
+        while (this.contacts.length) {
+            this.contacts.removeAt(0);
+        }
+        for (const group of contactGroups) {
+            this.contacts.push(group);
+        }
+
         this.form.markAsPristine();
     }
     public async save() {
@@ -129,6 +173,18 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
         this.environments.removeAt(index);
         this.form.markAsDirty();
     }
+    public addContact() {
+        this.contacts.push(this.formBuilder.group({
+            type: [undefined, Validators.required],
+            name: ["", Validators.required],
+            value: ["", Validators.required, contactValidator],
+        }));
+        this.form.markAsDirty();
+    }
+    public deleteContact(index: number) {
+        this.contacts.removeAt(index);
+        this.form.markAsDirty();
+    }
     private modelToSettings() {
         const model = this.form.value;
         const settings: ISettings = {
@@ -148,6 +204,12 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
                 ID: environment.id,
                 Name: environment.name,
             })),
+            Contacts: model.contacts.map((contact: any): IContact => ({
+                ID: contact.id,
+                TypeID: contact.type,
+                Name: contact.name,
+                Value: contact.value,
+            })),
         };
         return settings;
     }
@@ -156,6 +218,7 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
             logins: this.formBuilder.array([]),
             connStrings: this.formBuilder.array([]),
             environments: this.formBuilder.array([]),
+            contacts: this.formBuilder.array([]),
         });
     }
 }

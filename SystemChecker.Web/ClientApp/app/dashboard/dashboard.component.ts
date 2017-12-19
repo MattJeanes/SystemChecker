@@ -62,6 +62,7 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
         Logins: [],
         ConnStrings: [],
         Environments: [{ ID: 0, Name: "Loading" }],
+        Contacts: [],
     };
     public types: ICheckType[] = [];
     public environmentLookup: {
@@ -141,6 +142,7 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
         await this.appService.run(RunCheckComponent, check);
     }
     public updateCharts() {
+        if (!this.settings) { return; }
         this.chart = this.settings.Environments.map<IChart>(x => {
             let success = 0;
             let warning = 0;

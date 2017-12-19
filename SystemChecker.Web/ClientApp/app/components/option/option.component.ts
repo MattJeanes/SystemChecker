@@ -1,7 +1,7 @@
 import { Component, forwardRef, Input, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { OptionType } from "../../app.enums";
-import { IConnString, IOption, ISettings, ISlackChannel } from "../../app.interfaces";
+import { ContactType, OptionType } from "../../app.enums";
+import { IConnString, IContact, IOption, ISettings, ISlackChannel } from "../../app.interfaces";
 import { AppService } from "../../services";
 
 @Component({
@@ -24,7 +24,7 @@ export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy 
     public settings: ISettings;
     public slackChannels?: ISlackChannel[];
 
-    get connStrings(): IConnString[] {
+    get connStrings(): IConnString[] | undefined {
         if (this.settings) {
             if (this.environmentID) {
                 return this.settings.ConnStrings.filter(x => x.EnvironmentID === this.environmentID);
@@ -32,7 +32,23 @@ export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy 
                 return this.settings.ConnStrings;
             }
         } else {
-            return [];
+            return undefined;
+        }
+    }
+
+    get emails(): IContact[] | undefined {
+        if (this.settings) {
+            return this.settings.Contacts.filter(x => x.TypeID === ContactType.Email);
+        } else {
+            return undefined;
+        }
+    }
+
+    get phones(): IContact[] | undefined {
+        if (this.settings) {
+            return this.settings.Contacts.filter(x => x.TypeID === ContactType.Phone);
+        } else {
+            return undefined;
         }
     }
 
@@ -72,7 +88,10 @@ export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy 
     public async ngOnInit() {
         if (this.option.OptionType === OptionType.Login
             || this.option.OptionType === OptionType.ConnString
-            || this.option.OptionType === OptionType.Environment) {
+            || this.option.OptionType === OptionType.Environment
+            || this.option.OptionType === OptionType.Email
+            || this.option.OptionType === OptionType.Phone
+        ) {
             this.settings = await this.appService.getSettings();
         }
         if (this.option.OptionType === OptionType.Slack) {

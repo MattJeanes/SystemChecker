@@ -92,6 +92,8 @@ namespace SystemChecker.Web
 
             // Notifiers
             services.AddTransient<SlackNotifier>();
+            services.AddTransient<EmailNotifier>();
+            services.AddTransient<SMSNotifier>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
