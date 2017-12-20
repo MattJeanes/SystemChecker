@@ -18,7 +18,7 @@ using SystemChecker.Model.Loggers;
 
 namespace SystemChecker.Model.Jobs
 {
-    public class CleanupJob : IJob
+    public class CleanupJob : IJob, IDisposable
     {
         private readonly ICheckerUow _uow;
         private readonly ILogger _logger;
@@ -29,6 +29,7 @@ namespace SystemChecker.Model.Jobs
             _logger = logger;
             _appSettings = appSettings.Value;
         }
+
         public async Task Execute(IJobExecutionContext context)
         {
             var resultsToAggregate = await _uow.CheckResults.GetAll()
@@ -62,6 +63,23 @@ namespace SystemChecker.Model.Jobs
             _uow.CheckResults.DeleteRange(resultsToDelete);
 
             await _uow.Commit();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_uow != null)
+                {
+                    _uow.Dispose();
+                }
+            }
         }
     }
 }

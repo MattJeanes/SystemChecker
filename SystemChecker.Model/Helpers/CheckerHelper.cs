@@ -18,7 +18,7 @@ using SystemChecker.Model.Notifiers;
 
 namespace SystemChecker.Model.Helpers
 {
-    public interface ICheckerHelper
+    public interface ICheckerHelper : IDisposable
     {
         Task<ISettings> GetSettings();
         Task SaveResult(CheckResult result);
@@ -27,7 +27,7 @@ namespace SystemChecker.Model.Helpers
         Task<Check> GetDetails(int value);
         Task Commit();
     }
-    public class CheckerHelper : ICheckerHelper
+    public class CheckerHelper : ICheckerHelper, IDisposable
     {
         private readonly ICheckerUow _uow;
         private readonly ISettingsHelper _settingsHelper;
@@ -121,6 +121,23 @@ namespace SystemChecker.Model.Helpers
         public async Task Commit()
         {
             await _uow.Commit();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_uow != null)
+                {
+                    _uow.Dispose();
+                }
+            }
         }
     }
 }
