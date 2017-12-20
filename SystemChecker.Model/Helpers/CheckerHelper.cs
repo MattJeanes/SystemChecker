@@ -27,7 +27,7 @@ namespace SystemChecker.Model.Helpers
         Task<Check> GetDetails(int value);
         Task Commit();
     }
-    public class CheckerHelper : ICheckerHelper, IDisposable
+    public class CheckerHelper : ICheckerHelper
     {
         private readonly ICheckerUow _uow;
         private readonly ISettingsHelper _settingsHelper;
