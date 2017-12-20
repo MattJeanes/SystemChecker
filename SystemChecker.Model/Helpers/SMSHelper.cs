@@ -52,7 +52,7 @@ namespace SystemChecker.Model.Helpers
             var requestJson = JsonConvert.SerializeObject(request);
             var payload = new StringContent(requestJson, Encoding.UTF8, "application/json");
             payload.Headers.Add("X-Version", "1");
-            payload.Headers.Add("Authentication", $"Bearer {_appSettings.Clickatell.ApiKey}");
+            payload.Headers.Add("Authorization", $"Bearer {_appSettings.Clickatell.ApiKey}");
 
             var httpClient = new HttpClient();
             var response = await httpClient.PostAsync(_appSettings.Clickatell.ApiUrl, payload);
