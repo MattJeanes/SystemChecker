@@ -16,7 +16,7 @@ using SystemChecker.Model.Loggers;
 
 namespace SystemChecker.Model.Jobs
 {
-    public abstract class BaseChecker : IJob
+    public abstract class BaseChecker : IJob, IDisposable
     {
         protected readonly ICheckerHelper _helper;
         protected ICheckLogger _logger;
@@ -118,5 +118,22 @@ namespace SystemChecker.Model.Jobs
         }
 
         public abstract Task<CheckResult> PerformCheck(CheckResult result);
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_helper != null)
+                {
+                    _helper.Dispose();
+                }
+            }
+        }
     }
 }
