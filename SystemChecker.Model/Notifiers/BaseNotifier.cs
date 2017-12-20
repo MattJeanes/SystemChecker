@@ -41,8 +41,7 @@ namespace SystemChecker.Model.Notifiers
             _logger = logger;
 
             logger.Info($"Running {GetType().Name}");
-            var failedAfter = $"{_notification.FailCount} check{(_notification.FailCount == 1 ? "" : "s")})";
-            var message = $"Check {_check.Name} completed in {_result.TimeMS}ms with result: {_result.Status.ToString()}{(string.IsNullOrEmpty(failedAfter) ? "" : $" - failed after {failedAfter}")}";
+            var message = $"Check {_check.Name} completed in {_result.TimeMS}ms with result: {_result.Status.ToString()}";
 
             var failed = result.Status <= Enums.CheckResultStatus.Failed;
             if (notification.Sent != null && !failed)
@@ -54,8 +53,8 @@ namespace SystemChecker.Model.Notifiers
             else if (notification.Sent == null && failed)
             {
                 var sent = false;
-                if (!sent) sent = await CheckCount(message, failedAfter);
-                if (!sent) sent = await CheckMinutes();
+                if (!sent) sent = await CheckCount(message);
+                if (!sent) sent = await CheckMinutes(message);
                 if (sent) notification.Sent = DateTime.Now;
             }
             else if (notification.Sent != null)
@@ -64,7 +63,7 @@ namespace SystemChecker.Model.Notifiers
             }
         }
 
-        private async Task<bool> CheckCount(string message, string failedAfter)
+        private async Task<bool> CheckCount(string message)
         {
             if (!_notification.FailCount.HasValue) { return false; }
             var shouldSend = false;
@@ -83,12 +82,13 @@ namespace SystemChecker.Model.Notifiers
             }
             if (shouldSend)
             {
-                await SendNotification(NotificationType.Count, message, failedAfter);
+                var failedAfter = $"{_notification.FailCount} check{(_notification.FailCount == 1 ? "" : "s")}";
+                await SendNotification(NotificationType.Count, message + (string.IsNullOrEmpty(failedAfter) ? "" : $" - failed after {failedAfter}"), failedAfter);
             }
             return shouldSend;
         }
 
-        private async Task<bool> CheckMinutes()
+        private async Task<bool> CheckMinutes(string message)
         {
             if (!_notification.FailMinutes.HasValue) { return false; }
             var shouldSend = false;
@@ -112,7 +112,8 @@ namespace SystemChecker.Model.Notifiers
             }
             if (shouldSend)
             {
-                await SendNotification(NotificationType.Minutes, $"{_notification.FailMinutes} minute{(_notification.FailMinutes == 1 ? "" : "s")}");
+                var failedAfter = $"{_notification.FailMinutes} minute{(_notification.FailMinutes == 1 ? "" : "s")}";
+                await SendNotification(NotificationType.Minutes, message + (string.IsNullOrEmpty(failedAfter) ? "" : $" - failed after {failedAfter}"), failedAfter);
             }
             return shouldSend;
         }

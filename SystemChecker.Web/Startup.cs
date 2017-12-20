@@ -83,6 +83,7 @@ namespace SystemChecker.Web
             services.AddTransient<ISettingsHelper, SettingsHelper>();
             services.AddTransient<ICheckerHelper, CheckerHelper>();
             services.AddTransient<ISlackHelper, SlackHelper>();
+            services.AddTransient<ISMSHelper, SMSHelper>();
 
             // Jobs
             services.AddTransient<DatabaseChecker>();

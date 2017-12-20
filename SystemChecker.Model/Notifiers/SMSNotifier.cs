@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SystemChecker.Model.Data.Interfaces;
 using SystemChecker.Model.Enums;
+using SystemChecker.Model.Helpers;
 
 namespace SystemChecker.Model.Notifiers
 {
@@ -14,7 +15,11 @@ namespace SystemChecker.Model.Notifiers
         {
             PhoneNumbers = 3
         }
-        public SMSNotifier(ICheckerUow uow) : base(uow) { }
+        private readonly ISMSHelper _helper;
+        public SMSNotifier(ICheckerUow uow, ISMSHelper helper) : base(uow)
+        {
+            _helper = helper;
+        }
 
         protected override async Task SendNotification(NotificationType type, string message, string failedAfter = null)
         {
@@ -22,6 +27,12 @@ namespace SystemChecker.Model.Notifiers
             var phoneNumbers = _settings.Contacts.Where(x => phoneIDs.Contains(x.ID)).Select(x => x.Value);
             var to = string.Join(",", phoneNumbers.ToArray());
             _logger.Info($"Sending SMS notification to {to}: {message}");
+
+            await _helper.SendSMS(new SMSMessage
+            {
+                To = phoneNumbers,
+                Message = $"SystemChecker: {message}"
+            });
         }
     }
 }
