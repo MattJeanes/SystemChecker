@@ -29,6 +29,8 @@ namespace SystemChecker.Model.Jobs
         {
             FieldEqualTo = 3,
             FieldNotEqualTo = 4,
+            FieldGreaterThan = 5,
+            FieldLessThan = 6,
         }
 
         /// <summary>
@@ -46,6 +48,20 @@ namespace SystemChecker.Model.Jobs
             FieldName = 9,
             Value = 10,
             Exists = 11,
+        }
+
+        private enum FieldGreaterThan
+        {
+            FieldName = 12,
+            Value = 13,
+            Exists = 14,
+        }
+
+        private enum FieldLessThan
+        {
+            FieldName = 15,
+            Value = 16,
+            Exists = 17,
         }
 
         public async override Task<CheckResult> PerformCheck(CheckResult result)
@@ -138,33 +154,91 @@ namespace SystemChecker.Model.Jobs
                     expectedValue = subCheck.Options[((int)FieldNotEqualTo.Value).ToString()];
                     VerifyAreNotEquals(expectedValue, actualValue, fieldName);
                     break;
+                case (int)SubCheckType.FieldGreaterThan:
+                    fieldName = subCheck.Options[((int)FieldGreaterThan.FieldName).ToString()];
+                    exists = subCheck.Options[((int)FieldGreaterThan.Exists).ToString()];
+                    actualValue = GetFieldValue(fieldName, exists, jsonResult);
+                    expectedValue = subCheck.Options[((int)FieldGreaterThan.Value).ToString()];
+                    VerifyIsGreaterThan(expectedValue, actualValue, fieldName);
+                    break;
+                case (int)SubCheckType.FieldLessThan:
+                    fieldName = subCheck.Options[((int)FieldLessThan.FieldName).ToString()];
+                    exists = subCheck.Options[((int)FieldLessThan.Exists).ToString()];
+                    actualValue = GetFieldValue(fieldName, exists, jsonResult);
+                    expectedValue = subCheck.Options[((int)FieldLessThan.Value).ToString()];
+                    VerifyIsLessThan(expectedValue, actualValue, fieldName);
+                    break;
                 default:
                     _logger.Warn($"Unknown sub-check type {subCheck.TypeID} - ignoring");
                     break;
             }
         }
 
-        private void VerifyAreEquals(string expectedValue, string actualValue, string columnName)
+        private void VerifyIsLessThan(string expectedValueString, string actualValueString, string fieldName)
         {
-            if (actualValue == expectedValue)
+            if (!int.TryParse(expectedValueString, out var expectedValue))
             {
-                _logger.Info($"Field '{columnName}' equals the expected value of '{expectedValue}'");
+                throw new SubCheckException($"Expected value of {expectedValueString} could not be parsed to int");
             }
-            else
+            if (!int.TryParse(actualValueString, out var actualValue))
             {
-                throw new SubCheckException($"Field '{columnName}' does not equal the expected value of '{expectedValue}', the actual value is '{actualValue}'");
+                throw new SubCheckException($"Actual value of {actualValueString} could not be parsed to int");
+            }
+            {
+                if (actualValue < expectedValue)
+                {
+                    _logger.Info($"Field '{fieldName}' is less than the expected value of '{expectedValue}'");
+                }
+                else
+                {
+                    throw new SubCheckException($"Field '{fieldName}' is not less than the expected value of '{expectedValue}', the actual value is '{actualValue}'");
+                }
             }
         }
 
-        private void VerifyAreNotEquals(string nonExpectedValue, string actualValue, string columnName)
+        private void VerifyIsGreaterThan(string expectedValueString, string actualValueString, string fieldName)
         {
-            if (actualValue != nonExpectedValue)
+            if (!int.TryParse(expectedValueString, out var expectedValue))
             {
-                _logger.Info($"Field '{columnName}' does not equal the non-expected value of '{nonExpectedValue}', the actual value is '{actualValue}'");
+                throw new SubCheckException($"Expected value of {expectedValueString} could not be parsed to int");
+            }
+            if (!int.TryParse(actualValueString, out var actualValue))
+            {
+                throw new SubCheckException($"Actual value of {actualValueString} could not be parsed to int");
+            }
+            {
+                if (actualValue > expectedValue)
+                {
+                    _logger.Info($"Field '{fieldName}' is greater than the expected value of '{expectedValue}'");
+                }
+                else
+                {
+                    throw new SubCheckException($"Field '{fieldName}' is not greater than the expected value of '{expectedValue}', the actual value is '{actualValue}'");
+                }
+            }
+        }
+
+        private void VerifyAreEquals(string expectedValue, string actualValue, string fieldName)
+        {
+            if (actualValue == expectedValue)
+            {
+                _logger.Info($"Field '{fieldName}' equals the expected value of '{expectedValue}'");
             }
             else
             {
-                throw new SubCheckException($"Field '{columnName}' equals the non-expected value of '{nonExpectedValue}'");
+                throw new SubCheckException($"Field '{fieldName}' does not equal the expected value of '{expectedValue}', the actual value is '{actualValue}'");
+            }
+        }
+
+        private void VerifyAreNotEquals(string nonExpectedValue, string actualValue, string fieldName)
+        {
+            if (actualValue != nonExpectedValue)
+            {
+                _logger.Info($"Field '{fieldName}' does not equal the non-expected value of '{nonExpectedValue}', the actual value is '{actualValue}'");
+            }
+            else
+            {
+                throw new SubCheckException($"Field '{fieldName}' equals the non-expected value of '{nonExpectedValue}'");
             }
         }
 
