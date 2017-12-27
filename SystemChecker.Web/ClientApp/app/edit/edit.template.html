@@ -111,6 +111,7 @@
                 <button mat-raised-button color="primary" (click)="updateForm()" [disabled]="form.pristine || saving">Revert</button>
                 <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid || form.pristine || saving">Save</button>
                 <button mat-raised-button color="primary" (click)="run()" [disabled]="form.dirty || saving || check.ID === 0">Run</button>
+                <button mat-raised-button color="accent" routerLink="/edit/{{check.ID}}/copy" [disabled]="form.dirty || saving || check.ID === 0">Copy</button>
                 <button mat-raised-button color="accent" routerLink="/details/{{check.ID}}" [disabled]="saving || check.ID === 0">Details</button>
                 <button *ngIf="check.ID > 0" mat-raised-button color="warn" (click)="delete()">Delete</button>
             </mat-card-actions>
