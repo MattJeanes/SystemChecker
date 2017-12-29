@@ -41,6 +41,9 @@ namespace SystemChecker.Model.Data
             CreateMap<ContactDTO, Contact>()
                 .EqualityComparison((odto, o) => odto.ID == o.ID)
                 .ReverseMap();
+            CreateMap<CheckGroupDTO, CheckGroup>()
+                .EqualityComparison((odto, o) => odto.ID == o.ID)
+                .ReverseMap();
         }
     }
 }

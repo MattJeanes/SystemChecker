@@ -24,5 +24,6 @@ namespace SystemChecker.Model.Data
         public IRepository<Environment> Environments { get { return GetStandardRepo<Environment>(); } }
         public IRepository<Contact> Contacts { get { return GetStandardRepo<Contact>(); } }
         public IRepository<ContactType> ContactTypes { get { return GetStandardRepo<ContactType>(); } }
+        public IRepository<CheckGroup> CheckGroups { get { return GetStandardRepo<CheckGroup>(); } }
     }
 }

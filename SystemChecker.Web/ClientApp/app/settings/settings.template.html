@@ -86,9 +86,24 @@
                                 </div>
                             </div>
                         </mat-tab>
+                        <mat-tab label="Check Groups">
+                            <br />
+                            <button mat-raised-button color="primary" (click)="addCheckGroup()">Add new</button>
+                            <div formArrayName="checkGroups">
+                                <div *ngFor="let control of checkGroups.controls; let i=index" [formGroupName]="i">
+                                    <mat-form-field class="ui-g-12 ui-md-10 ui-xl-11">
+                                        <input matInput placeholder="Name" formControlName="name">
+                                    </mat-form-field>
+                                    <div class="ui-g-12 ui-md-2 ui-xl-1">
+                                        <button class="full" mat-raised-button color="warn" (click)="deleteCheckGroup(i)">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </mat-tab>
                     </mat-tab-group>
                 </form>
-                <!-- <pre>{{form.value | json}}</pre> -->
+                <!--<pre>{{settings | json}}</pre>-->
+                <!--<pre>{{modelToSettings() | json}}</pre>-->
             </mat-card-content>
             <mat-card-actions>
                 <button mat-raised-button (click)="back()" [disabled]="saving">Back</button>

@@ -35,6 +35,7 @@ namespace SystemChecker.Model.Helpers
             var connStrings = await _uow.ConnStrings.GetAll().ToListAsync();
             var environments = await _uow.Environments.GetAll().ToListAsync();
             var contacts = await _uow.Contacts.GetAll().ToListAsync();
+            var checkGroups = await _uow.CheckGroups.GetAll().ToListAsync();
 
             var settings = new Settings
             {
@@ -42,6 +43,7 @@ namespace SystemChecker.Model.Helpers
                 ConnStrings = _mapper.Map<List<ConnStringDTO>>(connStrings),
                 Environments = _mapper.Map<List<EnvironmentDTO>>(environments),
                 Contacts = _mapper.Map<List<ContactDTO>>(contacts),
+                CheckGroups = _mapper.Map<List<CheckGroupDTO>>(checkGroups),
             };
 
             foreach (var login in settings.Logins)
@@ -120,6 +122,20 @@ namespace SystemChecker.Model.Helpers
                 if (contact.ID == 0)
                 {
                     _uow.Contacts.Add(contact);
+                }
+            }
+
+            var checkGroups = await _uow.CheckGroups.GetAll().ToListAsync();
+            foreach (var group in checkGroups.Where(x => !settings.CheckGroups.Exists(y => y.ID == x.ID)))
+            {
+                _uow.CheckGroups.Delete(group);
+            }
+            _mapper.Map(settings.CheckGroups, checkGroups);
+            foreach (var group in checkGroups)
+            {
+                if (group.ID == 0)
+                {
+                    _uow.CheckGroups.Add(group);
                 }
             }
 

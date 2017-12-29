@@ -18,5 +18,6 @@ namespace SystemChecker.Model.Data.Interfaces
         IRepository<Environment> Environments { get; }
         IRepository<Contact> Contacts { get; }
         IRepository<ContactType> ContactTypes { get; }
+        IRepository<CheckGroup> CheckGroups { get; }
     }
 }

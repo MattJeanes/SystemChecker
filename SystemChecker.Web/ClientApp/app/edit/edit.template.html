@@ -14,6 +14,15 @@
                                 <input matInput placeholder="Name" formControlName="name">
                             </mat-form-field>
                             <mat-form-field class="ui-g-12 full">
+                                <textarea mat-textarea matInput autosize placeholder="Description" formControlName="description"></textarea>
+                            </mat-form-field>
+                            <mat-form-field class="ui-g-12 full">
+                                <mat-select placeholder="Group" formControlName="group">
+                                    <mat-option [value]="undefined">None</mat-option>
+                                    <mat-option *ngFor="let group of settings ? settings.CheckGroups : []" [value]="group.ID">{{group.Name}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="ui-g-12 full">
                                 <mat-select placeholder="Environment" formControlName="environment">
                                     <mat-option [value]="undefined">None</mat-option>
                                     <mat-option *ngFor="let environment of settings ? settings.Environments : []" [value]="environment.ID">{{environment.Name}}</mat-option>

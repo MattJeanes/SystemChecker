@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SystemChecker.Model.Enums;
 
 namespace SystemChecker.Model.Data.Entities
 {
@@ -19,10 +15,17 @@ namespace SystemChecker.Model.Data.Entities
 
         public bool Active { get; set; }
 
+        public string Description { get; set; }
+
         [Column("TypeID")]
         public CheckType Type { get; set; }
 
         public int TypeID { get; set; }
+
+        [Column("GroupID")]
+        public CheckGroup Group { get; set; }
+
+        public int? GroupID { get; set; }
 
         public List<CheckSchedule> Schedules { get; set; }
 

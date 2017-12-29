@@ -4,7 +4,9 @@ export interface ICheck {
     ID: number;
     Name: string;
     Active: boolean;
+    Description?: string;
     TypeID?: number;
+    GroupID?: number;
     LastResultStatus?: CheckResultStatus;
     EnvironmentID?: number;
 }
@@ -69,6 +71,7 @@ export interface ISettings {
     ConnStrings: IConnString[];
     Environments: IEnvironment[];
     Contacts: IContact[];
+    CheckGroups: ICheckGroup[];
 }
 
 export interface IRunLog {
@@ -139,4 +142,9 @@ export interface IContact {
     TypeID: number;
     Name: string;
     Value: string;
+}
+
+export interface ICheckGroup {
+    ID: string;
+    Name: string;
 }
