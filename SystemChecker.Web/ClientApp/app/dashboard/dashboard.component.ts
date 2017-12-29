@@ -4,7 +4,7 @@ import { Router } from "@angular/router";
 import { DataTable, SelectItem } from "primeng/primeng";
 
 import { CheckResultStatus } from "../app.enums";
-import { ICheck, ICheckType, IEnvironment, ISettings } from "../app.interfaces";
+import { ICheck, ICheckGroup, ICheckType, IEnvironment, ISettings } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
 import { AppService, MessageService } from "../services";
 
@@ -51,26 +51,32 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
         { label: "Failed", value: CheckResultStatus.Failed },
         { label: "Not run", value: CheckResultStatus.NotRun },
     ];
-    public environmentOptions: SelectItem[] = [];
-    public typeOptions: SelectItem[] = [];
     public activeOption: boolean | null = true;
     public resultOption: CheckResultStatus | null = null;
+    public environmentOptions: SelectItem[] = [];
     public environmentOption: number | null = null;
+    public environmentLookup: {
+        [key: string]: IEnvironment;
+    };
+    public checkGroupOptions: SelectItem[] = [];
+    public checkGroupOption: number | null = null;
+    public checkGroupLookup: {
+        [key: string]: ICheckGroup;
+    };
+    public typeOptions: SelectItem[] = [];
     public typeOption: number | null = null;
+    public typeLookup: {
+        [key: string]: ICheckType;
+    };
     public CheckResultStatus = CheckResultStatus;
     public settings: ISettings = {
         Logins: [],
         ConnStrings: [],
         Environments: [{ ID: 0, Name: "Loading" }],
         Contacts: [],
+        CheckGroups: [],
     };
     public types: ICheckType[] = [];
-    public environmentLookup: {
-        [key: string]: IEnvironment;
-    };
-    public typeLookup: {
-        [key: string]: ICheckType;
-    };
     @ViewChild("dt") private dataTable: DataTable;
     private hub = new HubConnection("hub/dashboard");
     private hubReady: boolean = false;
@@ -109,6 +115,15 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
             this.types.map(x => {
                 this.typeLookup[x.ID] = x;
                 this.typeOptions.push({ label: x.Name, value: x.ID });
+            });
+
+            delete this.checkGroupLookup;
+            this.checkGroupLookup = {};
+            delete this.checkGroupOptions;
+            this.checkGroupOptions = [{ label: "All", value: null }];
+            this.settings.CheckGroups.map(x => {
+                this.checkGroupLookup[x.ID] = x;
+                this.checkGroupOptions.push({ label: x.Name, value: x.ID });
             });
 
             delete this.checks;
@@ -204,6 +219,10 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
     public updateTypeFilter() {
         const col = this.dataTable.columns.find(x => x.header === "Type")!;
         this.dataTable.filter(this.typeOption, col.field, col.filterMatchMode);
+    }
+    public updateCheckGroupFilter() {
+        const col = this.dataTable.columns.find(x => x.header === "Group")!;
+        this.dataTable.filter(this.checkGroupOption, col.field, col.filterMatchMode);
     }
     public onChartSelect(results: IChart, event: { name: string, value: number }) {
         const selected = results.results.find(x => x.name === event.name);

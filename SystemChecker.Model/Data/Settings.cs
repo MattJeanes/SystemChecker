@@ -9,6 +9,7 @@ namespace SystemChecker.Model.Data
         List<ConnStringDTO> ConnStrings { get; set; }
         List<EnvironmentDTO> Environments { get; set; }
         List<ContactDTO> Contacts { get; set; }
+        List<CheckGroupDTO> CheckGroups { get; set; }
     }
     public class Settings : ISettings
     {
@@ -16,5 +17,6 @@ namespace SystemChecker.Model.Data
         public List<ConnStringDTO> ConnStrings { get; set; }
         public List<EnvironmentDTO> Environments { get; set; }
         public List<ContactDTO> Contacts { get; set; }
+        public List<CheckGroupDTO> CheckGroups { get; set; }
     }
 }

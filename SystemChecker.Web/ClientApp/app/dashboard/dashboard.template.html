@@ -27,6 +27,15 @@
                                 {{check.Active ? "Yes" : "No"}}
                             </ng-template>
                         </p-column>
+                        <p-column header="Group" field="GroupID" sortable="true" [filter]="true" filterMatchMode="equals" [style]="{'overflow':'visible'}">
+                            <ng-template pTemplate="filter" let-col>
+                                <p-dropdown [options]="checkGroupOptions" [(ngModel)]="checkGroupOption" [style]="{'width':'100%'}" (onChange)="updateCheckGroupFilter()"
+                                            styleClass="ui-column-filter"></p-dropdown>
+                            </ng-template>
+                            <ng-template let-check="rowData" pTemplate="body">
+                                {{check.GroupID ? checkGroupLookup[check.GroupID].Name : "None"}}
+                            </ng-template>
+                        </p-column>
                         <p-column header="Environment" field="EnvironmentID" sortable="true" [filter]="true" filterMatchMode="equals" [style]="{'overflow':'visible'}">
                             <ng-template pTemplate="filter" let-col>
                                 <p-dropdown [options]="environmentOptions" [(ngModel)]="environmentOption" [style]="{'width':'100%'}" (onChange)="updateEnvironmentFilter()"

@@ -193,7 +193,9 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
     public async updateForm() {
         this.form.reset({
             name: this.check.Name,
+            description: this.check.Description,
             type: this.check.TypeID ? this.check.TypeID : null,
+            group: this.check.GroupID ? this.check.GroupID : null,
             active: this.check.Active,
             environment: this.check.EnvironmentID,
         });
@@ -383,7 +385,9 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
             ID: this.check.ID,
             Name: model.name,
             Active: model.active,
+            Description: model.description,
             TypeID: model.type,
+            GroupID: model.group,
             EnvironmentID: model.environment,
             Schedules: model.schedules.map((schedule: any): ICheckSchedule => ({
                 ID: schedule.id,
@@ -425,6 +429,9 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
         model.notifications.forEach((notification: any, index: number) => {
             notification.options.forEach((option: { value: any, option: IOption }) => check.Notifications[index].Options[option.option.ID] = option.value);
         });
+        if (check.GroupID === null) {
+            delete check.GroupID;
+        }
         return check;
     }
     private getNewCheck(loading?: boolean): ICheckDetail {
@@ -450,8 +457,10 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
     private createForm() {
         this.form = this.formBuilder.group({
             name: ["", Validators.required],
+            description: [undefined],
             environment: [undefined, Validators.required],
             type: [undefined, Validators.required],
+            group: [undefined],
             active: false,
             schedules: this.formBuilder.array([]),
             options: this.formBuilder.array([]),

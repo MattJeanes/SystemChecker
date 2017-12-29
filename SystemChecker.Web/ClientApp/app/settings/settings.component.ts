@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
 import { ContactType } from "../app.enums";
-import { IConnString, IContact, IContactType, IEnvironment, ILogin, ISettings } from "../app.interfaces";
+import { ICheckGroup, IConnString, IContact, IContactType, IEnvironment, ILogin, ISettings } from "../app.interfaces";
 import { ICanComponentDeactivate } from "../guards";
 import { AppService, MessageService, UtilService } from "../services";
 
@@ -50,6 +50,9 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
     }
     get contacts(): FormArray {
         return this.form.get("contacts") as FormArray;
+    }
+    get checkGroups(): FormArray {
+        return this.form.get("checkGroups") as FormArray;
     }
     constructor(
         private messageService: MessageService, private appService: AppService, private formBuilder: FormBuilder,
@@ -124,6 +127,17 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
             this.contacts.push(group);
         }
 
+        const checkGroupGroups = this.settings.CheckGroups.map(group => this.formBuilder.group({
+            id: group.ID,
+            name: [group.Name, Validators.required],
+        }));
+        while (this.checkGroups.length) {
+            this.checkGroups.removeAt(0);
+        }
+        for (const group of checkGroupGroups) {
+            this.checkGroups.push(group);
+        }
+
         this.form.markAsPristine();
     }
     public async save() {
@@ -185,6 +199,16 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
         this.contacts.removeAt(index);
         this.form.markAsDirty();
     }
+    public addCheckGroup() {
+        this.checkGroups.push(this.formBuilder.group({
+            name: ["", Validators.required],
+        }));
+        this.form.markAsDirty();
+    }
+    public deleteCheckGroup(index: number) {
+        this.checkGroups.removeAt(index);
+        this.form.markAsDirty();
+    }
     private modelToSettings() {
         const model = this.form.value;
         const settings: ISettings = {
@@ -210,6 +234,10 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
                 Name: contact.name,
                 Value: contact.value,
             })),
+            CheckGroups: model.checkGroups.map((checkGroup: any): ICheckGroup => ({
+                ID: checkGroup.id,
+                Name: checkGroup.name,
+            })),
         };
         return settings;
     }
@@ -219,6 +247,7 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
             connStrings: this.formBuilder.array([]),
             environments: this.formBuilder.array([]),
             contacts: this.formBuilder.array([]),
+            checkGroups: this.formBuilder.array([]),
         });
     }
 }
