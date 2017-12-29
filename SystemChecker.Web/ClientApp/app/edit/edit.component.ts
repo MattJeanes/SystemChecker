@@ -193,7 +193,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
     public async updateForm() {
         this.form.reset({
             name: this.check.Name,
-            description: this.check.Description,
+            description: this.check.Description ? this.check.Description : null,
             type: this.check.TypeID ? this.check.TypeID : null,
             group: this.check.GroupID ? this.check.GroupID : null,
             active: this.check.Active,
@@ -431,6 +431,9 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
         });
         if (check.GroupID === null) {
             delete check.GroupID;
+        }
+        if (!check.Description) {
+            delete check.Description;
         }
         return check;
     }
