@@ -204,6 +204,13 @@ namespace SystemChecker.Web.Controllers
             return _mapper.Map<List<ContactTypeDTO>>(contactTypes);
         }
 
+        [HttpGet("triggers")]
+        public async Task<List<ITrigger>> GetAllTriggers()
+        {
+            var triggers = await _manager.GetAllTriggers();
+            return triggers;
+        }
+
         [HttpPost("cron/{validateOnly:bool?}")]
         public object ValidateCronExpression(bool? validateOnly, [FromBody]string cron)
         {

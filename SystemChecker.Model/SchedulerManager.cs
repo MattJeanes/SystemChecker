@@ -18,6 +18,7 @@ using SystemChecker.Model.Loggers;
 using SystemChecker.Model.Data;
 using AutoMapper;
 using SystemChecker.Model.DTO;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SystemChecker.Model
 {
@@ -30,6 +31,7 @@ namespace SystemChecker.Model
         Task UpdateSchedule(Check check);
         Task RemoveSchedule(Check check);
         Task<ManualRunLogger> RunManualUICheck(Check check);
+        Task<List<ITrigger>> GetAllTriggers();
     }
 
     public class SchedulerManager : ISchedulerManager
@@ -158,10 +160,24 @@ namespace SystemChecker.Model
         public async Task<ManualRunLogger> RunManualUICheck(Check check)
         {
             var type = GetJobForCheck(check);
-            var checker = _container.GetService(type) as BaseChecker;
             var logger = new ManualRunLogger();
-            await checker.Run(check, logger);
+            using (var scope = _container.CreateScope())
+            {
+                var checker = _container.GetService(type) as BaseChecker;
+                await checker.Run(check, logger);
+            }
             return logger;
+        }
+
+        public async Task<List<ITrigger>> GetAllTriggers()
+        {
+            var allTriggerKeys = await _scheduler.GetTriggerKeys(GroupMatcher<TriggerKey>.AnyGroup());
+            var triggers = new List<ITrigger>();
+            foreach (var triggerKey in allTriggerKeys)
+            {
+                triggers.Add(await _scheduler.GetTrigger(triggerKey));
+            }
+            return triggers;
         }
 
         private TriggerKey GetTriggerKeyForSchedule(CheckSchedule schedule)
