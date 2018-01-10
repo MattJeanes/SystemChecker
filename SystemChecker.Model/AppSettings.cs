@@ -34,5 +34,6 @@ namespace SystemChecker.Model
         public string ApiKey { get; set; }
         public EmailSettings Email { get; set; }
         public ClickatellSettings Clickatell { get; set; }
+        public string Url { get; set; }
     }
 }
