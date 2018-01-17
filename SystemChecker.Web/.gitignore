@@ -7,3 +7,4 @@ webpack.config.js.map
 webpack.config.vendor.js
 webpack.config.vendor.js.map
 *.user
+logs

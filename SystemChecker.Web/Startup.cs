@@ -115,6 +115,10 @@ namespace SystemChecker.Web
                     ConfigFile = "webpack.dev.js"
                 });
             }
+            else
+            {
+                loggerFactory.AddFile("logs/systemchecker-{Date}.log", LogLevel.Warning);
+            }
 
             app.UseStaticFiles();
 
