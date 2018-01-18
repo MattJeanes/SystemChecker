@@ -57,6 +57,7 @@ namespace SystemChecker.Web
             {
                 var pathToExe = Process.GetCurrentProcess().MainModule.FileName;
                 pathToContentRoot = Path.GetDirectoryName(pathToExe);
+                Directory.SetCurrentDirectory(pathToContentRoot);
             }
 
             var host = new WebHostBuilder()
