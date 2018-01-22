@@ -148,6 +148,12 @@ namespace SystemChecker.Model.Helpers
                     await _checkGroups.Add(group);
                 }
             }
+
+            await _logins.SaveChangesAsync();
+            await _connStrings.SaveChangesAsync();
+            await _environments.SaveChangesAsync();
+            await _contacts.SaveChangesAsync();
+            await _checkGroups.SaveChangesAsync();
         }
     }
 }
