@@ -74,7 +74,7 @@ namespace SystemChecker.Model.Helpers
             var connStrings = await _connStrings.GetAll().ToListAsync();
             foreach (var connString in connStrings.Where(x => !settings.ConnStrings.Exists(y => y.ID == x.ID)))
             {
-                await _connStrings.Delete(connString);
+                _connStrings.Delete(connString);
             }
             foreach (var connString in settings.ConnStrings)
             {
@@ -85,14 +85,14 @@ namespace SystemChecker.Model.Helpers
             {
                 if (connString.ID == 0)
                 {
-                    await _connStrings.Add(connString);
+                    _connStrings.Add(connString);
                 }
             }
 
             var logins = await _logins.GetAll().ToListAsync();
             foreach (var login in logins.Where(x => !settings.Logins.Exists(y => y.ID == x.ID)))
             {
-                await _logins.Delete(login);
+                _logins.Delete(login);
             }
             foreach (var login in settings.Logins)
             {
@@ -103,49 +103,49 @@ namespace SystemChecker.Model.Helpers
             {
                 if (login.ID == 0)
                 {
-                    await _logins.Add(login);
+                    _logins.Add(login);
                 }
             }
 
             var environments = await _environments.GetAll().ToListAsync();
             foreach (var environment in environments.Where(x => !settings.Environments.Exists(y => y.ID == x.ID)))
             {
-                await _environments.Delete(environment);
+                _environments.Delete(environment);
             }
             _mapper.Map(settings.Environments, environments);
             foreach (var environment in environments)
             {
                 if (environment.ID == 0)
                 {
-                    await _environments.Add(environment);
+                    _environments.Add(environment);
                 }
             }
 
             var contacts = await _contacts.GetAll().ToListAsync();
             foreach (var contact in contacts.Where(x => !settings.Contacts.Exists(y => y.ID == x.ID)))
             {
-                await _contacts.Delete(contact);
+                _contacts.Delete(contact);
             }
             _mapper.Map(settings.Contacts, contacts);
             foreach (var contact in contacts)
             {
                 if (contact.ID == 0)
                 {
-                    await _contacts.Add(contact);
+                    _contacts.Add(contact);
                 }
             }
 
             var checkGroups = await _checkGroups.GetAll().ToListAsync();
             foreach (var group in checkGroups.Where(x => !settings.CheckGroups.Exists(y => y.ID == x.ID)))
             {
-                await _checkGroups.Delete(group);
+                _checkGroups.Delete(group);
             }
             _mapper.Map(settings.CheckGroups, checkGroups);
             foreach (var group in checkGroups)
             {
                 if (group.ID == 0)
                 {
-                    await _checkGroups.Add(group);
+                    _checkGroups.Add(group);
                 }
             }
 

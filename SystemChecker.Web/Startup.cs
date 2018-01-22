@@ -68,7 +68,7 @@ namespace SystemChecker.Web
             // Database
             var builder = new DbContextOptionsBuilder<CheckerContext>();
             builder.UseSqlServer(Configuration.GetConnectionString("SystemChecker"));
-            services.AddTransient<ICheckerContext>(_ => new CheckerContext(builder.Options));
+            services.AddScoped<ICheckerContext>(_ => new CheckerContext(builder.Options));
             services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
             services.AddSingleton<IMapper>(_ => new Mapper(new MapperConfiguration(cfg =>
             {

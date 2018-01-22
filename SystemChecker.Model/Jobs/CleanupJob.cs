@@ -44,7 +44,7 @@ namespace SystemChecker.Model.Jobs
                 var ticks = group.Select(x => x.DTS.Ticks);
                 var avgTicks = ticks.Select(i => i / ticks.Count()).Sum() + ticks.Select(i => i % ticks.Count()).Sum() / ticks.Count();
                 var dateAverage = new DateTime(avgTicks);
-                await _checkResults.Add(new CheckResult
+                _checkResults.Add(new CheckResult
                 {
                     CheckID = group.Key.CheckID,
                     DTS = dateAverage,
@@ -53,13 +53,15 @@ namespace SystemChecker.Model.Jobs
                 });
             }
 
-            await _checkResults.DeleteRange(resultsToAggregate.SelectMany(x => x));
+            _checkResults.DeleteRange(resultsToAggregate.SelectMany(x => x));
+            await _checkResults.SaveChangesAsync();
 
             var resultsToDelete = await _checkResults.GetAll()
                 .Where(x => x.DTS < DateTime.Now.AddMonths(-_appSettings.ResultRetentionMonths))
                 .ToListAsync();
 
-            await _checkResults.DeleteRange(resultsToDelete);
+            _checkResults.DeleteRange(resultsToDelete);
+            await _checkResults.SaveChangesAsync();
         }
     }
 }

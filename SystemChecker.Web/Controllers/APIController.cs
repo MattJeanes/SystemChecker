@@ -144,7 +144,7 @@ namespace SystemChecker.Web.Controllers
                 {
                     Schedules = new List<CheckSchedule>()
                 };
-                await _checks.Add(check);
+                _checks.Add(check);
             }
 
             _mapper.Map(value, check);
@@ -166,6 +166,15 @@ namespace SystemChecker.Web.Controllers
         {
             var check = await _checks.GetDetails(id);
             var logger = await _manager.RunManualUICheck(check);
+            try
+            {
+                await _checks.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                logger.Error("Failed to commit changes");
+                logger.Error(e.ToString());
+            }
             return logger.GetLog();
         }
 
@@ -173,8 +182,9 @@ namespace SystemChecker.Web.Controllers
         public async Task<bool> Delete(int id)
         {
             var check = await _checks.GetDetails(id, true);
-            await _checks.Delete(check);
+            _checks.Delete(check);
             await _manager.RemoveSchedule(check);
+            await _checks.SaveChangesAsync();
             return true;
         }
 

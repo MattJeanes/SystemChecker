@@ -35,29 +35,25 @@ namespace SystemChecker.Model.Data
             return await _db.FirstOrDefaultAsync(predicate);
         }
 
-        public async Task AddRange(IEnumerable<T> content)
+        public void AddRange(IEnumerable<T> content)
         {
             _db.AddRange(content);
-            await _ctx.SaveChangesAsync();
         }
 
-        public async Task<T> Add(T content)
+        public T Add(T content)
         {
-            await _db.AddAsync(content);
-            await _ctx.SaveChangesAsync();
+            _db.Add(content);
             return content;
         }
 
-        public async Task Delete(T request)
+        public void Delete(T request)
         {
             _db.Remove(request);
-            await _ctx.SaveChangesAsync();
         }
 
-        public async Task DeleteRange(IEnumerable<T> req)
+        public void DeleteRange(IEnumerable<T> req)
         {
             _db.RemoveRange(req);
-            await _ctx.SaveChangesAsync();
         }
 
         public async Task<int> SaveChangesAsync()

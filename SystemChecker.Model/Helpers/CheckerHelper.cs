@@ -25,6 +25,7 @@ namespace SystemChecker.Model.Helpers
         Task RunSubChecks(Check check, ICheckLogger logger, Action<SubCheck> action);
         Task RunNotifiers(Check check, CheckResult result, ISettings settings, ICheckLogger logger);
         Task<Check> GetDetails(int value);
+        Task SaveChangesAsync();
     }
     public class CheckerHelper : ICheckerHelper
     {
@@ -68,7 +69,8 @@ namespace SystemChecker.Model.Helpers
 
         public async Task SaveResult(CheckResult result)
         {
-            await _checkResults.Add(result);
+            _checkResults.Add(result);
+            await _checkResults.SaveChangesAsync();
             await _dashboardHub.Clients.All.InvokeAsync("check", result.CheckID);
             await _detailsHub.Clients.All.InvokeAsync("check", result.CheckID);
             await _checkHub.Clients.All.InvokeAsync("check", result.CheckID);
@@ -118,6 +120,11 @@ namespace SystemChecker.Model.Helpers
         public async Task<Check> GetDetails(int checkID)
         {
             return await _checks.GetDetails(checkID);
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _checks.SaveChangesAsync();
         }
     }
 }

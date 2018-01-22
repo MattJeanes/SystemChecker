@@ -12,10 +12,10 @@ namespace SystemChecker.Model.Data.Interfaces
         Task<T> Find(object key);
         IQueryable<T> GetAll();
         Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
-        Task AddRange(IEnumerable<T> content);
-        Task<T> Add(T content);
-        Task DeleteRange(IEnumerable<T> req);
-        Task Delete(T request);
+        void AddRange(IEnumerable<T> content);
+        T Add(T content);
+        void DeleteRange(IEnumerable<T> req);
+        void Delete(T request);
         Task<int> SaveChangesAsync();
 
         IIncludableQueryable<TEntity, TProperty> Include<TEntity, TProperty>(
