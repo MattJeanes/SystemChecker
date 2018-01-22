@@ -7,10 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SystemChecker.Model.Data.Repositories
 {
-    public class CheckTypeRepository : EFRepository<CheckType>, ICheckTypeRepository
+    public class CheckTypeRepository : Repository<CheckType>, ICheckTypeRepository
     {
-        public CheckTypeRepository(DbContext dbContext)
-            : base(dbContext) { }
+        public CheckTypeRepository(ICheckerContext context)
+            : base(context) { }
 
         public override IQueryable<CheckType> GetAll()
         {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Data.Interfaces;
 using SystemChecker.Model.Helpers;
 
@@ -17,7 +18,7 @@ namespace SystemChecker.Model.Notifiers
         }
         private readonly ISlackHelper _slackHelper;
         private readonly AppSettings _appSettings;
-        public SlackNotifier(ICheckerUow uow, ISlackHelper slackHelper, IOptions<AppSettings> appSettings) : base(uow)
+        public SlackNotifier(IRepository<CheckResult> checkResults, ISlackHelper slackHelper, IOptions<AppSettings> appSettings) : base(checkResults)
         {
             _slackHelper = slackHelper;
             _appSettings = appSettings.Value;

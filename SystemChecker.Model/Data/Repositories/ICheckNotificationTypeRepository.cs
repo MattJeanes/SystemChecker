@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace SystemChecker.Model.Data.Interfaces
 {
-    public interface ICheckNotificationTypeRepository : IRepository<CheckNotificationType>
+    public interface ICheckNotificationTypeRepository :IRepository<CheckNotificationType>
     {
 
     }

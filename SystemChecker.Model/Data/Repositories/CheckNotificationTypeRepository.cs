@@ -7,10 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SystemChecker.Model.Data.Repositories
 {
-    public class CheckNotificationTypeRepository : EFRepository<CheckNotificationType>, ICheckNotificationTypeRepository
+    public class CheckNotificationTypeRepository : Repository<CheckNotificationType>, ICheckNotificationTypeRepository
     {
-        public CheckNotificationTypeRepository(DbContext dbContext)
-            : base(dbContext) { }
+        public CheckNotificationTypeRepository(ICheckerContext context)
+            : base(context) { }
 
         public override IQueryable<CheckNotificationType> GetAll()
         {

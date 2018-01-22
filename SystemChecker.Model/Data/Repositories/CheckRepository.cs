@@ -8,10 +8,10 @@ using System.Collections.Generic;
 
 namespace SystemChecker.Model.Data.Repositories
 {
-    public class CheckRepository : EFRepository<Check>, ICheckRepository
+    public class CheckRepository : Repository<Check>, ICheckRepository
     {
-        public CheckRepository(DbContext dbContext)
-            : base(dbContext) { }
+        public CheckRepository(ICheckerContext context)
+            : base(context) { }
 
         public async Task<Check> GetDetails(int id, bool includeResults = false)
         {

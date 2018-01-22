@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using SystemChecker.Model.Data;
+using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Data.Interfaces;
 using SystemChecker.Model.DTO;
 
@@ -20,22 +21,31 @@ namespace SystemChecker.Model.Helpers
     }
     public class SettingsHelper : ISettingsHelper
     {
-        private readonly ICheckerUow _uow;
+        private readonly IRepository<Login> _logins;
+        private readonly IRepository<ConnString> _connStrings;
+        private readonly IRepository<Data.Entities.Environment> _environments;
+        private readonly IRepository<Contact> _contacts;
+        private readonly IRepository<CheckGroup> _checkGroups;
         private readonly IMapper _mapper;
         private readonly IEncryptionHelper _encryptionHelper;
-        public SettingsHelper(ICheckerUow uow, IMapper mapper, IEncryptionHelper encryptionHelper)
+        public SettingsHelper(IRepository<Login> logins, IRepository<ConnString> connStrings, IRepository<Data.Entities.Environment> environments, IRepository<Contact> contacts, IRepository<CheckGroup> checkGroups,
+            IMapper mapper, IEncryptionHelper encryptionHelper)
         {
-            _uow = uow;
+            _logins = logins;
+            _connStrings = connStrings;
+            _environments = environments;
+            _contacts = contacts;
+            _checkGroups = checkGroups;
             _mapper = mapper;
             _encryptionHelper = encryptionHelper;
         }
         public async Task<ISettings> Get()
         {
-            var logins = await _uow.Logins.GetAll().ToListAsync();
-            var connStrings = await _uow.ConnStrings.GetAll().ToListAsync();
-            var environments = await _uow.Environments.GetAll().ToListAsync();
-            var contacts = await _uow.Contacts.GetAll().ToListAsync();
-            var checkGroups = await _uow.CheckGroups.GetAll().ToListAsync();
+            var logins = await _logins.GetAll().ToListAsync();
+            var connStrings = await _connStrings.GetAll().ToListAsync();
+            var environments = await _environments.GetAll().ToListAsync();
+            var contacts = await _contacts.GetAll().ToListAsync();
+            var checkGroups = await _checkGroups.GetAll().ToListAsync();
 
             var settings = new Settings
             {
@@ -61,10 +71,10 @@ namespace SystemChecker.Model.Helpers
 
         public async Task Set(ISettings settings)
         {
-            var connStrings = await _uow.ConnStrings.GetAll().ToListAsync();
+            var connStrings = await _connStrings.GetAll().ToListAsync();
             foreach (var connString in connStrings.Where(x => !settings.ConnStrings.Exists(y => y.ID == x.ID)))
             {
-                _uow.ConnStrings.Delete(connString);
+                _connStrings.Delete(connString);
             }
             foreach (var connString in settings.ConnStrings)
             {
@@ -75,14 +85,14 @@ namespace SystemChecker.Model.Helpers
             {
                 if (connString.ID == 0)
                 {
-                    _uow.ConnStrings.Add(connString);
+                    _connStrings.Add(connString);
                 }
             }
 
-            var logins = await _uow.Logins.GetAll().ToListAsync();
+            var logins = await _logins.GetAll().ToListAsync();
             foreach (var login in logins.Where(x => !settings.Logins.Exists(y => y.ID == x.ID)))
             {
-                _uow.Logins.Delete(login);
+                _logins.Delete(login);
             }
             foreach (var login in settings.Logins)
             {
@@ -93,53 +103,57 @@ namespace SystemChecker.Model.Helpers
             {
                 if (login.ID == 0)
                 {
-                    _uow.Logins.Add(login);
+                    _logins.Add(login);
                 }
             }
 
-            var environments = await _uow.Environments.GetAll().ToListAsync();
+            var environments = await _environments.GetAll().ToListAsync();
             foreach (var environment in environments.Where(x => !settings.Environments.Exists(y => y.ID == x.ID)))
             {
-                _uow.Environments.Delete(environment);
+                _environments.Delete(environment);
             }
             _mapper.Map(settings.Environments, environments);
             foreach (var environment in environments)
             {
                 if (environment.ID == 0)
                 {
-                    _uow.Environments.Add(environment);
+                    _environments.Add(environment);
                 }
             }
 
-            var contacts = await _uow.Contacts.GetAll().ToListAsync();
+            var contacts = await _contacts.GetAll().ToListAsync();
             foreach (var contact in contacts.Where(x => !settings.Contacts.Exists(y => y.ID == x.ID)))
             {
-                _uow.Contacts.Delete(contact);
+                _contacts.Delete(contact);
             }
             _mapper.Map(settings.Contacts, contacts);
             foreach (var contact in contacts)
             {
                 if (contact.ID == 0)
                 {
-                    _uow.Contacts.Add(contact);
+                    _contacts.Add(contact);
                 }
             }
 
-            var checkGroups = await _uow.CheckGroups.GetAll().ToListAsync();
+            var checkGroups = await _checkGroups.GetAll().ToListAsync();
             foreach (var group in checkGroups.Where(x => !settings.CheckGroups.Exists(y => y.ID == x.ID)))
             {
-                _uow.CheckGroups.Delete(group);
+                _checkGroups.Delete(group);
             }
             _mapper.Map(settings.CheckGroups, checkGroups);
             foreach (var group in checkGroups)
             {
                 if (group.ID == 0)
                 {
-                    _uow.CheckGroups.Add(group);
+                    _checkGroups.Add(group);
                 }
             }
 
-            await _uow.Commit();
+            await _logins.SaveChangesAsync();
+            await _connStrings.SaveChangesAsync();
+            await _environments.SaveChangesAsync();
+            await _contacts.SaveChangesAsync();
+            await _checkGroups.SaveChangesAsync();
         }
     }
 }

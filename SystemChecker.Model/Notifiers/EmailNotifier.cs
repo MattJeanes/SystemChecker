@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
+using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Data.Interfaces;
 
 namespace SystemChecker.Model.Notifiers
@@ -17,7 +18,7 @@ namespace SystemChecker.Model.Notifiers
             EmailAddresses = 2
         }
         private readonly AppSettings _appSettings;
-        public EmailNotifier(ICheckerUow uow, IOptions<AppSettings> appSettings) : base(uow)
+        public EmailNotifier(IRepository<CheckResult> checkResults, IOptions<AppSettings> appSettings) : base(checkResults)
         {
             _appSettings = appSettings.Value;
         }

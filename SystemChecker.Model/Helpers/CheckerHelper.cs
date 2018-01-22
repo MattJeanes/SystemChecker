@@ -18,27 +18,31 @@ using SystemChecker.Model.Notifiers;
 
 namespace SystemChecker.Model.Helpers
 {
-    public interface ICheckerHelper : IDisposable
+    public interface ICheckerHelper
     {
         Task<ISettings> GetSettings();
         Task SaveResult(CheckResult result);
         Task RunSubChecks(Check check, ICheckLogger logger, Action<SubCheck> action);
         Task RunNotifiers(Check check, CheckResult result, ISettings settings, ICheckLogger logger);
         Task<Check> GetDetails(int value);
-        Task Commit();
+        Task SaveChangesAsync();
     }
     public class CheckerHelper : ICheckerHelper
     {
-        private readonly ICheckerUow _uow;
+        private readonly IRepository<SubCheckType> _subCheckTypes;
+        private readonly IRepository<CheckResult> _checkResults;
+        private readonly ICheckRepository _checks;
         private readonly ISettingsHelper _settingsHelper;
         private readonly IHubContext<DashboardHub> _dashboardHub;
         private readonly IHubContext<DetailsHub> _detailsHub;
         private readonly IHubContext<CheckHub> _checkHub;
         private readonly IServiceProvider _serviceProvider;
-        public CheckerHelper(ICheckerUow uow, IMapper mapper, ISettingsHelper settingsHelper, IHubContext<DashboardHub> dashboardHub,
+        public CheckerHelper(IRepository<SubCheckType> subCheckTypes, IRepository<CheckResult> checkResults, ICheckRepository checks, IMapper mapper, ISettingsHelper settingsHelper, IHubContext<DashboardHub> dashboardHub,
             IHubContext<DetailsHub> detailsHub, IHubContext<CheckHub> checkHub, IServiceProvider serviceProvider)
         {
-            _uow = uow;
+            _subCheckTypes = subCheckTypes;
+            _checkResults = checkResults;
+            _checks = checks;
             _settingsHelper = settingsHelper;
             _dashboardHub = dashboardHub;
             _detailsHub = detailsHub;
@@ -53,7 +57,7 @@ namespace SystemChecker.Model.Helpers
 
         public async Task RunSubChecks(Check check, ICheckLogger logger, Action<SubCheck> action)
         {
-            var types = await _uow.SubCheckTypes.GetAll().Where(x => x.CheckTypeID == check.TypeID).ToListAsync();
+            var types = await _subCheckTypes.GetAll().Where(x => x.CheckTypeID == check.TypeID).ToListAsync();
             var subChecks = check.SubChecks.Where(x => x.Active);
             foreach (var subCheck in subChecks)
             {
@@ -65,8 +69,8 @@ namespace SystemChecker.Model.Helpers
 
         public async Task SaveResult(CheckResult result)
         {
-            _uow.CheckResults.Add(result);
-            await _uow.Commit();
+            _checkResults.Add(result);
+            await _checkResults.SaveChangesAsync();
             await _dashboardHub.Clients.All.InvokeAsync("check", result.CheckID);
             await _detailsHub.Clients.All.InvokeAsync("check", result.CheckID);
             await _checkHub.Clients.All.InvokeAsync("check", result.CheckID);
@@ -115,29 +119,12 @@ namespace SystemChecker.Model.Helpers
 
         public async Task<Check> GetDetails(int checkID)
         {
-            return await _uow.Checks.GetDetails(checkID);
+            return await _checks.GetDetails(checkID);
         }
 
-        public async Task Commit()
+        public async Task SaveChangesAsync()
         {
-            await _uow.Commit();
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (_uow != null)
-                {
-                    _uow.Dispose();
-                }
-            }
+            await _checks.SaveChangesAsync();
         }
     }
 }
