@@ -16,7 +16,7 @@ using SystemChecker.Model.Loggers;
 
 namespace SystemChecker.Model.Jobs
 {
-    public abstract class BaseChecker : IJob, IDisposable
+    public abstract class BaseChecker : IJob
     {
         protected readonly ICheckerHelper _helper;
         protected ICheckLogger _logger;
@@ -32,15 +32,6 @@ namespace SystemChecker.Model.Jobs
             var check = await _helper.GetDetails(checkID.Value);
             var logger = context.JobDetail.JobDataMap.Get("Logger") as ICheckLogger;
             await Run(check, logger);
-            try
-            {
-                await _helper.Commit();
-            }
-            catch (Exception e)
-            {
-                logger.Error("Failed to commit changes");
-                logger.Error(e.ToString());
-            }
         }
 
         public async Task Run(Check check, ICheckLogger logger)
@@ -118,22 +109,5 @@ namespace SystemChecker.Model.Jobs
         }
 
         public abstract Task<CheckResult> PerformCheck(CheckResult result);
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (_helper != null)
-                {
-                    _helper.Dispose();
-                }
-            }
-        }
     }
 }

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SystemChecker.Model.Data
 {
-    public class CheckerContext : DbContext
+    public class CheckerContext : DbContext, ICheckerContext
     {
         public CheckerContext() { }
         public CheckerContext(DbContextOptions options)

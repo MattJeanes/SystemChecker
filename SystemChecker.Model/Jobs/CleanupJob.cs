@@ -18,21 +18,21 @@ using SystemChecker.Model.Loggers;
 
 namespace SystemChecker.Model.Jobs
 {
-    public class CleanupJob : IJob, IDisposable
+    public class CleanupJob : IJob
     {
-        private readonly ICheckerUow _uow;
+        private readonly IRepository<CheckResult> _checkResults;
         private readonly ILogger _logger;
         private readonly AppSettings _appSettings;
-        public CleanupJob(ICheckerUow uow, ILogger<CleanupJob> logger, IOptions<AppSettings> appSettings)
+        public CleanupJob(IRepository<CheckResult> checkResults, ILogger<CleanupJob> logger, IOptions<AppSettings> appSettings)
         {
-            _uow = uow;
+            _checkResults = checkResults;
             _logger = logger;
             _appSettings = appSettings.Value;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
-            var resultsToAggregate = await _uow.CheckResults.GetAll()
+            var resultsToAggregate = await _checkResults.GetAll()
                 .Where(x => x.DTS < DateTime.Now.AddDays(-_appSettings.ResultAggregateDays))
                 .GroupBy(x => new { x.DTS.Hour, x.DTS.Date, x.Status, x.CheckID })
                 .Where(x => x.Count() > 1)
@@ -44,7 +44,7 @@ namespace SystemChecker.Model.Jobs
                 var ticks = group.Select(x => x.DTS.Ticks);
                 var avgTicks = ticks.Select(i => i / ticks.Count()).Sum() + ticks.Select(i => i % ticks.Count()).Sum() / ticks.Count();
                 var dateAverage = new DateTime(avgTicks);
-                _uow.CheckResults.Add(new CheckResult
+                await _checkResults.Add(new CheckResult
                 {
                     CheckID = group.Key.CheckID,
                     DTS = dateAverage,
@@ -53,33 +53,13 @@ namespace SystemChecker.Model.Jobs
                 });
             }
 
-            _uow.CheckResults.DeleteRange(resultsToAggregate.SelectMany(x => x));
-            await _uow.Commit();
+            await _checkResults.DeleteRange(resultsToAggregate.SelectMany(x => x));
 
-            var resultsToDelete = await _uow.CheckResults.GetAll()
+            var resultsToDelete = await _checkResults.GetAll()
                 .Where(x => x.DTS < DateTime.Now.AddMonths(-_appSettings.ResultRetentionMonths))
                 .ToListAsync();
 
-            _uow.CheckResults.DeleteRange(resultsToDelete);
-
-            await _uow.Commit();
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (_uow != null)
-                {
-                    _uow.Dispose();
-                }
-            }
+            await _checkResults.DeleteRange(resultsToDelete);
         }
     }
 }

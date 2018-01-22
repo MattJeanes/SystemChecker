@@ -39,13 +39,13 @@ namespace SystemChecker.Model
         private readonly ISchedulerFactory _factory;
         private readonly IScheduler _scheduler;
         private readonly AppSettings _appSettings;
-        private readonly ICheckerUow _uow;
+        private readonly ICheckRepository _checks;
         private readonly ILogger _logger;
         private readonly IServiceProvider _container;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ICheckLogger _checkLogger;
         private readonly IMapper _mapper;
-        public SchedulerManager(ISchedulerFactory factory, IJobFactory jobFactory, IOptions<AppSettings> appSettings, ICheckerUow uow,
+        public SchedulerManager(ISchedulerFactory factory, IJobFactory jobFactory, IOptions<AppSettings> appSettings, ICheckRepository checks,
             ILogger<SchedulerManager> logger, IServiceProvider container, ILoggerFactory loggerFactory, ICheckLogger checkLogger,
             IEncryptionHelper encryptionHelper, IMapper mapper)
         {
@@ -55,7 +55,7 @@ namespace SystemChecker.Model
             _scheduler.ListenerManager.AddJobListener(new GlobalJobListener(loggerFactory.CreateLogger<GlobalJobListener>()), GroupMatcher<JobKey>.AnyGroup());
             _scheduler.ListenerManager.AddSchedulerListener(new GlobalSchedulerListener(loggerFactory.CreateLogger<GlobalSchedulerListener>()));
             _appSettings = appSettings.Value;
-            _uow = uow;
+            _checks = checks;
             _logger = logger;
             _container = container;
             _loggerFactory = loggerFactory;
@@ -95,7 +95,7 @@ namespace SystemChecker.Model
 
         public async Task UpdateSchedules()
         {
-            var checks = await _uow.Checks.GetDetails(true);
+            var checks = await _checks.GetDetails(true);
             foreach (var check in checks)
             {
                 await UpdateSchedule(check);
@@ -104,7 +104,7 @@ namespace SystemChecker.Model
 
         public async Task UpdateSchedule(int id)
         {
-            var check = await _uow.Checks.GetDetails(id);
+            var check = await _checks.GetDetails(id);
             if (check == null)
             {
                 throw new InvalidOperationException($"Check {id} does not exist");

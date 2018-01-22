@@ -20,16 +20,16 @@ namespace SystemChecker.Model.Notifiers
             Minutes,
             Fixed,
         }
-        protected ICheckerUow _uow;
+        protected IRepository<CheckResult> _checkResults;
         protected Check _check;
         protected CheckNotification _notification;
         protected CheckResult _result;
         protected ISettings _settings;
         protected ICheckLogger _logger;
 
-        protected BaseNotifier(ICheckerUow uow)
+        protected BaseNotifier(IRepository<CheckResult> checkResults)
         {
-            _uow = uow;
+            _checkResults = checkResults;
         }
 
         public async Task Run(Check check, CheckNotification notification, CheckResult result, ISettings settings, ICheckLogger logger)
@@ -73,7 +73,7 @@ namespace SystemChecker.Model.Notifiers
             }
             else
             {
-                shouldSend = !(await _uow.CheckResults.GetAll()
+                shouldSend = !(await _checkResults.GetAll()
                     .Where(x => x.CheckID == _check.ID)
                     .OrderByDescending(x => x.ID)
                     .Take(_notification.FailCount.Value)
@@ -99,13 +99,13 @@ namespace SystemChecker.Model.Notifiers
             else
             {
                 var dts = DateTime.Now.AddMinutes(-_notification.FailMinutes.Value);
-                var result = await _uow.CheckResults.GetAll()
+                var result = await _checkResults.GetAll()
                     .Where(x => x.CheckID == _check.ID && x.DTS <= dts)
                     .OrderByDescending(x => x.ID)
                     .FirstOrDefaultAsync();
                 if (result.Status <= Enums.CheckResultStatus.Failed)
                 {
-                    shouldSend = !(await _uow.CheckResults.GetAll()
+                    shouldSend = !(await _checkResults.GetAll()
                         .Where(x => x.CheckID == _check.ID && x.Status > Enums.CheckResultStatus.Failed && x.DTS > dts)
                         .AnyAsync());
                 }

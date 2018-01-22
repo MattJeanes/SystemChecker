@@ -15,7 +15,6 @@ using Newtonsoft.Json;
 using ***REMOVED***;
 using SystemChecker.Model.Data.Interfaces;
 using SystemChecker.Model.Data;
-using SystemChecker.Model.Data.Helpers;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using Quartz;
@@ -29,6 +28,7 @@ using AutoMapper.EquivalencyExpression;
 using SystemChecker.Model.Hubs;
 using SystemChecker.Model.Notifiers;
 using SystemChecker.Web.Helpers;
+using SystemChecker.Model.Data.Repositories;
 
 namespace SystemChecker.Web
 {
@@ -65,18 +65,27 @@ namespace SystemChecker.Web
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
+            // Database
             var builder = new DbContextOptionsBuilder<CheckerContext>();
             builder.UseSqlServer(Configuration.GetConnectionString("SystemChecker"));
-            services.AddTransient<ICheckerUow>(_ => new CheckerUow(new RepositoryProvider(new RepositoryFactories()), builder.Options));
+            services.AddTransient<ICheckerContext>(_ => new CheckerContext(builder.Options));
+            services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
             services.AddSingleton<IMapper>(_ => new Mapper(new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile<MappingProfile>();
                 cfg.AddCollectionMappers();
             })));
+
+            // Repositories
+            services.AddTransient<ICheckRepository, CheckRepository>();
+            services.AddTransient<ICheckTypeRepository, CheckTypeRepository>();
+            services.AddTransient<ISubCheckTypeRepository, SubCheckTypeRepository>();
+            services.AddTransient<ICheckNotificationTypeRepository, CheckNotificationTypeRepository>();
+
+            // Other
             services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
             services.AddSingleton<ISchedulerManager, SchedulerManager>();
             services.AddSingleton<IJobFactory, JobFactory>();
-            services.AddSingleton<IEncryptionHelper, EncryptionHelper>();
             services.AddSingleton<ICheckLogger, CheckLogger>();
 
             // Helpers
@@ -84,6 +93,7 @@ namespace SystemChecker.Web
             services.AddTransient<ICheckerHelper, CheckerHelper>();
             services.AddTransient<ISlackHelper, SlackHelper>();
             services.AddTransient<ISMSHelper, SMSHelper>();
+            services.AddSingleton<IEncryptionHelper, EncryptionHelper>();
 
             // Jobs
             services.AddTransient<DatabaseChecker>();
