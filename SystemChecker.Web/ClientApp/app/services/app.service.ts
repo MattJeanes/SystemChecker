@@ -1,25 +1,22 @@
 ﻿import { Injectable } from "@angular/core";
-import { Http } from "@angular/http";
+import { HttpClient } from "@angular/common/http";
 import { MatDialog } from "@angular/material";
 import { ICheck, ICheckDetail, ICheckNotificationType, ICheckResults, ICheckType, IContactType, IRunLog, ISettings, ISlackChannel, ISubCheckType } from "../app.interfaces";
 
 import * as moment from "moment";
 
-import { BaseWebService } from "***REMOVED***";
-
 @Injectable()
 export class AppService {
-    private webService = new BaseWebService(this.http, "/api");
-    constructor(private http: Http, private dialogService: MatDialog) { }
+    constructor(private httpClient: HttpClient, private dialogService: MatDialog) { }
     public async get(id: number, simpleStatus?: boolean) {
-        return await this.webService.get<ICheck>(id.toString() + (typeof simpleStatus !== "undefined" ? "/" + simpleStatus.toString() : ""));
+        return await this.httpClient.get<ICheck>(`/api/${id}` + (typeof simpleStatus !== "undefined" ? "/" + simpleStatus.toString() : "")).first().toPromise();
     }
     public async getAll(simpleStatus?: boolean) {
-        const checks = await this.webService.get<ICheck[]>(typeof simpleStatus !== "undefined" ? simpleStatus.toString() : "");
+        const checks = await this.httpClient.get<ICheck[]>("/api/" + (typeof simpleStatus !== "undefined" ? simpleStatus.toString() : "")).first().toPromise();
         return checks;
     }
     public async getDetails(id: number, includeResults?: boolean) {
-        const check = await this.webService.get<ICheckDetail>("details/" + id.toString() + (typeof includeResults !== "undefined" ? "/" + includeResults.toString() : ""));
+        const check = await this.httpClient.get<ICheckDetail>("/api/details/" + id.toString() + (typeof includeResults !== "undefined" ? "/" + includeResults.toString() : "")).first().toPromise();
         if (!includeResults) {
             delete check.Results;
         }
@@ -28,41 +25,41 @@ export class AppService {
     public async getResults(id: number): Promise<ICheckResults>;
     public async getResults(id: number, dateFrom: Date, dateTo: Date): Promise<ICheckResults>;
     public async getResults(id: number, dateFrom?: Date, dateTo?: Date) {
-        return await this.webService.get<ICheckResults>("results/" + id.toString()
+        return await this.httpClient.get<ICheckResults>("/api/results/" + id.toString()
             + (typeof dateFrom !== "undefined" ? "/" + moment(dateFrom).format("YYYY-MM-DD") : "")
-            + (typeof dateTo !== "undefined" ? "/" + moment(dateTo).format("YYYY-MM-DD") : ""));
+            + (typeof dateTo !== "undefined" ? "/" + moment(dateTo).format("YYYY-MM-DD") : "")).first().toPromise();
     }
     public async edit(check: ICheckDetail) {
-        check = await this.webService.post<ICheckDetail>({ data: check });
+        check = await this.httpClient.post<ICheckDetail>("/api", check).first().toPromise();
         delete check.Results;
         return check;
     }
     public async delete(id: number) {
-        return await this.webService.delete<boolean>(id.toString());
+        return await this.httpClient.delete<boolean>(id.toString()).first().toPromise();
     }
     public async getTypes() {
-        return await this.webService.get<ICheckType[]>("types");
+        return await this.httpClient.get<ICheckType[]>("/api/types").first().toPromise();
     }
     public async getSettings() {
-        return await this.webService.get<ISettings>("settings");
+        return await this.httpClient.get<ISettings>("/api/settings").first().toPromise();
     }
     public async setSettings(settings: ISettings) {
-        return await this.webService.post<ISettings>({ path: "settings", data: settings });
+        return await this.httpClient.post<ISettings>("/api/settings", settings).first().toPromise();
     }
     public async startRun(id: number) {
-        return await this.webService.post<IRunLog[]>(`run/${id}`);
+        return await this.httpClient.post<IRunLog[]>(`/api/run/${id}`, undefined).first().toPromise();
     }
     public async getSubCheckTypes(checkTypeID: number) {
-        return await this.webService.get<ISubCheckType[]>(`subchecktypes/${checkTypeID}`);
+        return await this.httpClient.get<ISubCheckType[]>(`/api/subchecktypes/${checkTypeID}`).first().toPromise();
     }
     public async getCheckNotificationTypes() {
-        return await this.webService.get<ICheckNotificationType[]>("checknotificationtypes");
+        return await this.httpClient.get<ICheckNotificationType[]>("/api/checknotificationtypes").first().toPromise();
     }
     public async getSlackChannels() {
-        return await this.webService.get<ISlackChannel[]>("slackchannels");
+        return await this.httpClient.get<ISlackChannel[]>("/api/slackchannels").first().toPromise();
     }
     public async getContactTypes() {
-        return await this.webService.get<IContactType[]>("contacttypes");
+        return await this.httpClient.get<IContactType[]>("/api/contacttypes").first().toPromise();
     }
     public run(component: any, check: ICheck) {
         return this.dialogService.open(component, {
@@ -76,9 +73,6 @@ export class AppService {
             .toPromise() as Promise<void>;
     }
     public async validateCronExpression(cron: string, validateOnly?: boolean) {
-        return await this.webService.post<{ valid: boolean, next?: string; error?: string }>({
-            path: "cron" + (typeof validateOnly !== "undefined" ? "/" + validateOnly.toString() : ""),
-            data: cron,
-        });
+        return await this.httpClient.post<{ valid: boolean, next?: string; error?: string }>("/api/cron" + (typeof validateOnly !== "undefined" ? "/" + validateOnly.toString() : ""), cron).first().toPromise();
     }
 }

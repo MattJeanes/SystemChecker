@@ -1,4 +1,5 @@
 import { CommonModule, registerLocaleData } from "@angular/common";
+import { HttpClientModule } from "@angular/common/http";
 import localeGB from "@angular/common/locales/en-GB";
 import { LOCALE_ID, NgModule } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
@@ -100,6 +101,7 @@ routes.forEach(x => {
         MatTooltipModule,
         CovalentLoadingModule,
         MatIconModule,
+        HttpClientModule,
     ],
     declarations: [
         AppComponent,

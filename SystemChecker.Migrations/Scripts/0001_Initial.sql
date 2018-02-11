@@ -1,30 +1,4 @@
-﻿IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='tblCheck') BEGIN
-	SET NOEXEC ON
-END
-
---------------------------------------------------------------------------------------------------------------------------
--- USERS -----------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------
-
-/****** Object:  User [***REMOVED***\***REMOVED***]    Script Date: 12/12/2017 15:50:29 ******/
-CREATE USER [***REMOVED***\***REMOVED***] FOR LOGIN [***REMOVED***\***REMOVED***] WITH DEFAULT_SCHEMA=[***REMOVED***\***REMOVED***]
-GO
-/****** Object:  User [***REMOVED***\***REMOVED***]    Script Date: 12/12/2017 15:50:29 ******/
-CREATE USER [***REMOVED***\***REMOVED***] FOR LOGIN [***REMOVED***\***REMOVED***]
-GO
-/****** Object:  User [***REMOVED***\***REMOVED***]    Script Date: 12/12/2017 15:50:29 ******/
-CREATE USER [***REMOVED***\***REMOVED***] FOR LOGIN [***REMOVED***\***REMOVED***]
-GO
-/****** Object:  Schema [***REMOVED***\***REMOVED***]    Script Date: 12/12/2017 15:50:29 ******/
-CREATE SCHEMA [***REMOVED***\***REMOVED***]
-GO
-/****** Object:  Table [dbo].[tblCheck]    Script Date: 12/12/2017 15:50:29 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
---------------------------------------------------------------------------------------------------------------------------
+﻿--------------------------------------------------------------------------------------------------------------------------
 -- TABLES -----------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
 
@@ -404,8 +378,9 @@ SET IDENTITY_INSERT [tblSubCheckType] ON;
 INSERT INTO [tblSubCheckType] ([ID],[CheckTypeID],[Name])
 VALUES
 ( 1, 1, 'Response Contains' ), 
-( 2, 1, 'JSON Property' ), 
-( 3, 2, 'JSON Property' )
+( 2, 1, 'Field Contains' ), 
+( 3, 2, 'Field Equal To' ),
+( 4, 2, 'Field Not Equal To')
 SET IDENTITY_INSERT [tblSubCheckType] OFF;
 GO 
 
@@ -413,12 +388,18 @@ SET IDENTITY_INSERT [tblSubCheckTypeOption] ON;
 INSERT INTO [tblSubCheckTypeOption] ([ID],[SubCheckTypeID],[OptionTypeID],[Label],[DefaultValue],[IsRequired])
 VALUES
 ( 1, 1, 2, 'Text', NULL, 1 ), 
+
 ( 2, 2, 2, 'Field Name (JPath expression)', NULL, 1 ), 
 ( 3, 2, 1, 'Exists', 'true', 1 ), 
-( 4, 2, 2, 'Value contains', NULL, 0 ), 
-( 6, 3, 3, 'Value equals (single row)', NULL, 0 ), 
-( 7, 3, 2, 'Column Name (JPath expression)', NULL, 1 ), 
-( 8, 3, 1, 'Exists', 'true', 1 )
+( 4, 2, 2, 'Value contains', NULL, 0 ),
+
+( 6, 3, 2, 'Value', NULL, 0 ), 
+( 7, 3, 2, 'Field Name (JPath expression)', NULL, 1 ), 
+( 8, 3, 1, 'Exists', 'true', 1 ),
+
+( 9, 4, 2, 'Field Name (JPath expression)', NULL, 1	),
+( 10, 4, 2, 'Value', NULL, 0 ),
+( 11, 4, 1, 'Exists', 'true', 1 )
 SET IDENTITY_INSERT [tblSubCheckTypeOption] OFF;
 GO 
 
@@ -442,3 +423,17 @@ VALUES
 ( 1, 'Slack' )
 SET IDENTITY_INSERT [tblCheckNotificationType] OFF;
 GO 
+
+SET IDENTITY_INSERT dbo.tblCheckNotificationTypeOption ON
+INSERT INTO dbo.tblCheckNotificationTypeOption
+(
+	ID,
+	CheckNotificationTypeID,
+	OptionTypeID,
+	Label,
+	DefaultValue,
+	IsRequired
+)
+VALUES
+( 1, 1, 8, 'Channel',	NULL, 1 )
+SET IDENTITY_INSERT dbo.tblCheckNotificationTypeOption OFF

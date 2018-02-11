@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Security.Principal;
+using System.Text;
 using System.Threading.Tasks;
 using SystemChecker.Model;
 
@@ -31,7 +32,7 @@ namespace SystemChecker.Web.Helpers
                 return;
             }
 
-            var user = (WindowsIdentity)context.User.Identity;
+            var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
             var apiKey = context.Request.Headers["ApiKey"].FirstOrDefault();
             if (apiKey != null)
             {
@@ -42,21 +43,15 @@ namespace SystemChecker.Web.Helpers
                     return;
                 }
             }
-            else if (user.IsAnonymous)
+            else if (true) // TODO: Proper authentcation
+            {
+
+            }
+            else
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 await context.Response.WriteAsync("Unauthorized");
                 return;
-            }
-            else
-            {
-                var groupNames = user.Groups.Select(x => x.Translate(typeof(NTAccount)).Value);
-                if (!groupNames.Any(x => x.Substring(x.IndexOf(@"\") + 1) == _appSettings.AuthenticationGroup))
-                {
-                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                    await context.Response.WriteAsync($"You are not part of the '{_appSettings.AuthenticationGroup}' group");
-                    return;
-                }
             }
 
             await _next(context);

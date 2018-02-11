@@ -12,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
-using ***REMOVED***;
 using SystemChecker.Model.Data.Interfaces;
 using SystemChecker.Model.Data;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +28,7 @@ using SystemChecker.Model.Hubs;
 using SystemChecker.Model.Notifiers;
 using SystemChecker.Web.Helpers;
 using SystemChecker.Model.Data.Repositories;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace SystemChecker.Web
 {
@@ -66,6 +66,9 @@ namespace SystemChecker.Web
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             // Database
+            services.AddDbContext<CheckerContext>(options =>
+            options.UseSqlServer(Configuration.GetConnectionString("SystemChecker")));
+
             var builder = new DbContextOptionsBuilder<CheckerContext>();
             builder.UseSqlServer(Configuration.GetConnectionString("SystemChecker"));
             services.AddScoped<ICheckerContext>(_ => new CheckerContext(builder.Options));

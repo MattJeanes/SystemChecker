@@ -20,9 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="dbup" Version="4.0.0-beta0002" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.0" />
-    <PackageReference Include="***REMOVED***" Version="1.0.19657.10624" />
     <PackageReference Include="NDesk.Options" Version="0.2.1" />
   </ItemGroup>
 

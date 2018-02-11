@@ -1,0 +1,8 @@
+﻿CREATE TABLE dbo.tblCheckGroup (
+	ID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	Name VARCHAR(255) NOT NULL
+)
+
+ALTER TABLE dbo.tblCheck ADD Description VARCHAR(MAX) NULL
+ALTER TABLE dbo.tblCheck ADD GroupID INT NULL
+ALTER TABLE dbo.tblCheck ADD CONSTRAINT FK_tblCheck_tblCheckGroup FOREIGN KEY (GroupID) REFERENCES dbo.tblCheckGroup
