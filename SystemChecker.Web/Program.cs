@@ -71,9 +71,12 @@ namespace SystemChecker.Web
                 .UseUrls($"http://localhost:{port}")
                 .Build();
 
+            isService = false; // temporary
+
             if (isService)
             {
-                host.RunAsSchedulerService();
+                throw new InvalidOperationException("Windows service not currently supported");
+                //host.RunAsSchedulerService();
             }
             else
             {
