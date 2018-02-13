@@ -6,6 +6,50 @@
             <mat-card-content>
                 <form [formGroup]="form" novalidate>
                     <mat-tab-group [dynamicHeight]="true">
+                        <mat-tab label="Global">
+                            <div formGroupName="global">
+                                <h1>Email</h1>
+                                <div class="ui-g" formGroupName="email">
+                                    <mat-form-field class="ui-g-12 ui-lg-4 ui-xl-4">
+                                        <input matInput placeholder="From" formControlName="from">
+                                    </mat-form-field>
+                                    <mat-form-field class="ui-g-12 ui-lg-4 ui-xl-4">
+                                        <input matInput placeholder="Server" formControlName="server">
+                                    </mat-form-field>
+                                    <mat-form-field class="ui-g-12 ui-lg-4 ui-xl-4">
+                                        <input matInput type="number" placeholder="Port" formControlName="port">
+                                    </mat-form-field>
+                                    <mat-form-field class="ui-g-12 ui-lg-4 ui-xl-4">
+                                        <input matInput placeholder="Username" formControlName="username">
+                                    </mat-form-field>
+                                    <mat-form-field class="ui-g-12 ui-lg-4 ui-xl-4">
+                                        <input matInput placeholder="Password" formControlName="password">
+                                    </mat-form-field>
+                                    <mat-checkbox class="ui-g-12 ui-lg-4 ui-xl-4" formControlName="tls">TLS</mat-checkbox>
+                                </div>
+                                <h1>Clickatell</h1>
+                                <div class="ui-g" formGroupName="clickatell">
+                                    <mat-form-field class="ui-g-12 ui-lg-4 ui-xl-4">
+                                        <input matInput placeholder="API Key" formControlName="apiKey">
+                                    </mat-form-field>
+                                    <mat-form-field class="ui-g-12 ui-lg-4 ui-xl-4">
+                                        <input matInput placeholder="API Url" formControlName="apiUrl">
+                                    </mat-form-field>
+                                    <mat-form-field class="ui-g-12 ui-lg-4 ui-xl-4">
+                                        <input matInput placeholder="From" formControlName="from">
+                                    </mat-form-field>
+                                </div>
+                                <h1>Other</h1>
+                                <div class="ui-g">
+                                    <mat-form-field class="ui-g-12 ui-lg-4 ui-xl-4">
+                                        <input matInput placeholder="Authentication Group" formControlName="authenticationGroup">
+                                    </mat-form-field>
+                                    <mat-form-field class="ui-g-12 ui-lg-4 ui-xl-4">
+                                        <input matInput placeholder="Slack Token" formControlName="slackToken">
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </mat-tab>
                         <mat-tab label="Logins">
                             <br />
                             <button mat-raised-button color="primary" (click)="addLogin()">Add new</button>

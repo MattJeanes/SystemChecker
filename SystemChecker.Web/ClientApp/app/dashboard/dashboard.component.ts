@@ -75,6 +75,7 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
         Environments: [{ ID: 0, Name: "Loading" }],
         Contacts: [],
         CheckGroups: [],
+        Global: {},
     };
     public types: ICheckType[] = [];
     @ViewChild("dt") private dataTable: DataTable;

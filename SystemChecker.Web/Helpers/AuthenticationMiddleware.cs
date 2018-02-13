@@ -32,27 +32,29 @@ namespace SystemChecker.Web.Helpers
                 return;
             }
 
-            var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
-            var apiKey = context.Request.Headers["ApiKey"].FirstOrDefault();
-            if (apiKey != null)
-            {
-                if (apiKey != _appSettings.ApiKey)
-                {
-                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                    await context.Response.WriteAsync(JsonConvert.SerializeObject(new { error = "Invalid API key" }, Formatting.Indented));
-                    return;
-                }
-            }
-            else if (true) // TODO: Proper authentcation
-            {
+            //var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
+            //var apiKey = context.Request.Headers["ApiKey"].FirstOrDefault();
+            //if (apiKey != null)
+            //{
+            //    if (apiKey != _appSettings.ApiKey)
+            //    {
+            //        context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+            //        await context.Response.WriteAsync(JsonConvert.SerializeObject(new { error = "Invalid API key" }, Formatting.Indented));
+            //        return;
+            //    }
+            //}
+            //else if (true) // TODO: Proper authentcation
+            //{
 
-            }
-            else
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                await context.Response.WriteAsync("Unauthorized");
-                return;
-            }
+            //}
+            //else
+            //{
+            //    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            //    await context.Response.WriteAsync("Unauthorized");
+            //    return;
+            //}
+
+            // TODO authentication
 
             await _next(context);
         }

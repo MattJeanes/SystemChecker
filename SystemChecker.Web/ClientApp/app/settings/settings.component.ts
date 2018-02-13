@@ -77,6 +77,33 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
     public updateForm() {
         this.form.reset();
 
+        const global: FormGroup = this.form.controls.global as FormGroup;
+        global.reset({
+            authenticationGroup: this.settings.Global.AuthenticationGroup,
+            slackToken: this.settings.Global.SlackToken,
+        });
+
+        const email = this.settings.Global.Email;
+        if (email) {
+            global.controls.email.reset({
+                from: email.From,
+                server: email.Server,
+                port: email.Port,
+                username: email.Username,
+                password: email.Password,
+                tls: email.TLS,
+            });
+        }
+
+        const clickatell = this.settings.Global.Clickatell;
+        if (clickatell) {
+            global.controls.clickatell.reset({
+                apiKey: clickatell.ApiKey,
+                apiUrl: clickatell.ApiUrl,
+                from: clickatell.From,
+            });
+        }1
+
         const loginGroups = this.settings.Logins.map(login => this.formBuilder.group({
             id: login.ID,
             username: [login.Username, Validators.required],
@@ -238,6 +265,23 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
                 ID: checkGroup.id,
                 Name: checkGroup.name,
             })),
+            Global: {
+                Email: {
+                    From: model.global.email.from,
+                    Server: model.global.email.server,
+                    Port: model.global.email.port,
+                    Username: model.global.email.username,
+                    Password: model.global.email.password,
+                    TLS: model.global.email.tls,
+                },
+                Clickatell: {
+                    ApiKey: model.global.clickatell.apiKey,
+                    ApiUrl: model.global.clickatell.apiUrl,
+                    From: model.global.clickatell.from,
+                },
+                AuthenticationGroup: model.global.authenticationGroup,
+                SlackToken: model.global.slackToken,
+            }
         };
         return settings;
     }
@@ -248,6 +292,23 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
             environments: this.formBuilder.array([]),
             contacts: this.formBuilder.array([]),
             checkGroups: this.formBuilder.array([]),
+            global: this.formBuilder.group({
+                email: this.formBuilder.group({
+                    from: [undefined],
+                    server: [undefined],
+                    port: [undefined],
+                    username: [undefined],
+                    password: [undefined],
+                    tls: [undefined],
+                }),
+                clickatell: this.formBuilder.group({
+                    apiKey: [undefined],
+                    apiUrl: [undefined],
+                    from: [undefined],
+                }),
+                authenticationGroup: [undefined],
+                slackToken: [undefined],
+            }),
         });
     }
 }

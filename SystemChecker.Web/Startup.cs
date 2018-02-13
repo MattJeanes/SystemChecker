@@ -53,7 +53,10 @@ namespace SystemChecker.Web
         {
             // Add framework services.
             services
-                .AddMvc()
+                .AddMvc(options =>
+                {
+                    options.InputFormatters.Add(new TextPlainInputFormatter());
+                })
                 .AddJsonOptions(options =>
                 {
                     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
@@ -66,14 +69,19 @@ namespace SystemChecker.Web
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             // Database
+            var connString = Configuration.GetConnectionString("SystemChecker");
+            if (string.IsNullOrEmpty(connString))
+            {
+                throw new ArgumentException("ConnectionStrings:SystemChecker option not set");
+            }
             services.AddDbContext<CheckerContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("SystemChecker")));
+            options.UseSqlServer(connString));
 
             var builder = new DbContextOptionsBuilder<CheckerContext>();
-            builder.UseSqlServer(Configuration.GetConnectionString("SystemChecker"));
-            services.AddScoped<ICheckerContext>(_ => new CheckerContext(builder.Options));
+            builder.UseSqlServer(connString);
+            services.AddTransient<ICheckerContext>(_ => new CheckerContext(builder.Options));
             services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
-            services.AddSingleton<IMapper>(_ => new Mapper(new MapperConfiguration(cfg =>
+            services.AddTransient<IMapper>(_ => new Mapper(new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile<MappingProfile>();
                 cfg.AddCollectionMappers();
@@ -86,17 +94,17 @@ namespace SystemChecker.Web
             services.AddTransient<ICheckNotificationTypeRepository, CheckNotificationTypeRepository>();
 
             // Other
-            services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+            services.AddTransient<ISchedulerFactory, StdSchedulerFactory>();
             services.AddSingleton<ISchedulerManager, SchedulerManager>();
-            services.AddSingleton<IJobFactory, JobFactory>();
-            services.AddSingleton<ICheckLogger, CheckLogger>();
+            services.AddTransient<IJobFactory, JobFactory>();
+            services.AddTransient<ICheckLogger, CheckLogger>();
 
             // Helpers
             services.AddTransient<ISettingsHelper, SettingsHelper>();
             services.AddTransient<ICheckerHelper, CheckerHelper>();
             services.AddTransient<ISlackHelper, SlackHelper>();
             services.AddTransient<ISMSHelper, SMSHelper>();
-            services.AddSingleton<IEncryptionHelper, EncryptionHelper>();
+            services.AddTransient<IJobHelper, JobHelper>();
 
             // Jobs
             services.AddTransient<DatabaseChecker>();

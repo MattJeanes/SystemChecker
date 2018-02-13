@@ -66,12 +66,34 @@ export interface IConnString {
     Value: string;
 }
 
+export interface IEmailSettings {
+    From: string;
+    Server: string;
+    Port: number;
+    Username: string;
+    Password: string;
+    TLS: boolean;
+}
+export interface IClickatellSettings {
+    ApiKey: string;
+    ApiUrl: string;
+    From: string;
+}
+
+export interface IGlobalSettings {
+    Email?: IEmailSettings;
+    Clickatell?: IClickatellSettings;
+    AuthenticationGroup?: string;
+    SlackToken?: string;
+}
+
 export interface ISettings {
     Logins: ILogin[];
     ConnStrings: IConnString[];
     Environments: IEnvironment[];
     Contacts: IContact[];
     CheckGroups: ICheckGroup[];
+    Global: IGlobalSettings;
 }
 
 export interface IRunLog {

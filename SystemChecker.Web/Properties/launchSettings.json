@@ -13,6 +13,7 @@
       "commandLineArgs": "--port 51114 --no-scheduler",
       "launchBrowser": true,
       "environmentVariables": {
+        "ConnectionStrings:SystemChecker": "***REMOVED***",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:51114/"
@@ -22,6 +23,7 @@
       "commandLineArgs": "--port 51114",
       "launchBrowser": true,
       "environmentVariables": {
+        "ConnectionStrings:SystemChecker": "***REMOVED***",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:51114/"

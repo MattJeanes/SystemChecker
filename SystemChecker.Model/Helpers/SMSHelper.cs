@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using SystemChecker.Model.Data;
 
 namespace SystemChecker.Model.Helpers
 {
@@ -33,21 +34,26 @@ namespace SystemChecker.Model.Helpers
             [JsonProperty("from")]
             public string From { get; set; }
         }
-        private readonly AppSettings _appSettings;
+        private readonly ISettingsHelper _settingsHelper;
         private PhoneNumberUtil _phoneUtil;
-        public SMSHelper(IOptions<AppSettings> appSettings)
+        public SMSHelper(ISettingsHelper settingsHelper)
         {
-            _appSettings = appSettings.Value;
+            _settingsHelper = settingsHelper;
             _phoneUtil = PhoneNumberUtil.GetInstance();
         }
 
         public async Task SendSMS(SMSMessage message)
         {
-            var request = GetRequestFromMessage(message);
-            await SendMessage(request);
+            var settings = (await _settingsHelper.Get()).Global.Clickatell;
+            if (settings == null || settings.ApiKey == null || settings.ApiUrl == null)
+            {
+                throw new Exception("Clickatell not set up");
+            }
+            var request = GetRequestFromMessage(message, settings);
+            await SendMessage(request, settings);
         }
 
-        private async Task SendMessage(ClickatellRequest request)
+        private async Task SendMessage(ClickatellRequest request, ClickatellSettings settings)
         {
             var requestJson = JsonConvert.SerializeObject(request);
             var payload = new StringContent(requestJson, Encoding.UTF8, "application/json");
@@ -55,9 +61,9 @@ namespace SystemChecker.Model.Helpers
 
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization =
-                        new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", _appSettings.Clickatell.ApiKey);
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", settings.ApiKey);
 
-            var response = await httpClient.PostAsync(_appSettings.Clickatell.ApiUrl, payload);
+            var response = await httpClient.PostAsync(settings.ApiUrl, payload);
             var responseMessage = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -66,12 +72,12 @@ namespace SystemChecker.Model.Helpers
             }
         }
 
-        private ClickatellRequest GetRequestFromMessage(SMSMessage message)
+        private ClickatellRequest GetRequestFromMessage(SMSMessage message, ClickatellSettings settings)
         {
             return new ClickatellRequest
             {
                 To = message.To.Select(x => FormatNumber(x)).ToArray(),
-                From = "***REMOVED***",
+                From = settings.From,
                 Text = message.Message
             };
         }

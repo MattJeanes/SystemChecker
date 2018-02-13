@@ -2,7 +2,7 @@ import { Component, forwardRef, Input, NgZone, OnDestroy, OnInit } from "@angula
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { ContactType, OptionType } from "../../app.enums";
 import { IConnString, IContact, IOption, ISettings, ISlackChannel } from "../../app.interfaces";
-import { AppService } from "../../services";
+import { AppService, UtilService } from "../../services";
 
 @Component({
     templateUrl: "./option.template.html",
@@ -83,19 +83,23 @@ export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy 
     // tslint:disable-next-line:variable-name
     private _environmentID: number = 0;
 
-    constructor(private appService: AppService, private ngZone: NgZone) { }
+    constructor(private appService: AppService, private utilService: UtilService, private ngZone: NgZone) { }
 
     public async ngOnInit() {
-        if (this.option.OptionType === OptionType.Login
-            || this.option.OptionType === OptionType.ConnString
-            || this.option.OptionType === OptionType.Environment
-            || this.option.OptionType === OptionType.Email
-            || this.option.OptionType === OptionType.Phone
-        ) {
-            this.settings = await this.appService.getSettings();
-        }
-        if (this.option.OptionType === OptionType.Slack) {
-            this.slackChannels = await this.appService.getSlackChannels();
+        try {
+            if (this.option.OptionType === OptionType.Login
+                || this.option.OptionType === OptionType.ConnString
+                || this.option.OptionType === OptionType.Environment
+                || this.option.OptionType === OptionType.Email
+                || this.option.OptionType === OptionType.Phone
+            ) {
+                this.settings = await this.appService.getSettings();
+            }
+            if (this.option.OptionType === OptionType.Slack) {
+                this.slackChannels = await this.appService.getSlackChannels();
+            }
+        } catch (e) {
+            this.utilService.alert("Failed to load option", e.toString());
         }
     }
 

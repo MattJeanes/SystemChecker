@@ -30,7 +30,6 @@ namespace SystemChecker.Model
         Task UpdateSchedule(int id);
         Task UpdateSchedule(Check check);
         Task RemoveSchedule(Check check);
-        Task<ManualRunLogger> RunManualUICheck(Check check);
         Task<List<ITrigger>> GetAllTriggers();
     }
 
@@ -44,10 +43,10 @@ namespace SystemChecker.Model
         private readonly IServiceProvider _container;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ICheckLogger _checkLogger;
+        private readonly IJobHelper _jobHelper;
         private readonly IMapper _mapper;
         public SchedulerManager(ISchedulerFactory factory, IJobFactory jobFactory, IOptions<AppSettings> appSettings, ICheckRepository checks,
-            ILogger<SchedulerManager> logger, IServiceProvider container, ILoggerFactory loggerFactory, ICheckLogger checkLogger,
-            IEncryptionHelper encryptionHelper, IMapper mapper)
+            ILogger<SchedulerManager> logger, IServiceProvider container, ILoggerFactory loggerFactory, ICheckLogger checkLogger, IJobHelper jobHelper, IMapper mapper)
         {
             _factory = factory;
             _scheduler = factory.GetScheduler().Result;
@@ -60,6 +59,7 @@ namespace SystemChecker.Model
             _container = container;
             _loggerFactory = loggerFactory;
             _checkLogger = checkLogger;
+            _jobHelper = jobHelper;
             _mapper = mapper;
         }
 
@@ -116,7 +116,7 @@ namespace SystemChecker.Model
         {
             await RemoveSchedule(check);
             if (!check.Active) { return; }
-            var type = GetJobForCheck(check);
+            var type = _jobHelper.GetJobForCheck(check);
             IDictionary<string, object> data = new Dictionary<string, object>
             {
                 ["CheckID"] = check.ID,
@@ -157,18 +157,6 @@ namespace SystemChecker.Model
             }
         }
 
-        public async Task<ManualRunLogger> RunManualUICheck(Check check)
-        {
-            var type = GetJobForCheck(check);
-            var logger = new ManualRunLogger();
-            using (var scope = _container.CreateScope())
-            {
-                var checker = _container.GetService(type) as BaseChecker;
-                await checker.Run(check, logger);
-            }
-            return logger;
-        }
-
         public async Task<List<ITrigger>> GetAllTriggers()
         {
             var allTriggerKeys = await _scheduler.GetTriggerKeys(GroupMatcher<TriggerKey>.AnyGroup());
@@ -188,21 +176,6 @@ namespace SystemChecker.Model
         private JobKey GetJobKeyForCheck(Check check)
         {
             return new JobKey($"check-{check.ID}");
-        }
-
-        private Type GetJobForCheck(Check check)
-        {
-            switch ((Enums.CheckType)check.TypeID)
-            {
-                case Enums.CheckType.WebRequest:
-                    return typeof(WebRequestChecker);
-                case Enums.CheckType.Database:
-                    return typeof(DatabaseChecker);
-                case Enums.CheckType.Ping:
-                    return typeof(PingChecker);
-                default:
-                    throw new InvalidOperationException("Invalid check type");
-            }
-        }
+        }        
     }
 }

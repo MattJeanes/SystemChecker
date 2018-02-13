@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,18 +28,18 @@ namespace SystemChecker.Model.Helpers
         private readonly IRepository<Data.Entities.Environment> _environments;
         private readonly IRepository<Contact> _contacts;
         private readonly IRepository<CheckGroup> _checkGroups;
+        private readonly IRepository<GlobalSetting> _globalSettings;
         private readonly IMapper _mapper;
-        private readonly IEncryptionHelper _encryptionHelper;
-        public SettingsHelper(IRepository<Login> logins, IRepository<ConnString> connStrings, IRepository<Data.Entities.Environment> environments, IRepository<Contact> contacts, IRepository<CheckGroup> checkGroups,
-            IMapper mapper, IEncryptionHelper encryptionHelper)
+        public SettingsHelper(IRepository<Login> logins, IRepository<ConnString> connStrings, IRepository<Data.Entities.Environment> environments,
+            IRepository<Contact> contacts, IRepository<CheckGroup> checkGroups, IRepository<GlobalSetting> globalSettings, IMapper mapper)
         {
             _logins = logins;
             _connStrings = connStrings;
             _environments = environments;
             _contacts = contacts;
             _checkGroups = checkGroups;
+            _globalSettings = globalSettings;
             _mapper = mapper;
-            _encryptionHelper = encryptionHelper;
         }
         public async Task<ISettings> Get()
         {
@@ -47,6 +49,13 @@ namespace SystemChecker.Model.Helpers
             var contacts = await _contacts.GetAll().ToListAsync();
             var checkGroups = await _checkGroups.GetAll().ToListAsync();
 
+            var global = await _globalSettings.GetAll().ToListAsync();
+
+            var clickatell = await _globalSettings.Find("Clickatell");
+            var email = await _globalSettings.Find("Email");
+            var authenticationGroup = await _globalSettings.Find("AuthenticationGroup");
+            var slackToken = await _globalSettings.Find("SlackToken");
+
             var settings = new Settings
             {
                 Logins = _mapper.Map<List<LoginDTO>>(logins),
@@ -54,17 +63,14 @@ namespace SystemChecker.Model.Helpers
                 Environments = _mapper.Map<List<EnvironmentDTO>>(environments),
                 Contacts = _mapper.Map<List<ContactDTO>>(contacts),
                 CheckGroups = _mapper.Map<List<CheckGroupDTO>>(checkGroups),
+                Global = new GlobalSettings
+                {
+                    Clickatell = clickatell != null ? JsonConvert.DeserializeObject<ClickatellSettings>(clickatell.ValueJSON) : null,
+                    Email = email != null ? JsonConvert.DeserializeObject<EmailSettings>(email.ValueJSON) : null,
+                    AuthenticationGroup = authenticationGroup != null ? JsonConvert.DeserializeObject<string>(authenticationGroup.ValueJSON) : null,
+                    SlackToken = slackToken != null ? JsonConvert.DeserializeObject<string>(slackToken.ValueJSON) : null
+                }
             };
-
-            foreach (var login in settings.Logins)
-            {
-                login.Password = _encryptionHelper.Decrypt(login.Password);
-            }
-
-            foreach (var connString in settings.ConnStrings)
-            {
-                connString.Value = _encryptionHelper.Decrypt(connString.Value);
-            }
 
             return settings;
         }
@@ -75,10 +81,6 @@ namespace SystemChecker.Model.Helpers
             foreach (var connString in connStrings.Where(x => !settings.ConnStrings.Exists(y => y.ID == x.ID)))
             {
                 _connStrings.Delete(connString);
-            }
-            foreach (var connString in settings.ConnStrings)
-            {
-                connString.Value = _encryptionHelper.Encrypt(connString.Value);
             }
             _mapper.Map(settings.ConnStrings, connStrings);
             foreach (var connString in connStrings)
@@ -93,10 +95,6 @@ namespace SystemChecker.Model.Helpers
             foreach (var login in logins.Where(x => !settings.Logins.Exists(y => y.ID == x.ID)))
             {
                 _logins.Delete(login);
-            }
-            foreach (var login in settings.Logins)
-            {
-                login.Password = _encryptionHelper.Encrypt(login.Password);
             }
             _mapper.Map(settings.Logins, logins);
             foreach (var login in logins)
@@ -149,11 +147,17 @@ namespace SystemChecker.Model.Helpers
                 }
             }
 
+           ((await _globalSettings.Find("Clickatell")) ?? _globalSettings.Add(new GlobalSetting { Key = "Clickatell" })).Value = settings.Global.Clickatell;
+            ((await _globalSettings.Find("Email")) ?? _globalSettings.Add(new GlobalSetting { Key = "Email" })).Value = settings.Global.Email;
+            ((await _globalSettings.Find("AuthenticationGroup")) ?? _globalSettings.Add(new GlobalSetting { Key = "AuthenticationGroup" })).Value = settings.Global.AuthenticationGroup;
+            ((await _globalSettings.Find("SlackToken")) ?? _globalSettings.Add(new GlobalSetting { Key = "SlackToken" })).Value = settings.Global.SlackToken;
+
             await _logins.SaveChangesAsync();
             await _connStrings.SaveChangesAsync();
             await _environments.SaveChangesAsync();
             await _contacts.SaveChangesAsync();
             await _checkGroups.SaveChangesAsync();
+            await _globalSettings.SaveChangesAsync();
         }
     }
 }

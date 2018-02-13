@@ -30,8 +30,9 @@ namespace SystemChecker.Web.Controllers
         private readonly ISchedulerManager _manager;
         private readonly ISettingsHelper _settingsHelper;
         private readonly ISlackHelper _slackHelper;
+        private readonly IJobHelper _jobHelper;
         public APIController(ICheckRepository checks, IRepository<CheckResult> checkResults, ISubCheckTypeRepository subCheckTypes, ICheckTypeRepository checkTypes, ICheckNotificationTypeRepository checkNotificationTypes,
-            IRepository<ContactType> contactTypes, IMapper mapper, ISchedulerManager manager, ISettingsHelper settingsHelper, ISlackHelper slackHelper)
+            IRepository<ContactType> contactTypes, IMapper mapper, ISchedulerManager manager, ISettingsHelper settingsHelper, ISlackHelper slackHelper, IJobHelper jobHelper)
         {
             _checks = checks;
             _checkResults = checkResults;
@@ -43,6 +44,7 @@ namespace SystemChecker.Web.Controllers
             _manager = manager;
             _settingsHelper = settingsHelper;
             _slackHelper = slackHelper;
+            _jobHelper = jobHelper;
         }
 
         [HttpGet("{simpleStatus:bool?}")]
@@ -165,7 +167,7 @@ namespace SystemChecker.Web.Controllers
         public async Task<List<RunLog>> Run(int id)
         {
             var check = await _checks.GetDetails(id);
-            var logger = await _manager.RunManualUICheck(check);
+            var logger = await _jobHelper.RunManualUICheck(check);
             try
             {
                 await _checks.SaveChangesAsync();
@@ -252,7 +254,7 @@ namespace SystemChecker.Web.Controllers
                 return new
                 {
                     valid = true,
-                    next = next
+                    next
                 };
             }
             catch (Exception e)

@@ -16,17 +16,33 @@ namespace SystemChecker.Model.Helpers
     public class SlackHelper : ISlackHelper
     {
         private readonly AppSettings _appSettings;
-        private readonly SlackClient _client;
-        public SlackHelper(IOptions<AppSettings> appSettings)
+        private readonly ISettingsHelper _settingsHelper;
+        private SlackClient _client;
+        public SlackHelper(IOptions<AppSettings> appSettings, ISettingsHelper settingsHelper)
         {
             _appSettings = appSettings.Value;
-            _client = new SlackClient(_appSettings.SlackToken);
+            _settingsHelper = settingsHelper;
+        }
+
+        private async Task<SlackClient> GetClient()
+        {
+            if (_client != null) { return _client; }
+            var settings = await _settingsHelper.Get();
+            var token = settings.Global.SlackToken;
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new Exception("Slack token not setup");
+            }
+            _client = new SlackClient(token);
+            return _client;
         }
 
         public async Task<Channel[]> GetChannels()
         {
             var task = new TaskCompletionSource<Channel[]>();
-            _client.GetChannelList(response => {
+            var client = await GetClient();
+            client.GetChannelList(response =>
+            {
                 if (response.ok)
                 {
                     task.SetResult(response.channels);
@@ -42,7 +58,8 @@ namespace SystemChecker.Model.Helpers
         public async Task SendMessage(string channelID, string message)
         {
             var task = new TaskCompletionSource<bool>();
-            _client.PostMessage(response =>
+            var client = await GetClient();
+            client.PostMessage(response =>
             {
                 if (response.ok)
                 {
