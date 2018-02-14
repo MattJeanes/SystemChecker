@@ -19,7 +19,7 @@ namespace SystemChecker.Web
         public static int Main(string[] args)
         {
             bool isService = true;
-            if (Debugger.IsAttached)
+            if (Debugger.IsAttached || !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 isService = false;
             }
@@ -81,7 +81,7 @@ namespace SystemChecker.Web
 
             var host = hostBuilder.Build();
 
-            if (isService && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (isService)
             {
                 host.RunAsSchedulerService();
             }
