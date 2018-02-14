@@ -28,7 +28,6 @@ using SystemChecker.Model.Hubs;
 using SystemChecker.Model.Notifiers;
 using SystemChecker.Web.Helpers;
 using SystemChecker.Model.Data.Repositories;
-using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace SystemChecker.Web
 {
@@ -92,6 +91,7 @@ namespace SystemChecker.Web
             services.AddTransient<ICheckTypeRepository, CheckTypeRepository>();
             services.AddTransient<ISubCheckTypeRepository, SubCheckTypeRepository>();
             services.AddTransient<ICheckNotificationTypeRepository, CheckNotificationTypeRepository>();
+            services.AddTransient<IUserRepository, UserRepository>();
 
             // Other
             services.AddTransient<ISchedulerFactory, StdSchedulerFactory>();
@@ -105,6 +105,7 @@ namespace SystemChecker.Web
             services.AddTransient<ISlackHelper, SlackHelper>();
             services.AddTransient<ISMSHelper, SMSHelper>();
             services.AddTransient<IJobHelper, JobHelper>();
+            services.AddTransient<ISecurityHelper, SecurityHelper>();
 
             // Jobs
             services.AddTransient<DatabaseChecker>();

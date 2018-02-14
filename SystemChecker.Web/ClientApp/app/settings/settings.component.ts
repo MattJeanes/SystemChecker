@@ -102,7 +102,7 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
                 apiUrl: clickatell.ApiUrl,
                 from: clickatell.From,
             });
-        }1
+        }
 
         const loginGroups = this.settings.Logins.map(login => this.formBuilder.group({
             id: login.ID,
@@ -281,7 +281,7 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
                 },
                 AuthenticationGroup: model.global.authenticationGroup,
                 SlackToken: model.global.slackToken,
-            }
+            },
         };
         return settings;
     }

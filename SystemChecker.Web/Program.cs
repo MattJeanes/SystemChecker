@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SystemChecker.Model;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.AspNetCore.Server.HttpSys;
+using System.Runtime.InteropServices;
 
 namespace SystemChecker.Web
 {
@@ -60,23 +61,29 @@ namespace SystemChecker.Web
                 Directory.SetCurrentDirectory(pathToContentRoot);
             }
 
-            var host = new WebHostBuilder()
-                .UseHttpSys(x =>
+            var hostBuilder = new WebHostBuilder()
+                .UseContentRoot(pathToContentRoot)
+                .UseStartup<Startup>()
+                .UseUrls($"http://localhost:{port}");
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                hostBuilder.UseHttpSys(x =>
                 {
                     x.Authentication.Schemes = AuthenticationSchemes.NTLM | AuthenticationSchemes.Negotiate;
                     x.Authentication.AllowAnonymous = true;
-                })
-                .UseContentRoot(pathToContentRoot)
-                .UseStartup<Startup>()
-                .UseUrls($"http://localhost:{port}")
-                .Build();
-
-            isService = false; // temporary
-
-            if (isService)
+                });
+            }
+            else
             {
-                throw new InvalidOperationException("Windows service not currently supported");
-                //host.RunAsSchedulerService();
+                hostBuilder.UseKestrel();
+            }
+
+            var host = hostBuilder.Build();
+
+            if (isService && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                host.RunAsSchedulerService();
             }
             else
             {

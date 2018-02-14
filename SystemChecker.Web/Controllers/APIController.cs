@@ -14,6 +14,7 @@ using Quartz;
 using SystemChecker.Model;
 using SystemChecker.Model.Helpers;
 using SlackAPI;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SystemChecker.Web.Controllers
 {
@@ -31,8 +32,11 @@ namespace SystemChecker.Web.Controllers
         private readonly ISettingsHelper _settingsHelper;
         private readonly ISlackHelper _slackHelper;
         private readonly IJobHelper _jobHelper;
+        private readonly ISecurityHelper _securityHelper;
+        private readonly IUserRepository _users;
         public APIController(ICheckRepository checks, IRepository<CheckResult> checkResults, ISubCheckTypeRepository subCheckTypes, ICheckTypeRepository checkTypes, ICheckNotificationTypeRepository checkNotificationTypes,
-            IRepository<ContactType> contactTypes, IMapper mapper, ISchedulerManager manager, ISettingsHelper settingsHelper, ISlackHelper slackHelper, IJobHelper jobHelper)
+            IRepository<ContactType> contactTypes, IMapper mapper, ISchedulerManager manager, ISettingsHelper settingsHelper, ISlackHelper slackHelper, IJobHelper jobHelper, ISecurityHelper securityHelper,
+            IUserRepository users)
         {
             _checks = checks;
             _checkResults = checkResults;
@@ -45,6 +49,8 @@ namespace SystemChecker.Web.Controllers
             _settingsHelper = settingsHelper;
             _slackHelper = slackHelper;
             _jobHelper = jobHelper;
+            _securityHelper = securityHelper;
+            _users = users;
         }
 
         [HttpGet("{simpleStatus:bool?}")]
@@ -222,6 +228,58 @@ namespace SystemChecker.Web.Controllers
         {
             var triggers = await _manager.GetAllTriggers();
             return triggers;
+        }
+
+        [HttpPost("login")]
+        public async Task<LoginResult> Login([FromBody] LoginRequest request)
+        {
+            return await _securityHelper.Login(request, HttpContext);
+        }
+
+        [HttpGet("user")]
+        public async Task<UserDTO> GetUser()
+        {
+            var username = (string)HttpContext.Items["Username"];
+            var user = await _users.GetDetails(username);
+            if (user == null)
+            {
+                throw new Exception($"User '{username}' not found");
+            }
+            return _mapper.Map<UserDTO>(user);
+        }
+
+        [HttpPost("user")]
+        public async Task<UserDTO> EditUser([FromBody]UserDTO value)
+        {
+            var username = (string)HttpContext.Items["Username"];
+            if (value.Username != username)
+            {
+                throw new Exception("Cannot edit other users");
+            }
+
+            Model.Data.Entities.User user;
+            if (value.ID > 0)
+            {
+                user = await _users.GetDetails(value.ID);
+            }
+            else
+            {
+                user = new Model.Data.Entities.User
+                {
+                    ApiKeys = new List<ApiKey>()
+                };
+                _users.Add(user);
+            }
+
+            if (!string.IsNullOrEmpty(value.Password))
+            {
+                value.Password = SecurePasswordHasher.Hash(value.Password);
+            }
+
+            _mapper.Map(value, user);
+
+            await _users.SaveChangesAsync();
+            return await GetUser();
         }
 
         [HttpPost("cron/{validateOnly:bool?}")]

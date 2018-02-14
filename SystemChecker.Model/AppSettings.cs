@@ -12,5 +12,6 @@ namespace SystemChecker.Model
         public int ResultAggregateDays { get; set; }
         public string CleanupSchedule { get; set; }
         public string Url { get; set; }
+        public int LoginExpireAfterDays { get; set; }
     }
 }

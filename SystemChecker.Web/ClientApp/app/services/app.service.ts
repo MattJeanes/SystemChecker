@@ -1,9 +1,12 @@
-﻿import { Injectable } from "@angular/core";
-import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from "@angular/common/http";
+﻿import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from "@angular/common/http";
+import { Injectable } from "@angular/core";
 import { MatDialog } from "@angular/material";
-import { ICheck, ICheckDetail, ICheckNotificationType, ICheckResults, ICheckType, IContactType, IRunLog, ISettings, ISlackChannel, ISubCheckType } from "../app.interfaces";
+import { ICheck, ICheckDetail, ICheckNotificationType, ICheckResults, ICheckType, IContactType, ILoginResult, IRunLog, ISettings, ISlackChannel, ISubCheckType, IUser } from "../app.interfaces";
 
+import { Router } from "@angular/router";
+import { JwtHelperService } from "@auth0/angular-jwt";
 import * as moment from "moment";
+import * as store from "store";
 
 export class BaseWebService {
     constructor(private httpClient: HttpClient) { }
@@ -11,12 +14,12 @@ export class BaseWebService {
         headers?: HttpHeaders | {
             [header: string]: string | string[];
         };
-        observe?: 'body';
+        observe?: "body";
         params?: HttpParams | {
             [param: string]: string | string[];
         };
         reportProgress?: boolean;
-        responseType?: 'json';
+        responseType?: "json";
         withCredentials?: boolean;
     }): Promise<T> {
         try {
@@ -31,12 +34,12 @@ export class BaseWebService {
         headers?: HttpHeaders | {
             [header: string]: string | string[];
         };
-        observe?: 'body';
+        observe?: "body";
         params?: HttpParams | {
             [param: string]: string | string[];
         };
         reportProgress?: boolean;
-        responseType?: 'json';
+        responseType?: "json";
         withCredentials?: boolean;
     }): Promise<T> {
         try {
@@ -51,12 +54,12 @@ export class BaseWebService {
         headers?: HttpHeaders | {
             [header: string]: string | string[];
         };
-        observe?: 'body';
+        observe?: "body";
         params?: HttpParams | {
             [param: string]: string | string[];
         };
         reportProgress?: boolean;
-        responseType?: 'json';
+        responseType?: "json";
         withCredentials?: boolean;
     }): Promise<T> {
         try {
@@ -90,7 +93,7 @@ export class BaseWebService {
 @Injectable()
 export class AppService {
     private readonly baseWebService = new BaseWebService(this.httpClient);
-    constructor(private httpClient: HttpClient, private dialogService: MatDialog) { }
+    constructor(private httpClient: HttpClient, private dialogService: MatDialog, private jwtHelperService: JwtHelperService, private router: Router) { }
     public async get(id: number, simpleStatus?: boolean) {
         return await this.baseWebService.get<ICheck>(`/api/${id}` + (typeof simpleStatus !== "undefined" ? "/" + simpleStatus.toString() : ""));
     }
@@ -144,6 +147,39 @@ export class AppService {
     public async getContactTypes() {
         return await this.baseWebService.get<IContactType[]>("/api/contacttypes");
     }
+    public async login(): Promise<ILoginResult>;
+    public async login(username: string, password: string): Promise<ILoginResult>;
+    public async login(username?: string, password?: string) {
+        const result = await this.baseWebService.post<ILoginResult>("/api/login", { username, password });
+        if (result.Success) {
+            this.setToken(result.Token);
+        }
+        return result;
+    }
+    public logout() {
+        this.clearToken();
+        this.router.navigate(["/"]);
+    }
+    public async getUser() {
+        return await this.baseWebService.get<IUser>("/api/user");
+    }
+    public async editUser(user: IUser) {
+        return await this.baseWebService.post<IUser>("/api/user", user);
+    }
+    public isAuthed() {
+        const token = this.jwtHelperService.tokenGetter();
+        if (!token) { return false; }
+        try {
+            return !this.jwtHelperService.isTokenExpired(token);
+        } catch (e) {
+            return false;
+        }
+    }
+    public getUsername() {
+        if (!this.isAuthed()) { return; }
+        const data = this.jwtHelperService.decodeToken();
+        return data.username as string | undefined;
+    }
     public run(component: any, check: ICheck) {
         return this.dialogService.open(component, {
             width: "90%",
@@ -157,5 +193,12 @@ export class AppService {
     }
     public async validateCronExpression(cron: string, validateOnly?: boolean) {
         return await this.baseWebService.post<{ valid: boolean, next?: string; error?: string }>("/api/cron" + (typeof validateOnly !== "undefined" ? "/" + validateOnly.toString() : ""), cron);
+    }
+    public setToken(token: string) {
+        store.set("token", token);
+        console.log(`Set new token: ${token}`);
+    }
+    public clearToken() {
+        store.remove("token");
     }
 }

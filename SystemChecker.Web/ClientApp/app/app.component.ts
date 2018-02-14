@@ -1,11 +1,12 @@
 import { Component } from "@angular/core";
 
-import { MessageService } from "./services";
+import { MessageService, PageService } from "./services";
 
 @Component({
     selector: "systemchecker",
     templateUrl: "./app.template.html",
+    styleUrls: ["./app.style.scss"],
 })
 export class AppComponent {
-    constructor(public messageService: MessageService) { }
+    constructor(public messageService: MessageService, public pageService: PageService) { }
 }

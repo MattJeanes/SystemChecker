@@ -20,6 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Scripts\0007_UsersAndApiKeys.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="dbup" Version="4.0.0-beta0002" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.0" />

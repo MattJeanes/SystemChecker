@@ -170,3 +170,24 @@ export interface ICheckGroup {
     ID: string;
     Name: string;
 }
+
+export interface ILoginResult {
+    Success: boolean;
+    Token: string;
+    Error: string;
+}
+
+export interface IApiKey {
+    ID: number;
+    UserID: number;
+    Name: string;
+    Key: string;
+}
+
+export interface IUser {
+    ID: number;
+    Username: string;
+    Password?: string;
+    IsWindowsUser: boolean;
+    ApiKeys: IApiKey[];
+}

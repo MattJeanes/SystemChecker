@@ -65,10 +65,10 @@ namespace SystemChecker.Model.Helpers
                 CheckGroups = _mapper.Map<List<CheckGroupDTO>>(checkGroups),
                 Global = new GlobalSettings
                 {
-                    Clickatell = clickatell != null ? JsonConvert.DeserializeObject<ClickatellSettings>(clickatell.ValueJSON) : null,
-                    Email = email != null ? JsonConvert.DeserializeObject<EmailSettings>(email.ValueJSON) : null,
-                    AuthenticationGroup = authenticationGroup != null ? JsonConvert.DeserializeObject<string>(authenticationGroup.ValueJSON) : null,
-                    SlackToken = slackToken != null ? JsonConvert.DeserializeObject<string>(slackToken.ValueJSON) : null
+                    Clickatell = clickatell != null ? JsonConvert.DeserializeObject<ClickatellSettings>(clickatell.Value) : null,
+                    Email = email != null ? JsonConvert.DeserializeObject<EmailSettings>(email.Value) : null,
+                    AuthenticationGroup = authenticationGroup != null ? JsonConvert.DeserializeObject<string>(authenticationGroup.Value) : null,
+                    SlackToken = slackToken != null ? JsonConvert.DeserializeObject<string>(slackToken.Value) : null
                 }
             };
 
@@ -147,10 +147,10 @@ namespace SystemChecker.Model.Helpers
                 }
             }
 
-           ((await _globalSettings.Find("Clickatell")) ?? _globalSettings.Add(new GlobalSetting { Key = "Clickatell" })).Value = settings.Global.Clickatell;
-            ((await _globalSettings.Find("Email")) ?? _globalSettings.Add(new GlobalSetting { Key = "Email" })).Value = settings.Global.Email;
-            ((await _globalSettings.Find("AuthenticationGroup")) ?? _globalSettings.Add(new GlobalSetting { Key = "AuthenticationGroup" })).Value = settings.Global.AuthenticationGroup;
-            ((await _globalSettings.Find("SlackToken")) ?? _globalSettings.Add(new GlobalSetting { Key = "SlackToken" })).Value = settings.Global.SlackToken;
+            ((await _globalSettings.Find("Clickatell")) ?? _globalSettings.Add(new GlobalSetting { Key = "Clickatell" })).Value = JsonConvert.SerializeObject(settings.Global.Clickatell);
+            ((await _globalSettings.Find("Email")) ?? _globalSettings.Add(new GlobalSetting { Key = "Email" })).Value = JsonConvert.SerializeObject(settings.Global.Email);
+            ((await _globalSettings.Find("AuthenticationGroup")) ?? _globalSettings.Add(new GlobalSetting { Key = "AuthenticationGroup" })).Value = JsonConvert.SerializeObject(settings.Global.AuthenticationGroup);
+            ((await _globalSettings.Find("SlackToken")) ?? _globalSettings.Add(new GlobalSetting { Key = "SlackToken" })).Value = JsonConvert.SerializeObject(settings.Global.SlackToken);
 
             await _logins.SaveChangesAsync();
             await _connStrings.SaveChangesAsync();

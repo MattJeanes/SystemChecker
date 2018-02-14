@@ -33,5 +33,7 @@ namespace SystemChecker.Model.Data
         DbSet<ContactType> ContactTypes { get; set; }
         DbSet<CheckGroup> CheckGroups { get; set; }
         DbSet<GlobalSetting> GlobalSettings { get; set; }
+        DbSet<User> Users { get; set; }
+        DbSet<ApiKey> ApiKeys { get; set; }
     }
 }

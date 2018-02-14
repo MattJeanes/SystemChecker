@@ -44,6 +44,13 @@ namespace SystemChecker.Model.Data
             CreateMap<CheckGroupDTO, CheckGroup>()
                 .EqualityComparison((odto, o) => odto.ID == o.ID)
                 .ReverseMap();
+            CreateMap<UserDTO, User>()
+                .EqualityComparison((odto, o) => odto.ID == o.ID)
+                .ForMember(x => x.Password, x => x.Ignore())
+                .ReverseMap();
+            CreateMap<ApiKeyDTO, ApiKey>()
+                .EqualityComparison((odto, o) => odto.ID == o.ID)
+                .ReverseMap();
         }
     }
 }

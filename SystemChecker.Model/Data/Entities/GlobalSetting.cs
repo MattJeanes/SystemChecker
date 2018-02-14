@@ -15,10 +15,6 @@ namespace SystemChecker.Model.Data.Entities
         [Key]
         public string Key { get; set; }
 
-        [NotMapped]
-        public dynamic Value { get => JsonConvert.DeserializeObject(ValueJSON); set => ValueJSON = JsonConvert.SerializeObject(value); }
-
-        [Column("Value")]
-        public string ValueJSON { get; set; }
+        public string Value { get; set; }
     }
 }

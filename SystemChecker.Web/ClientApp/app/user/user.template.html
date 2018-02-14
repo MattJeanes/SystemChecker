@@ -1,0 +1,27 @@
+<mat-card>
+    <mat-card-content>
+        <form [formGroup]="form" novalidate>
+            <h1>API Keys</h1>
+            <button mat-raised-button color="primary" (click)="addApiKey()">Add new</button>
+            <div class="ui-g-12" formArrayName="apiKeys">
+                <div *ngFor="let apiKey of apiKeys.controls; let i=index" [formGroupName]="i">
+                    <mat-form-field class="ui-g-12 ui-lg-3 ui-xl-3">
+                        <input matInput placeholder="Name" formControlName="name">
+                    </mat-form-field>
+                    <mat-form-field class="ui-g-12 ui-lg-7 ui-xl-8">
+                        <input matInput placeholder="Key" formControlName="key">
+                    </mat-form-field>
+                    <div class="ui-g-12 ui-lg-2 ui-xl-1">
+                        <button class="full" mat-raised-button color="warn" (click)="deleteApiKey(i)">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </mat-card-content>
+    <mat-card-actions>
+        <button mat-raised-button (click)="back()" [disabled]="saving">Back</button>
+        <button mat-raised-button color="primary" (click)="updateForm()" [disabled]="form.pristine || saving">Revert</button>
+        <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid || form.pristine || saving">Save</button>
+        <button mat-raised-button color="warn" (click)="logout()">Logout</button>
+    </mat-card-actions>
+</mat-card>
