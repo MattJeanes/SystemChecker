@@ -26,6 +26,9 @@ export class LoginComponent implements OnInit {
             this.auto = true;
             const result = await this.appService.login();
             if (result.Success) { this.return(); }
+            if (result.InitRequired) {
+                this.init();
+            }
         } catch (e) {
             console.error(e);
             this.utilService.alert("Failed auto-login", e.toString());
@@ -39,6 +42,8 @@ export class LoginComponent implements OnInit {
             const result = await this.appService.login(this.username, this.password);
             if (result.Success) {
                 this.return();
+            } else if (result.InitRequired) {
+                this.init();
             } else {
                 throw new Error(result.Error);
             }
@@ -54,5 +59,13 @@ export class LoginComponent implements OnInit {
         } else {
             this.router.navigate(["/"]);
         }
+    }
+
+    private init() {
+        this.router.navigate(["/init"], {
+            queryParams: {
+                return: this.returnUrl,
+            },
+        });
     }
 }

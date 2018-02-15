@@ -38,7 +38,7 @@ namespace SystemChecker.Web.Helpers
             if (
                 !context.Request.Path.StartsWithSegments(new PathString("/api")) // Allow calls not to the api through
                 || context.Request.Path.StartsWithSegments(new PathString("/api/login")) // Also the login api
-                || context.Request.Path.StartsWithSegments(new PathString("/api/auth")) // And the auth api
+                || context.Request.Path.StartsWithSegments(new PathString("/api/init")) // And the init api
                 )
             {
                 await _next(context);

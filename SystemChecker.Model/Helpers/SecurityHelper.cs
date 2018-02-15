@@ -78,6 +78,14 @@ namespace SystemChecker.Model.Helpers
                 else
                 {
                     user = await AutoLogin(result, context);
+                    if (user == null)
+                    {
+                        var anyUsers = await _users.GetAll().AnyAsync(x => !x.IsWindowsUser);
+                        if (!anyUsers)
+                        {
+                            result.InitRequired = true;
+                        }
+                    }
                 }
             }
             else
@@ -149,7 +157,7 @@ namespace SystemChecker.Model.Helpers
         public async Task<string> GetToken(string username)
         {
             var user = await _users.GetByUsername(username);
-            if(user == null)
+            if (user == null)
             {
                 throw new Exception("User not found");
             }

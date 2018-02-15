@@ -175,6 +175,7 @@ export interface ILoginResult {
     Success: boolean;
     Token: string;
     Error: string;
+    InitRequired: boolean;
 }
 
 export interface IApiKey {
@@ -190,4 +191,13 @@ export interface IUser {
     Password?: string;
     IsWindowsUser: boolean;
     ApiKeys: IApiKey[];
+}
+
+export interface IInitRequest {
+    Username: string;
+    Password: string;
+}
+
+export interface IInitResult {
+    Required: boolean;
 }

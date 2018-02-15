@@ -1,7 +1,11 @@
 ﻿import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { MatDialog } from "@angular/material";
-import { ICheck, ICheckDetail, ICheckNotificationType, ICheckResults, ICheckType, IContactType, ILoginResult, IRunLog, ISettings, ISlackChannel, ISubCheckType, IUser } from "../app.interfaces";
+import {
+    ICheck, ICheckDetail, ICheckNotificationType, ICheckResults, ICheckType,
+    IContactType, IInitRequest, IInitResult, ILoginResult, IRunLog, ISettings,
+    ISlackChannel, ISubCheckType, IUser
+} from "../app.interfaces";
 
 import { Router } from "@angular/router";
 import { JwtHelperService } from "@auth0/angular-jwt";
@@ -165,6 +169,12 @@ export class AppService {
     }
     public async editUser(user: IUser) {
         return await this.baseWebService.post<IUser>("/api/user", user);
+    }
+    public async getInit() {
+        return await this.baseWebService.get<IInitResult>("/api/init");
+    }
+    public async setInit(initRequest: IInitRequest) {
+        return await this.baseWebService.post<IInitResult>("/api/init", initRequest);
     }
     public isAuthed() {
         const token = this.jwtHelperService.tokenGetter();

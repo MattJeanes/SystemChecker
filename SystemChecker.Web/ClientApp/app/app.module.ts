@@ -24,6 +24,7 @@ import { PageNotFoundComponent } from "./errors/not-found.component";
 import { LoginComponent } from "./login/login.component";
 import { SettingsComponent } from "./settings/settings.component";
 import { UserComponent } from "./user/user.component";
+import { InitComponent } from "./init/init.component";
 
 import {
     AppService,
@@ -72,8 +73,9 @@ const routes: Routes = [
     { path: "edit/:id/:copy", component: EditComponent, data: { title: "Copy Check" } },
     { path: "settings", component: SettingsComponent, data: { title: "Settings" } },
     { path: "details/:id", component: DetailsComponent, data: { title: "Details" } },
-    { path: "login", component: LoginComponent, data: { title: "Login" } },
+    { path: "login", component: LoginComponent, data: { title: "Login", noDashboardLink: true } },
     { path: "user", component: UserComponent, data: { title: "User" } },
+    { path: "init", component: InitComponent, data: { title: "SystemChecker Init", noDashboardLink: true } },
     { path: "**", component: PageNotFoundComponent, data: { title: "Not Found" } },
 ];
 
@@ -83,7 +85,7 @@ routes.forEach(x => {
     }
     x.canDeactivate.push(CanDeactivateGuard);
 
-    if (x.path === "login") { return; }
+    if (x.path === "login" || x.path == "init") { return; }
     if (!x.canActivate) {
         x.canActivate = [];
     }
@@ -135,6 +137,7 @@ routes.forEach(x => {
         DetailsComponent,
         LoginComponent,
         UserComponent,
+        InitComponent,
         Autosize,
     ],
     exports: [

@@ -14,7 +14,6 @@ using Quartz;
 using SystemChecker.Model;
 using SystemChecker.Model.Helpers;
 using SlackAPI;
-using Microsoft.AspNetCore.Authorization;
 
 namespace SystemChecker.Web.Controllers
 {
@@ -280,6 +279,38 @@ namespace SystemChecker.Web.Controllers
 
             await _users.SaveChangesAsync();
             return await GetUser();
+        }
+
+        [HttpGet("init")]
+        public async Task<InitResult> GetInit()
+        {
+            var result = new InitResult();
+
+            var anyUsers = await _users.GetAll().AnyAsync(x => !x.IsWindowsUser);
+            result.Required = !anyUsers;
+
+            return result;
+        }
+
+        [HttpPost("init")]
+        public async Task<InitResult> SetInit([FromBody]InitRequest request)
+        {
+            var result = new InitResult();
+
+            if (string.IsNullOrWhiteSpace(request.Username))
+            {
+                throw new Exception("Username required");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Password))
+            {
+                throw new Exception("Password required");
+            }
+
+            var user = await _securityHelper.CreateUser(request.Username, request.Password);
+            result.Required = false;
+
+            return result;
         }
 
         [HttpPost("cron/{validateOnly:bool?}")]

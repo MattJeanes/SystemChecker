@@ -1,14 +1,16 @@
 <mat-card>
     <mat-card-content>
-        <h1 *ngIf="auto">Attempting automatic authentication..</h1>
+        <h1 *ngIf="auto">Please wait..</h1>
         <div *ngIf="!auto" class="ui-g">
-            <mat-form-field class="ui-g-12 ui-lg-6">
+            <mat-form-field class="ui-g-12 ui-lg-5 ui-xl-5">
                 <input matInput placeholder="Username" [(ngModel)]="username">
             </mat-form-field>
-            <mat-form-field class="ui-g-12 ui-lg-6">
-                <input matInput placeholder="Password" [(ngModel)]="password">
+            <mat-form-field class="ui-g-12 ui-lg-5 ui-xl-6">
+                <input matInput type="password" placeholder="Password" [(ngModel)]="password">
             </mat-form-field>
-            <button mat-raised-button color="accent" (click)="login()">Login</button>
+            <div class="ui-g-12 ui-lg-2 ui-xl-1">
+                <button class="full" mat-raised-button color="accent" (click)="login()">Login</button>
+            </div>
         </div>
     </mat-card-content>
 </mat-card>

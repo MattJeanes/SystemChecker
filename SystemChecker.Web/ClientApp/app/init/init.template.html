@@ -1,0 +1,22 @@
+<mat-card>
+    <mat-card-content>
+        <h1 *ngIf="loading">Please wait..</h1>
+        <div *ngIf="!loading" class="ui-g">
+            <p>Welcome to the SystemChecker. Windows Authentication was not available and there are no users in the database so you must create one to continue.</p>
+            <div class="ui-g-12">
+                <mat-form-field class="ui-g-12 ui-lg-4 ui-xl-5">
+                    <input matInput placeholder="Username" [(ngModel)]="username">
+                </mat-form-field>
+                <mat-form-field class="ui-g-12 ui-lg-3 ui-xl-3">
+                    <input matInput type="password" placeholder="Password" [(ngModel)]="password">
+                </mat-form-field>
+                <mat-form-field class="ui-g-12 ui-lg-3 ui-xl-3">
+                    <input matInput type="password" placeholder="Confirm Password" [(ngModel)]="confirmPassword">
+                </mat-form-field>
+                <div class="ui-g-12 ui-lg-2 ui-xl-1">
+                    <button class="full" mat-raised-button color="accent" [disabled]="!username || !password || !confirmPassword || password!==confirmPassword" (click)="create()">Create</button>
+                </div>
+            </div>
+        </div>
+    </mat-card-content>
+</mat-card>
