@@ -10,7 +10,7 @@
   "profiles": {
     "Run (No Scheduler)": {
       "commandName": "Project",
-      "commandLineArgs": "--port 51114 --no-scheduler",
+      "commandLineArgs": "--no-scheduler",
       "launchBrowser": true,
       "environmentVariables": {
         "ConnectionStrings:SystemChecker": "***REMOVED***",
@@ -20,7 +20,7 @@
     },
     "Run (With Scheduler)": {
       "commandName": "Project",
-      "commandLineArgs": "--port 51114",
+      "commandLineArgs": "",
       "launchBrowser": true,
       "environmentVariables": {
         "ConnectionStrings:SystemChecker": "***REMOVED***",

@@ -26,7 +26,7 @@ namespace SystemChecker.Web
 
             var app = new CommandLineApplication();
             var console = app.Option("-c|--console", "Launch in console mode", CommandOptionType.NoValue);
-            var port = 5000;
+            int? port = null;
             var portArgument = app.Option("-p|--port", "Port to host on", CommandOptionType.SingleValue);
             var help = app.Option("-? | -h | --help", "Show help information", CommandOptionType.NoValue);
             var noScheduler = app.Option("-n|--no-scheduler", "Launch without scheduler running", CommandOptionType.NoValue);
@@ -46,10 +46,15 @@ namespace SystemChecker.Web
 
             if (portArgument.Value() != null)
             {
-                if (!int.TryParse(portArgument.Value(), out port))
+                if (!int.TryParse(portArgument.Value(), out var portTmp))
                 {
                     Console.WriteLine("Invalid port");
                     return 1;
+                }
+                else
+                {
+                    port = portTmp;
+                    Console.WriteLine($"Using port {port}");
                 }
             }
 
@@ -63,8 +68,7 @@ namespace SystemChecker.Web
 
             var hostBuilder = new WebHostBuilder()
                 .UseContentRoot(pathToContentRoot)
-                .UseStartup<Startup>()
-                .UseUrls($"http://localhost:{port}");
+                .UseStartup<Startup>();
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -77,6 +81,11 @@ namespace SystemChecker.Web
             else
             {
                 hostBuilder.UseKestrel();
+            }
+
+            if (port.HasValue)
+            {
+                hostBuilder.UseUrls($"http://localhost:{port}");
             }
 
             var host = hostBuilder.Build();
