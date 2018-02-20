@@ -14,6 +14,7 @@ namespace SystemChecker.Web.Helpers
         public string ServiceName => "SystemChecker";
         private readonly ISchedulerManager _schedulerManager;
         private readonly IWebHost _host;
+        private bool stopRequestedByWindows;
         public SchedulerWebHostService(IWebHost host)
         {
             _schedulerManager = host.Services.GetRequiredService<ISchedulerManager>();
@@ -22,14 +23,25 @@ namespace SystemChecker.Web.Helpers
 
         public void Start(string[] args, ServiceStoppedCallback callback)
         {
-            _schedulerManager.Start();
-            _host.StartAsync();
+            _host
+               .Services
+               .GetRequiredService<IApplicationLifetime>()
+               .ApplicationStopped
+               .Register(() =>
+               {
+                   if (stopRequestedByWindows == false)
+                   {
+                       serviceStoppedCallback();
+                   }
+               });
+
+            _host.Start();
         }
 
         public void Stop()
         {
-            _schedulerManager.Stop().Wait();
-            _host.StopAsync().Wait();
+            stopRequestedByWindows = true;
+            _host.Dispose();
         }
     }
 
