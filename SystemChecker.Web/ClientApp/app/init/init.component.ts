@@ -36,7 +36,7 @@ export class InitComponent implements OnInit {
             const result = await this.appService.setInit({
                 Username: this.username,
                 Password: this.password,
-            })
+            });
             if (!result.Required) {
                 this.return();
             }

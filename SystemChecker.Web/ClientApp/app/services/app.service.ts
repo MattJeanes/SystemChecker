@@ -4,7 +4,7 @@ import { MatDialog } from "@angular/material";
 import {
     ICheck, ICheckDetail, ICheckNotificationType, ICheckResults, ICheckType,
     IContactType, IInitRequest, IInitResult, ILoginResult, IRunLog, ISettings,
-    ISlackChannel, ISubCheckType, IUser
+    ISlackChannel, ISubCheckType, IUser,
 } from "../app.interfaces";
 
 import { Router } from "@angular/router";

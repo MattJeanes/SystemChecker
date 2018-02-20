@@ -21,10 +21,10 @@ import { DashboardComponent } from "./dashboard/dashboard.component";
 import { DetailsComponent } from "./details/details.component";
 import { EditComponent } from "./edit/edit.component";
 import { PageNotFoundComponent } from "./errors/not-found.component";
+import { InitComponent } from "./init/init.component";
 import { LoginComponent } from "./login/login.component";
 import { SettingsComponent } from "./settings/settings.component";
 import { UserComponent } from "./user/user.component";
-import { InitComponent } from "./init/init.component";
 
 import {
     AppService,
@@ -85,7 +85,7 @@ routes.forEach(x => {
     }
     x.canDeactivate.push(CanDeactivateGuard);
 
-    if (x.path === "login" || x.path == "init") { return; }
+    if (x.path === "login" || x.path === "init") { return; }
     if (!x.canActivate) {
         x.canActivate = [];
     }
