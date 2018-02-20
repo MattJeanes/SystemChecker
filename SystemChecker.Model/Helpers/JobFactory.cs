@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Quartz;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 
 namespace SystemChecker.Model.Helpers
 {
@@ -14,7 +15,7 @@ namespace SystemChecker.Model.Helpers
     {
         private readonly IServiceProvider _container;
         private readonly ILogger _logger;
-        private Dictionary<IJob, IServiceScope> _scopes = new Dictionary<IJob, IServiceScope>();
+        private ConcurrentDictionary<IJob, IServiceScope> _scopes = new ConcurrentDictionary<IJob, IServiceScope>();
         public JobFactory(IServiceProvider container, ILogger<JobFactory> logger)
         {
             _container = container;
@@ -26,7 +27,7 @@ namespace SystemChecker.Model.Helpers
             {
                 var scope = _container.CreateScope();
                 var job = scope.ServiceProvider.GetRequiredService(bundle.JobDetail.JobType) as IJob;
-                _scopes[job] = scope;
+                _scopes.TryAdd(job, scope);
                 return job;
             }
             catch (Exception e)
@@ -39,8 +40,8 @@ namespace SystemChecker.Model.Helpers
         public void ReturnJob(IJob job)
         {
             (job as IDisposable)?.Dispose();
-            _scopes[job]?.Dispose();
-            _scopes.Remove(job);
+            _scopes.TryRemove(job, out var serviceScope);
+            serviceScope?.Dispose();
         }
     }
 }
