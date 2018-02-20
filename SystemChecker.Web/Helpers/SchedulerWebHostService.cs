@@ -21,7 +21,7 @@ namespace SystemChecker.Web.Helpers
             _host = host;
         }
 
-        public void Start(string[] args, ServiceStoppedCallback callback)
+        public void Start(string[] args, ServiceStoppedCallback serviceStoppedCallback)
         {
             _host
                .Services
