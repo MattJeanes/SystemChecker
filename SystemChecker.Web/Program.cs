@@ -11,6 +11,7 @@ using SystemChecker.Model;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.AspNetCore.Server.HttpSys;
 using System.Runtime.InteropServices;
+using System.Reflection;
 
 namespace SystemChecker.Web
 {
@@ -18,14 +19,9 @@ namespace SystemChecker.Web
     {
         public static int Main(string[] args)
         {
-            bool isService = true;
-            if (Debugger.IsAttached || !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                isService = false;
-            }
-
+            var isService = false;
             var app = new CommandLineApplication();
-            var console = app.Option("-c|--console", "Launch in console mode", CommandOptionType.NoValue);
+            var service = app.Option("-s|--service", "Launch in service mode", CommandOptionType.NoValue);
             int? port = null;
             var portArgument = app.Option("-p|--port", "Port to host on", CommandOptionType.SingleValue);
             var help = app.Option("-? | -h | --help", "Show help information", CommandOptionType.NoValue);
@@ -39,9 +35,16 @@ namespace SystemChecker.Web
                 return 0;
             }
 
-            if (console.Value() != null)
+            if (service.Value() != null)
             {
-                isService = false;
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    Console.WriteLine("Running as a service only available on Windows");
+                }
+                else
+                {
+                    isService = true;
+                }
             }
 
             if (portArgument.Value() != null)
@@ -61,9 +64,9 @@ namespace SystemChecker.Web
             var pathToContentRoot = Directory.GetCurrentDirectory();
             if (isService)
             {
-                var pathToExe = Process.GetCurrentProcess().MainModule.FileName;
-                pathToContentRoot = Path.GetDirectoryName(pathToExe);
-                Directory.SetCurrentDirectory(pathToContentRoot);
+                var uri = new UriBuilder(Assembly.GetExecutingAssembly().CodeBase);
+                var path = Path.GetDirectoryName(Uri.UnescapeDataString(uri.Path));
+                Directory.SetCurrentDirectory(path);
             }
 
             var hostBuilder = new WebHostBuilder()
