@@ -24,8 +24,8 @@ namespace SystemChecker.Model
 {
     public interface ISchedulerManager
     {
-        void Start();
-        void Stop();
+        Task Start();
+        Task Stop();
         Task UpdateSchedules();
         Task UpdateSchedule(int id);
         Task UpdateSchedule(Check check);
@@ -63,16 +63,16 @@ namespace SystemChecker.Model
             _mapper = mapper;
         }
 
-        public void Start()
+        public async Task Start()
         {
-            _scheduler.Start().Wait();
-            UpdateSchedules().Wait();
-            SetupMaintenanceJobs().Wait();
+            await _scheduler.Start();
+            await UpdateSchedules();
+            await SetupMaintenanceJobs();
         }
 
-        public void Stop()
+        public async Task Stop()
         {
-            _scheduler.Shutdown(true).Wait();
+            await _scheduler.Shutdown(true);
         }
 
         public async Task SetupMaintenanceJobs()
@@ -176,6 +176,6 @@ namespace SystemChecker.Model
         private JobKey GetJobKeyForCheck(Check check)
         {
             return new JobKey($"check-{check.ID}");
-        }        
+        }
     }
 }

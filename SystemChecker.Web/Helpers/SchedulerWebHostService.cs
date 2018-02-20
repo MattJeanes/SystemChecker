@@ -13,19 +13,23 @@ namespace SystemChecker.Web.Helpers
     {
         public string ServiceName => "SystemChecker";
         private readonly ISchedulerManager _schedulerManager;
+        private readonly IWebHost _host;
         public SchedulerWebHostService(IWebHost host)
         {
             _schedulerManager = host.Services.GetRequiredService<ISchedulerManager>();
+            _host = host;
         }
 
         public void Start(string[] args, ServiceStoppedCallback callback)
         {
             _schedulerManager.Start();
+            _host.StartAsync();
         }
 
         public void Stop()
         {
-            _schedulerManager.Stop();
+            _schedulerManager.Stop().Wait();
+            _host.StopAsync().Wait();
         }
     }
 
