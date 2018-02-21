@@ -86,10 +86,6 @@ namespace SystemChecker.Web
                 {
                     var env = hostingContext.HostingEnvironment;
                     var loggingConfiguration = hostingContext.Configuration.GetSection("Logging");
-                    if (loggingConfiguration?.Value == null)
-                    {
-                        throw new ArgumentNullException(nameof(loggingConfiguration), "Logging configuration not found, check appsettings.json and current directory");
-                    }
                     logging.AddConfiguration(loggingConfiguration);
                     logging.AddConsole();
                     logging.AddDebug();
