@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using SystemChecker.Model;
@@ -17,10 +18,10 @@ namespace SystemChecker.Web.Helpers
         private readonly ILogger _logger;
         private readonly IWebHost _host;
         private bool stopRequestedByWindows;
-        public SchedulerWebHostService(IWebHost host)
+        public SchedulerWebHostService(IWebHost host, ILogger logger)
         {
             _schedulerManager = host.Services.GetRequiredService<ISchedulerManager>();
-            _logger = host.Services.GetRequiredService<ILogger<SchedulerWebHostService>>();
+            _logger = logger;
             _host = host;
         }
 
@@ -70,16 +71,24 @@ namespace SystemChecker.Web.Helpers
     {
         public static void RunAsSchedulerService(this IWebHost host)
         {
-            var logger = host.Services.GetRequiredService<ILogger>();
+            var loggerFactory = new LoggerFactory();
+            loggerFactory.AddConsole();
+            loggerFactory.AddFile("logs/systemchecker-debug-{Date}.log", LogLevel.Debug);
+            var logger = loggerFactory.CreateLogger<SchedulerWebHostService>();
+            logger.LogInformation(Directory.GetCurrentDirectory());
             try
             {
-                var webHostService = new SchedulerWebHostService(host);
+                var webHostService = new SchedulerWebHostService(host, logger);
                 var serviceHost = new Win32ServiceHost(webHostService);
                 serviceHost.Run();
             }
             catch (Exception e)
             {
                 logger.LogError(e, "Failed to run scheduler service");
+            }
+            finally
+            {
+                loggerFactory.Dispose();
             }
         }
     }
