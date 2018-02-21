@@ -42,7 +42,6 @@ namespace SystemChecker.Web.Helpers
 
         public void Stop()
         {
-            _logger.LogInformation("Stopping service");
             stopRequestedByWindows = true;
             _host.Dispose();
         }
