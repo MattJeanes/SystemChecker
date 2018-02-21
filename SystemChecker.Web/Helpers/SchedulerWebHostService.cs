@@ -42,6 +42,7 @@ namespace SystemChecker.Web.Helpers
                });
 
             _host.Start();
+            _schedulerManager.Start().Wait();
         }
 
         public void Stop()
@@ -49,6 +50,7 @@ namespace SystemChecker.Web.Helpers
             _logger.LogInformation("Stop requested by Windows");
             stopRequestedByWindows = true;
             _host.Dispose();
+            _schedulerManager.Stop().Wait();
         }
     }
 
