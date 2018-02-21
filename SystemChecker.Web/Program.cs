@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Threading;
 
 namespace SystemChecker.Web
 {
@@ -112,21 +113,34 @@ namespace SystemChecker.Web
             }
 
             var host = hostBuilder.Build();
+            var logger = host.Services.GetRequiredService<ILogger<Program>>();
             try
             {
                 if (isService)
                 {
+                    logger.LogInformation("Starting as service");
                     host.RunAsSchedulerService();
                 }
                 else
                 {
                     if (noScheduler.Value() == null)
                     {
+                        logger.LogInformation("Starting with scheduler");
                         var schedulerManager = host.Services.GetRequiredService<ISchedulerManager>();
                         await schedulerManager.Start();
                     }
+                    else
+                    {
+                        logger.LogInformation("Starting normally");
+                    }
                     host.Run();
                 }
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Fatal error");
+                Thread.Sleep(1000); // allow time to flush logs in the event of a crash
+                return 1;
             }
             finally
             {
