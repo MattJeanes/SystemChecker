@@ -84,6 +84,10 @@ namespace SystemChecker.Web
                 {
                     var env = hostingContext.HostingEnvironment;
                     var loggingConfiguration = hostingContext.Configuration.GetSection("Logging");
+                    if (loggingConfiguration?.Value == null)
+                    {
+                        throw new ArgumentNullException(nameof(loggingConfiguration), "Logging configuration not found, check appsettings.json and current directory");
+                    }
                     logging.AddConfiguration(loggingConfiguration);
                     logging.AddConsole();
                     logging.AddDebug();
@@ -112,7 +116,25 @@ namespace SystemChecker.Web
                 hostBuilder.UseUrls($"http://localhost:{port}");
             }
 
-            var host = hostBuilder.Build();
+            IWebHost host;
+            try
+            {
+                host = hostBuilder.Build();
+            }
+            catch (Exception e)
+            {
+                var critLogger = new LoggerFactory()
+                    .AddFile("logs/systemchecker-critical-{Date}.log")
+                    .AddDebug()
+                    .AddConsole()
+                    .CreateLogger<Program>();
+
+                critLogger.LogInformation($"Current directory: {Directory.GetCurrentDirectory()}");
+                critLogger.LogError(e, "Critical failure in host build");
+                Thread.Sleep(1000); // allow time to flush logs in the event of a crash
+                return 1;
+            }
+
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
             try
             {
@@ -141,10 +163,6 @@ namespace SystemChecker.Web
                 logger.LogError(e, "Fatal error");
                 Thread.Sleep(1000); // allow time to flush logs in the event of a crash
                 return 1;
-            }
-            finally
-            {
-                host.Dispose();
             }
 
             return 0;
