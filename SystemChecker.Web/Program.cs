@@ -12,12 +12,14 @@ using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.AspNetCore.Server.HttpSys;
 using System.Runtime.InteropServices;
 using System.Reflection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace SystemChecker.Web
 {
     public class Program
     {
-        public static int Main(string[] args)
+        public static async Task<int> Main(string[] args)
         {
             var isService = false;
             var app = new CommandLineApplication();
@@ -71,6 +73,25 @@ namespace SystemChecker.Web
 
             var hostBuilder = new WebHostBuilder()
                 .UseContentRoot(pathToContentRoot)
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    var env = hostingContext.HostingEnvironment;
+                    config.SetBasePath(env.ContentRootPath)
+                        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                        .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+                    config.AddEnvironmentVariables();
+                })
+                .ConfigureLogging((hostingContext, logging) =>
+                {
+                    var env = hostingContext.HostingEnvironment;
+                    logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+                    logging.AddConsole();
+                    logging.AddDebug();
+                    if (!env.IsDevelopment())
+                    {
+                        logging.AddFile("logs/systemchecker-{Date}.log", LogLevel.Debug);
+                    }
+                })
                 .UseStartup<Startup>();
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -102,10 +123,12 @@ namespace SystemChecker.Web
                 if (noScheduler.Value() == null)
                 {
                     var schedulerManager = host.Services.GetRequiredService<ISchedulerManager>();
-                    schedulerManager.Start();
+                    await schedulerManager.Start();
                 }
                 host.Run();
             }
+            host.Dispose();
+            
             return 0;
         }
     }

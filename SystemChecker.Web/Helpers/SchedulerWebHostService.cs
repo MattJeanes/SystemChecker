@@ -71,10 +71,7 @@ namespace SystemChecker.Web.Helpers
     {
         public static void RunAsSchedulerService(this IWebHost host)
         {
-            var loggerFactory = new LoggerFactory();
-            loggerFactory.AddConsole();
-            loggerFactory.AddFile("logs/systemchecker-debug-{Date}.log", LogLevel.Debug);
-            var logger = loggerFactory.CreateLogger<SchedulerWebHostService>();
+            var logger = host.Services.GetRequiredService<ILogger<SchedulerWebHostService>>();
             logger.LogInformation(Directory.GetCurrentDirectory());
             try
             {
@@ -85,10 +82,6 @@ namespace SystemChecker.Web.Helpers
             catch (Exception e)
             {
                 logger.LogError(e, "Failed to run scheduler service");
-            }
-            finally
-            {
-                loggerFactory.Dispose();
             }
         }
     }

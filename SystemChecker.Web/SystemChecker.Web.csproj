@@ -4,6 +4,7 @@
     <IsPackable>true</IsPackable>
     <Version>1.0.0-dev</Version>
     <TypeScriptToolsVersion>2.4</TypeScriptToolsVersion>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <WarningsAsErrors>NU1605</WarningsAsErrors>
