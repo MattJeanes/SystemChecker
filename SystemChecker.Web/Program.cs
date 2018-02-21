@@ -66,9 +66,7 @@ namespace SystemChecker.Web
             var pathToContentRoot = Directory.GetCurrentDirectory();
             if (isService)
             {
-                var uri = new UriBuilder(Assembly.GetExecutingAssembly().CodeBase);
-                var path = Path.GetDirectoryName(Uri.UnescapeDataString(uri.Path));
-                Directory.SetCurrentDirectory(path);
+                Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
             }
 
             var hostBuilder = new WebHostBuilder()
@@ -84,12 +82,13 @@ namespace SystemChecker.Web
                 .ConfigureLogging((hostingContext, logging) =>
                 {
                     var env = hostingContext.HostingEnvironment;
-                    logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+                    var loggingConfiguration = hostingContext.Configuration.GetSection("Logging");
+                    logging.AddConfiguration(loggingConfiguration);
                     logging.AddConsole();
                     logging.AddDebug();
                     if (!env.IsDevelopment())
                     {
-                        logging.AddFile("logs/systemchecker-{Date}.log", LogLevel.Debug);
+                        logging.AddFile(loggingConfiguration);
                     }
                 })
                 .UseStartup<Startup>();
@@ -113,22 +112,27 @@ namespace SystemChecker.Web
             }
 
             var host = hostBuilder.Build();
-
-            if (isService)
+            try
             {
-                host.RunAsSchedulerService();
-            }
-            else
-            {
-                if (noScheduler.Value() == null)
+                if (isService)
                 {
-                    var schedulerManager = host.Services.GetRequiredService<ISchedulerManager>();
-                    await schedulerManager.Start();
+                    host.RunAsSchedulerService();
                 }
-                host.Run();
+                else
+                {
+                    if (noScheduler.Value() == null)
+                    {
+                        var schedulerManager = host.Services.GetRequiredService<ISchedulerManager>();
+                        await schedulerManager.Start();
+                    }
+                    host.Run();
+                }
             }
-            host.Dispose();
-            
+            finally
+            {
+                host.Dispose();
+            }
+
             return 0;
         }
     }
