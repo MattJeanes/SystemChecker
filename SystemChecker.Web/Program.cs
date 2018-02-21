@@ -69,7 +69,7 @@ namespace SystemChecker.Web
             {
                 var path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
                 Directory.SetCurrentDirectory(path);
-                var pathToContentRoot = path;
+                pathToContentRoot = path;
             }
 
             var hostBuilder = new WebHostBuilder()
