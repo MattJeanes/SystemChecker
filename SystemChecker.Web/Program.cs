@@ -67,7 +67,9 @@ namespace SystemChecker.Web
             var pathToContentRoot = Directory.GetCurrentDirectory();
             if (isService)
             {
-                Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
+                var path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                Directory.SetCurrentDirectory(path);
+                var pathToContentRoot = path;
             }
 
             var hostBuilder = new WebHostBuilder()
