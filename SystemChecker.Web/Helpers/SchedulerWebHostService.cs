@@ -1,6 +1,7 @@
 ﻿using DasMulli.Win32.ServiceUtils;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,35 +14,55 @@ namespace SystemChecker.Web.Helpers
     {
         public string ServiceName => "SystemChecker";
         private readonly ISchedulerManager _schedulerManager;
+        private readonly ILogger _logger;
         private readonly IWebHost _host;
         private bool stopRequestedByWindows;
         public SchedulerWebHostService(IWebHost host)
         {
             _schedulerManager = host.Services.GetRequiredService<ISchedulerManager>();
+            _logger = host.Services.GetRequiredService<ILogger<SchedulerWebHostService>>();
             _host = host;
         }
 
         public void Start(string[] args, ServiceStoppedCallback serviceStoppedCallback)
         {
-            _host
-               .Services
-               .GetRequiredService<IApplicationLifetime>()
-               .ApplicationStopped
-               .Register(() =>
-               {
-                   if (stopRequestedByWindows == false)
+            try
+            {
+                _logger.LogInformation("Starting service");
+                _host
+                   .Services
+                   .GetRequiredService<IApplicationLifetime>()
+                   .ApplicationStopped
+                   .Register(() =>
                    {
-                       serviceStoppedCallback();
-                   }
-               });
+                       if (stopRequestedByWindows == false)
+                       {
+                           _logger.LogInformation("Service has stopped");
+                           serviceStoppedCallback();
+                       }
+                   });
 
-            _host.Start();
+                _host.Start();
+                _logger.LogInformation("Started service");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to start service");
+            }
         }
 
         public void Stop()
         {
-            stopRequestedByWindows = true;
-            _host.Dispose();
+            try
+            {
+                _logger.LogInformation("Stopping service");
+                stopRequestedByWindows = true;
+                _host.Dispose();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to start service");
+            }
         }
     }
 
@@ -49,9 +70,17 @@ namespace SystemChecker.Web.Helpers
     {
         public static void RunAsSchedulerService(this IWebHost host)
         {
-            var webHostService = new SchedulerWebHostService(host);
-            var serviceHost = new Win32ServiceHost(webHostService);
-            serviceHost.Run();
+            var logger = host.Services.GetRequiredService<ILogger>();
+            try
+            {
+                var webHostService = new SchedulerWebHostService(host);
+                var serviceHost = new Win32ServiceHost(webHostService);
+                serviceHost.Run();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to run scheduler service");
+            }
         }
     }
 }
