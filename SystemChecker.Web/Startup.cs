@@ -74,7 +74,7 @@ namespace SystemChecker.Web
             builder.UseSqlServer(connString);
             services.AddTransient<ICheckerContext>(_ => new CheckerContext(builder.Options));
             services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
-            services.AddTransient<IMapper>(_ => new Mapper(new MapperConfiguration(cfg =>
+            services.AddSingleton<IMapper>(_ => new Mapper(new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile<MappingProfile>();
                 cfg.AddCollectionMappers();
