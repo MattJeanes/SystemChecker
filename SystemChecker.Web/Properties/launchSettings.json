@@ -1,6 +1,6 @@
 {
   "iisSettings": {
-    "windowsAuthentication": false,
+    "windowsAuthentication": true,
     "anonymousAuthentication": true,
     "iisExpress": {
       "applicationUrl": "http://localhost:51114/",
@@ -8,13 +8,13 @@
     }
   },
   "profiles": {
-    "Run": {
-      "commandName": "Project",
+    "SystemChecker.Web": {
+      "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
+        "AppSettings:Url": "http://localhost:51114",
         "ConnectionStrings:SystemChecker": "***REMOVED***",
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "AppSettings:Url": "http://localhost:51114"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:51114/"
     }

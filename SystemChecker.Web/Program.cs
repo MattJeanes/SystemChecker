@@ -20,7 +20,7 @@ namespace SystemChecker.Web
 {
     public class Program
     {
-        public static async Task<int> Main(string[] args)
+        public static int Main(string[] args)
         {
             var pathToContentRoot = Directory.GetCurrentDirectory();
             var hostBuilder = new WebHostBuilder()
@@ -45,21 +45,10 @@ namespace SystemChecker.Web
                         logging.AddFile(loggingConfiguration);
                     }
                 })
-                .UseStartup<Startup>();
+                .UseStartup<Startup>()
+                .UseKestrel()
+                .UseIISIntegration();
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                hostBuilder.UseHttpSys(x =>
-                {
-                    x.Authentication.Schemes = AuthenticationSchemes.NTLM | AuthenticationSchemes.Negotiate;
-                    x.Authentication.AllowAnonymous = true;
-                });
-                hostBuilder.UseIISIntegration();
-            }
-            else
-            {
-                hostBuilder.UseKestrel();
-            }
 
             IWebHost host;
             try

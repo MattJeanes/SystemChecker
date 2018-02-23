@@ -189,11 +189,11 @@ namespace SystemChecker.Model.Helpers
                 result.Error = "Automatic login is only supported on Windows";
                 return null;
             }
-            var winUser = (WindowsIdentity)context.User.Identity;
-            if (winUser.IsAnonymous)
+            if (!(context.User.Identity is WindowsIdentity) || ((WindowsIdentity)context.User.Identity).IsAnonymous)
             {
                 throw new UnauthorizedAccessException("Unauthorized"); // triggers NTLM auth in browser
-            }
+            };
+            var winUser = (WindowsIdentity)context.User.Identity;
             var authenticationGroup = (await _settingsHelper.Get()).Global.AuthenticationGroup;
             if (string.IsNullOrEmpty(authenticationGroup))
             {
