@@ -19,6 +19,7 @@ using SystemChecker.Model.Data;
 using AutoMapper;
 using SystemChecker.Model.DTO;
 using Microsoft.Extensions.DependencyInjection;
+using TimeZoneConverter;
 
 namespace SystemChecker.Model
 {
@@ -46,6 +47,7 @@ namespace SystemChecker.Model
         private readonly ICheckLogger _checkLogger;
         private readonly IJobHelper _jobHelper;
         private readonly IMapper _mapper;
+        private readonly TimeZoneInfo timeZone = TZConvert.GetTimeZoneInfo("GMT Standard Time");
         public SchedulerManager(ISchedulerFactory factory, IJobFactory jobFactory, ISettingsHelper settingsHelper, ICheckRepository checks,
             ILogger<SchedulerManager> logger, IServiceProvider container, ILoggerFactory loggerFactory, ICheckLogger checkLogger, IJobHelper jobHelper, IMapper mapper)
         {
@@ -126,7 +128,7 @@ namespace SystemChecker.Model
                 {
                     var trigger = TriggerBuilder.Create()
                         .WithIdentity(GetTriggerKeyForSchedule(schedule))
-                        .WithCronSchedule(schedule.Expression)
+                        .WithCronSchedule(schedule.Expression, x => x.InTimeZone(timeZone))
                         .ForJob(job)
                         .Build();
 
@@ -183,7 +185,7 @@ namespace SystemChecker.Model
 
             var trigger = TriggerBuilder.Create()
                 .WithIdentity("cleanup")
-                .WithCronSchedule(global.CleanupSchedule)
+                .WithCronSchedule(global.CleanupSchedule, x => x.InTimeZone(timeZone))
                 .ForJob(job)
                 .Build();
 

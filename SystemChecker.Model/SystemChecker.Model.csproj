@@ -18,6 +18,7 @@
     <PackageReference Include="SlackAPI" Version="1.0.5.93" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.2.1" />
     <PackageReference Include="System.Security.Principal.Windows" Version="4.4.1" />
+    <PackageReference Include="TimeZoneConverter" Version="2.2.1" />
   </ItemGroup>
 
   <ItemGroup>
