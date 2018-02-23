@@ -24,13 +24,11 @@ namespace SystemChecker.Web.Helpers
         private readonly RequestDelegate _next;
         private readonly ISecurityHelper _securityHelper;
         private readonly IRepository<ApiKey> _apiKeys;
-        private readonly AppSettings _appSettings;
-        public AuthenticationMiddleware(RequestDelegate next, ISecurityHelper securityHelper, IRepository<ApiKey> apiKeys, IOptions<AppSettings> appSettings)
+        public AuthenticationMiddleware(RequestDelegate next, ISecurityHelper securityHelper, IRepository<ApiKey> apiKeys)
         {
             _next = next;
             _securityHelper = securityHelper;
             _apiKeys = apiKeys;
-            _appSettings = appSettings.Value;
         }
 
         public async Task Invoke(HttpContext context)

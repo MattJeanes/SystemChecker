@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
@@ -12,7 +11,6 @@ using SystemChecker.Model.Data;
 using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Data.Interfaces;
 using SystemChecker.Model.DTO;
-using SystemChecker.Model.Hubs;
 using SystemChecker.Model.Loggers;
 using SystemChecker.Model.Notifiers;
 
@@ -21,6 +19,7 @@ namespace SystemChecker.Model.Helpers
     public interface ICheckerHelper
     {
         Task<ISettings> GetSettings();
+        ICheckLogger GetCheckLogger();
         Task SaveResult(CheckResult result);
         Task RunSubChecks(Check check, ICheckLogger logger, Action<SubCheck> action);
         Task RunNotifiers(Check check, CheckResult result, ISettings settings, ICheckLogger logger);
@@ -33,26 +32,27 @@ namespace SystemChecker.Model.Helpers
         private readonly IRepository<CheckResult> _checkResults;
         private readonly ICheckRepository _checks;
         private readonly ISettingsHelper _settingsHelper;
-        private readonly IHubContext<DashboardHub> _dashboardHub;
-        private readonly IHubContext<DetailsHub> _detailsHub;
-        private readonly IHubContext<CheckHub> _checkHub;
         private readonly IServiceProvider _serviceProvider;
-        public CheckerHelper(IRepository<SubCheckType> subCheckTypes, IRepository<CheckResult> checkResults, ICheckRepository checks, IMapper mapper, ISettingsHelper settingsHelper, IHubContext<DashboardHub> dashboardHub,
-            IHubContext<DetailsHub> detailsHub, IHubContext<CheckHub> checkHub, IServiceProvider serviceProvider)
+        private readonly ICheckLogger _checkLogger;
+        public CheckerHelper(IRepository<SubCheckType> subCheckTypes, IRepository<CheckResult> checkResults, ICheckRepository checks, IMapper mapper,
+            ISettingsHelper settingsHelper, IServiceProvider serviceProvider, ICheckLogger checkLogger)
         {
             _subCheckTypes = subCheckTypes;
             _checkResults = checkResults;
             _checks = checks;
             _settingsHelper = settingsHelper;
-            _dashboardHub = dashboardHub;
-            _detailsHub = detailsHub;
-            _checkHub = checkHub;
             _serviceProvider = serviceProvider;
+            _checkLogger = checkLogger;
         }
 
         public async Task<ISettings> GetSettings()
         {
             return await _settingsHelper.Get();
+        }
+
+        public ICheckLogger GetCheckLogger()
+        {
+            return _checkLogger;
         }
 
         public async Task RunSubChecks(Check check, ICheckLogger logger, Action<SubCheck> action)
@@ -71,9 +71,10 @@ namespace SystemChecker.Model.Helpers
         {
             _checkResults.Add(result);
             await _checkResults.SaveChangesAsync();
-            await _dashboardHub.Clients.All.InvokeAsync("check", result.CheckID);
-            await _detailsHub.Clients.All.InvokeAsync("check", result.CheckID);
-            await _checkHub.Clients.All.InvokeAsync("check", result.CheckID);
+            // todo: setup for clustering
+            //await _dashboardHub.Clients.All.InvokeAsync("check", result.CheckID);
+            //await _detailsHub.Clients.All.InvokeAsync("check", result.CheckID);
+            //await _checkHub.Clients.All.InvokeAsync("check", result.CheckID);
         }
 
         public async Task RunNotifiers(Check check, CheckResult result, ISettings settings, ICheckLogger logger)

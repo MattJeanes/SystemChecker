@@ -31,13 +31,14 @@ namespace SystemChecker.Model
         Task UpdateSchedule(Check check);
         Task RemoveSchedule(Check check);
         Task<List<ITrigger>> GetAllTriggers();
+        Task UpdateCleanupJob();
     }
 
     public class SchedulerManager : ISchedulerManager
     {
         private readonly ISchedulerFactory _factory;
         private readonly IScheduler _scheduler;
-        private readonly AppSettings _appSettings;
+        private readonly ISettingsHelper _settingsHelper;
         private readonly ICheckRepository _checks;
         private readonly ILogger _logger;
         private readonly IServiceProvider _container;
@@ -45,7 +46,7 @@ namespace SystemChecker.Model
         private readonly ICheckLogger _checkLogger;
         private readonly IJobHelper _jobHelper;
         private readonly IMapper _mapper;
-        public SchedulerManager(ISchedulerFactory factory, IJobFactory jobFactory, IOptions<AppSettings> appSettings, ICheckRepository checks,
+        public SchedulerManager(ISchedulerFactory factory, IJobFactory jobFactory, ISettingsHelper settingsHelper, ICheckRepository checks,
             ILogger<SchedulerManager> logger, IServiceProvider container, ILoggerFactory loggerFactory, ICheckLogger checkLogger, IJobHelper jobHelper, IMapper mapper)
         {
             _factory = factory;
@@ -53,7 +54,7 @@ namespace SystemChecker.Model
             _scheduler.JobFactory = jobFactory;
             _scheduler.ListenerManager.AddJobListener(new GlobalJobListener(loggerFactory.CreateLogger<GlobalJobListener>()), GroupMatcher<JobKey>.AnyGroup());
             _scheduler.ListenerManager.AddSchedulerListener(new GlobalSchedulerListener(loggerFactory.CreateLogger<GlobalSchedulerListener>()));
-            _appSettings = appSettings.Value;
+            _settingsHelper = settingsHelper;
             _checks = checks;
             _logger = logger;
             _container = container;
@@ -65,32 +66,23 @@ namespace SystemChecker.Model
 
         public async Task Start()
         {
+            _logger.LogInformation("Scheduler starting");
             await _scheduler.Start();
             await UpdateSchedules();
-            await SetupMaintenanceJobs();
+            await UpdateMaintenanceJobs();
+            _logger.LogInformation("Scheduler started");
         }
 
         public async Task Stop()
         {
+            _logger.LogInformation("Scheduler stopping");
             await _scheduler.Shutdown(true);
+            _logger.LogInformation("Scheduler stopped");
         }
 
-        public async Task SetupMaintenanceJobs()
+        public async Task UpdateMaintenanceJobs()
         {
-            var job = JobBuilder.Create<CleanupJob>()
-                .WithIdentity("cleanup")
-                .Build();
-
-            await _scheduler.AddJob(job, false, true);
-
-            var trigger = TriggerBuilder.Create()
-                .WithIdentity("cleanup")
-                .WithCronSchedule(_appSettings.CleanupSchedule)
-                .ForJob(job)
-                .Build();
-
-            await _scheduler.ScheduleJob(trigger);
-            //await _scheduler.TriggerJob(new JobKey("cleanup"));
+            await UpdateCleanupJob();
         }
 
         public async Task UpdateSchedules()
@@ -120,7 +112,6 @@ namespace SystemChecker.Model
             IDictionary<string, object> data = new Dictionary<string, object>
             {
                 ["CheckID"] = check.ID,
-                ["Logger"] = _checkLogger
             };
             var job = JobBuilder.Create(type)
                 .WithIdentity(GetJobKeyForCheck(check))
@@ -166,6 +157,39 @@ namespace SystemChecker.Model
                 triggers.Add(await _scheduler.GetTrigger(triggerKey));
             }
             return triggers;
+        }
+
+        public async Task UpdateCleanupJob()
+        {
+            var global = await _settingsHelper.GetGlobal();
+
+            var key = new JobKey("cleanup");
+            var existing = await _scheduler.GetJobDetail(key);
+            if (existing != null)
+            {
+                await _scheduler.DeleteJob(existing.Key);
+            }
+            if (string.IsNullOrEmpty(global.CleanupSchedule))
+            {
+                _logger.LogWarning("Cleanup job schedule not set, cancelling job");
+                return;
+            }
+
+            var job = JobBuilder.Create<CleanupJob>()
+                .WithIdentity(key)
+                .Build();
+
+            await _scheduler.AddJob(job, false, true);
+
+            var trigger = TriggerBuilder.Create()
+                .WithIdentity("cleanup")
+                .WithCronSchedule(global.CleanupSchedule)
+                .ForJob(job)
+                .Build();
+
+            await _scheduler.ScheduleJob(trigger);
+            _logger.LogInformation($"Setup cleanup job with schedule {global.CleanupSchedule}");
+            //await _scheduler.TriggerJob(new JobKey("cleanup"));
         }
 
         private TriggerKey GetTriggerKeyForSchedule(CheckSchedule schedule)

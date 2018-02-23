@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 
 namespace SystemChecker.Model
 {
+    /// <summary>
+    /// These AppSettings can be used to override the Global Settings in the database
+    /// </summary>
     public class AppSettings
     {
-        public int ResultRetentionMonths { get; set; }
-        public int ResultAggregateDays { get; set; }
-        public string CleanupSchedule { get; set; }
         public string Url { get; set; }
-        public int LoginExpireAfterDays { get; set; }
     }
 }

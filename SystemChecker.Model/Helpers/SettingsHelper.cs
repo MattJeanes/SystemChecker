@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -19,7 +20,9 @@ namespace SystemChecker.Model.Helpers
     public interface ISettingsHelper
     {
         Task<ISettings> Get();
+        Task<GlobalSettings> GetGlobal();
         Task Set(ISettings settings);
+        Task SetGlobal(GlobalSettings settings);
     }
     public class SettingsHelper : ISettingsHelper
     {
@@ -29,9 +32,10 @@ namespace SystemChecker.Model.Helpers
         private readonly IRepository<Contact> _contacts;
         private readonly IRepository<CheckGroup> _checkGroups;
         private readonly IRepository<GlobalSetting> _globalSettings;
+        private readonly AppSettings _appSettings;
         private readonly IMapper _mapper;
         public SettingsHelper(IRepository<Login> logins, IRepository<ConnString> connStrings, IRepository<Data.Entities.Environment> environments,
-            IRepository<Contact> contacts, IRepository<CheckGroup> checkGroups, IRepository<GlobalSetting> globalSettings, IMapper mapper)
+            IRepository<Contact> contacts, IRepository<CheckGroup> checkGroups, IRepository<GlobalSetting> globalSettings, IOptions<AppSettings> appSettings, IMapper mapper)
         {
             _logins = logins;
             _connStrings = connStrings;
@@ -39,6 +43,7 @@ namespace SystemChecker.Model.Helpers
             _contacts = contacts;
             _checkGroups = checkGroups;
             _globalSettings = globalSettings;
+            _appSettings = appSettings.Value;
             _mapper = mapper;
         }
         public async Task<ISettings> Get()
@@ -49,13 +54,6 @@ namespace SystemChecker.Model.Helpers
             var contacts = await _contacts.GetAll().ToListAsync();
             var checkGroups = await _checkGroups.GetAll().ToListAsync();
 
-            var global = await _globalSettings.GetAll().ToListAsync();
-
-            var clickatell = await _globalSettings.Find("Clickatell");
-            var email = await _globalSettings.Find("Email");
-            var authenticationGroup = await _globalSettings.Find("AuthenticationGroup");
-            var slackToken = await _globalSettings.Find("SlackToken");
-
             var settings = new Settings
             {
                 Logins = _mapper.Map<List<LoginDTO>>(logins),
@@ -63,13 +61,7 @@ namespace SystemChecker.Model.Helpers
                 Environments = _mapper.Map<List<EnvironmentDTO>>(environments),
                 Contacts = _mapper.Map<List<ContactDTO>>(contacts),
                 CheckGroups = _mapper.Map<List<CheckGroupDTO>>(checkGroups),
-                Global = new GlobalSettings
-                {
-                    Clickatell = clickatell != null ? JsonConvert.DeserializeObject<ClickatellSettings>(clickatell.Value) : null,
-                    Email = email != null ? JsonConvert.DeserializeObject<EmailSettings>(email.Value) : null,
-                    AuthenticationGroup = authenticationGroup != null ? JsonConvert.DeserializeObject<string>(authenticationGroup.Value) : null,
-                    SlackToken = slackToken != null ? JsonConvert.DeserializeObject<string>(slackToken.Value) : null
-                }
+                Global = await GetGlobal()
             };
 
             return settings;
@@ -147,16 +139,53 @@ namespace SystemChecker.Model.Helpers
                 }
             }
 
-            ((await _globalSettings.Find("Clickatell")) ?? _globalSettings.Add(new GlobalSetting { Key = "Clickatell" })).Value = JsonConvert.SerializeObject(settings.Global.Clickatell);
-            ((await _globalSettings.Find("Email")) ?? _globalSettings.Add(new GlobalSetting { Key = "Email" })).Value = JsonConvert.SerializeObject(settings.Global.Email);
-            ((await _globalSettings.Find("AuthenticationGroup")) ?? _globalSettings.Add(new GlobalSetting { Key = "AuthenticationGroup" })).Value = JsonConvert.SerializeObject(settings.Global.AuthenticationGroup);
-            ((await _globalSettings.Find("SlackToken")) ?? _globalSettings.Add(new GlobalSetting { Key = "SlackToken" })).Value = JsonConvert.SerializeObject(settings.Global.SlackToken);
-
+            await SetGlobal(settings.Global);
             await _logins.SaveChangesAsync();
             await _connStrings.SaveChangesAsync();
             await _environments.SaveChangesAsync();
             await _contacts.SaveChangesAsync();
             await _checkGroups.SaveChangesAsync();
+        }
+
+        public async Task<GlobalSettings> GetGlobal()
+        {
+            var global = await _globalSettings.GetAll().ToListAsync();
+
+            var clickatell = await _globalSettings.Find("Clickatell");
+            var email = await _globalSettings.Find("Email");
+            var authenticationGroup = await _globalSettings.Find("AuthenticationGroup");
+            var slackToken = await _globalSettings.Find("SlackToken");
+            var url = await _globalSettings.Find("Url");
+            var resultRetentionMonths = await _globalSettings.Find("ResultRetentionMonths");
+            var resultAggregateDays = await _globalSettings.Find("ResultAggregateDays");
+            var cleanupSchedule = await _globalSettings.Find("CleanupSchedule");
+            var loginExpireAfterDays = await _globalSettings.Find("LoginExpireAfterDays");
+
+            return new GlobalSettings
+            {
+                Clickatell = clickatell != null ? JsonConvert.DeserializeObject<ClickatellSettings>(clickatell.Value) : null,
+                Email = email != null ? JsonConvert.DeserializeObject<EmailSettings>(email.Value) : null,
+                AuthenticationGroup = authenticationGroup != null ? JsonConvert.DeserializeObject<string>(authenticationGroup.Value) : null,
+                SlackToken = slackToken != null ? JsonConvert.DeserializeObject<string>(slackToken.Value) : null,
+                Url = string.IsNullOrEmpty(_appSettings.Url) && url != null ? JsonConvert.DeserializeObject<string>(url.Value) : _appSettings.Url,
+                ResultRetentionMonths = JsonConvert.DeserializeObject<int?>(resultRetentionMonths.Value),
+                ResultAggregateDays = JsonConvert.DeserializeObject<int?>(resultAggregateDays.Value),
+                CleanupSchedule = JsonConvert.DeserializeObject<string>(cleanupSchedule.Value),
+                LoginExpireAfterDays = JsonConvert.DeserializeObject<int>(loginExpireAfterDays.Value),
+            };
+        }
+
+        public async Task SetGlobal(GlobalSettings global)
+        {
+            ((await _globalSettings.Find("Clickatell")) ?? _globalSettings.Add(new GlobalSetting { Key = "Clickatell" })).Value = JsonConvert.SerializeObject(global.Clickatell);
+            ((await _globalSettings.Find("Email")) ?? _globalSettings.Add(new GlobalSetting { Key = "Email" })).Value = JsonConvert.SerializeObject(global.Email);
+            ((await _globalSettings.Find("AuthenticationGroup")) ?? _globalSettings.Add(new GlobalSetting { Key = "AuthenticationGroup" })).Value = JsonConvert.SerializeObject(global.AuthenticationGroup);
+            ((await _globalSettings.Find("SlackToken")) ?? _globalSettings.Add(new GlobalSetting { Key = "SlackToken" })).Value = JsonConvert.SerializeObject(global.SlackToken);
+            ((await _globalSettings.Find("Url")) ?? _globalSettings.Add(new GlobalSetting { Key = "Url" })).Value = JsonConvert.SerializeObject(global.Url);
+            ((await _globalSettings.Find("ResultRetentionMonths")) ?? _globalSettings.Add(new GlobalSetting { Key = "ResultRetentionMonths" })).Value = JsonConvert.SerializeObject(global.ResultRetentionMonths);
+            ((await _globalSettings.Find("ResultAggregateDays")) ?? _globalSettings.Add(new GlobalSetting { Key = "ResultAggregateDays" })).Value = JsonConvert.SerializeObject(global.ResultAggregateDays);
+            ((await _globalSettings.Find("CleanupSchedule")) ?? _globalSettings.Add(new GlobalSetting { Key = "CleanupSchedule" })).Value = JsonConvert.SerializeObject(global.CleanupSchedule);
+            ((await _globalSettings.Find("LoginExpireAfterDays")) ?? _globalSettings.Add(new GlobalSetting { Key = "LoginExpireAfterDays" })).Value = JsonConvert.SerializeObject(global.LoginExpireAfterDays);
             await _globalSettings.SaveChangesAsync();
         }
     }

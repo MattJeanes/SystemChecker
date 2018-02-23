@@ -22,56 +22,7 @@ namespace SystemChecker.Web
     {
         public static async Task<int> Main(string[] args)
         {
-            var isService = false;
-            var app = new CommandLineApplication();
-            var service = app.Option("-s|--service", "Launch in service mode", CommandOptionType.NoValue);
-            int? port = null;
-            var portArgument = app.Option("-p|--port", "Port to host on", CommandOptionType.SingleValue);
-            var help = app.Option("-? | -h | --help", "Show help information", CommandOptionType.NoValue);
-            var noScheduler = app.Option("-n|--no-scheduler", "Launch without scheduler running", CommandOptionType.NoValue);
-
-            app.Execute(args);
-
-            if (help.Value() != null)
-            {
-                app.ShowHelp();
-                return 0;
-            }
-
-            if (service.Value() != null)
-            {
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    Console.WriteLine("Running as a service only available on Windows");
-                }
-                else
-                {
-                    isService = true;
-                }
-            }
-
-            if (portArgument.Value() != null)
-            {
-                if (!int.TryParse(portArgument.Value(), out var portTmp))
-                {
-                    Console.WriteLine("Invalid port");
-                    return 1;
-                }
-                else
-                {
-                    port = portTmp;
-                    Console.WriteLine($"Using port {port}");
-                }
-            }
-
             var pathToContentRoot = Directory.GetCurrentDirectory();
-            if (isService)
-            {
-                var path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-                Directory.SetCurrentDirectory(path);
-                pathToContentRoot = path;
-            }
-
             var hostBuilder = new WebHostBuilder()
                 .UseContentRoot(pathToContentRoot)
                 .ConfigureAppConfiguration((hostingContext, config) =>
@@ -109,11 +60,6 @@ namespace SystemChecker.Web
                 hostBuilder.UseKestrel();
             }
 
-            if (port.HasValue)
-            {
-                hostBuilder.UseUrls($"http://localhost:{port}");
-            }
-
             IWebHost host;
             try
             {
@@ -136,25 +82,7 @@ namespace SystemChecker.Web
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
             try
             {
-                if (isService)
-                {
-                    logger.LogInformation("Starting as service");
-                    host.RunAsSchedulerService();
-                }
-                else
-                {
-                    if (noScheduler.Value() == null)
-                    {
-                        logger.LogInformation("Starting with scheduler");
-                        var schedulerManager = host.Services.GetRequiredService<ISchedulerManager>();
-                        await schedulerManager.Start();
-                    }
-                    else
-                    {
-                        logger.LogInformation("Starting normally");
-                    }
-                    host.Run();
-                }
+                host.Run();
             }
             catch (Exception e)
             {

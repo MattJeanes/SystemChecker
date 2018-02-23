@@ -28,9 +28,9 @@ namespace SystemChecker.Model.Jobs
         }
         public async Task Execute(IJobExecutionContext context)
         {
-            var checkID = context.JobDetail.JobDataMap.Get("CheckID") as int?;
-            var check = await _helper.GetDetails(checkID.Value);
-            var logger = context.JobDetail.JobDataMap.Get("Logger") as ICheckLogger;
+            var checkID = Convert.ToInt32(context.JobDetail.JobDataMap.Get("CheckID"));
+            var check = await _helper.GetDetails(checkID);
+            var logger = _helper.GetCheckLogger();
             await Run(check, logger);
             try
             {

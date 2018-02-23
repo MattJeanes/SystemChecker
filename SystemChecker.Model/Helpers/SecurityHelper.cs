@@ -37,14 +37,12 @@ namespace SystemChecker.Model.Helpers
     {
         private readonly IUserRepository _users;
         private readonly IRepository<GlobalSetting> _globalSettings;
-        private readonly AppSettings _appSettings;
         private readonly ISettingsHelper _settingsHelper;
         private readonly JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
-        public SecurityHelper(IUserRepository users, IRepository<GlobalSetting> globalSettings, IOptions<AppSettings> appSettings, ISettingsHelper settingsHelper)
+        public SecurityHelper(IUserRepository users, IRepository<GlobalSetting> globalSettings, ISettingsHelper settingsHelper)
         {
             _users = users;
             _globalSettings = globalSettings;
-            _appSettings = appSettings.Value;
             _settingsHelper = settingsHelper;
         }
 
@@ -174,11 +172,11 @@ namespace SystemChecker.Model.Helpers
 
             var key = await GetSecurityKey();
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
+            var global = await _settingsHelper.GetGlobal();
             var token = new JwtSecurityToken(
                 claims: claims,
                 notBefore: DateTime.Now,
-                expires: DateTime.Now.AddDays(_appSettings.LoginExpireAfterDays),
+                expires: DateTime.Now.AddDays(global.LoginExpireAfterDays),
                 signingCredentials: creds);
 
             return _tokenHandler.WriteToken(token);

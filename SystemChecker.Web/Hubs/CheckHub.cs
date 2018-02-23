@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SystemChecker.Model.Hubs
+namespace SystemChecker.Web.Hubs
 {
-    public class DashboardHub : Hub
+    public class CheckHub : Hub
     {
 
     }

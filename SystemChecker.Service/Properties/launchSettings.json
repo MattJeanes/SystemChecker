@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "SystemChecker.Service": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ConnectionStrings:SystemChecker": "***REMOVED***",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "AppSettings:Url": "http://localhost:51114"
+      }
+    }
+  }
+}

@@ -4,30 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
-using SystemChecker.Model.Data.Interfaces;
-using SystemChecker.Model.Data;
-using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using Quartz;
-using Quartz.Impl;
 using SystemChecker.Model;
-using Quartz.Spi;
-using SystemChecker.Model.Jobs;
-using SystemChecker.Model.Helpers;
-using SystemChecker.Model.Loggers;
-using AutoMapper.EquivalencyExpression;
-using SystemChecker.Model.Hubs;
-using SystemChecker.Model.Notifiers;
 using SystemChecker.Web.Helpers;
-using SystemChecker.Model.Data.Repositories;
+using SystemChecker.Web.Hubs;
 
 namespace SystemChecker.Web
 {
@@ -57,60 +41,7 @@ namespace SystemChecker.Web
                 });
 
             services.AddSignalR();
-
-            services.AddOptions();
-            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
-
-            // Database
-            var connString = Configuration.GetConnectionString("SystemChecker");
-            if (string.IsNullOrEmpty(connString))
-            {
-                throw new ArgumentException("ConnectionStrings:SystemChecker option not set");
-            }
-            services.AddDbContext<CheckerContext>(options =>
-            options.UseSqlServer(connString));
-
-            var builder = new DbContextOptionsBuilder<CheckerContext>();
-            builder.UseSqlServer(connString);
-            services.AddTransient<ICheckerContext>(_ => new CheckerContext(builder.Options));
-            services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
-            services.AddSingleton<IMapper>(_ => new Mapper(new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile<MappingProfile>();
-                cfg.AddCollectionMappers();
-            })));
-
-            // Repositories
-            services.AddTransient<ICheckRepository, CheckRepository>();
-            services.AddTransient<ICheckTypeRepository, CheckTypeRepository>();
-            services.AddTransient<ISubCheckTypeRepository, SubCheckTypeRepository>();
-            services.AddTransient<ICheckNotificationTypeRepository, CheckNotificationTypeRepository>();
-            services.AddTransient<IUserRepository, UserRepository>();
-
-            // Other
-            services.AddTransient<ISchedulerFactory, StdSchedulerFactory>();
-            services.AddSingleton<ISchedulerManager, SchedulerManager>();
-            services.AddTransient<IJobFactory, JobFactory>();
-            services.AddTransient<ICheckLogger, CheckLogger>();
-
-            // Helpers
-            services.AddTransient<ISettingsHelper, SettingsHelper>();
-            services.AddTransient<ICheckerHelper, CheckerHelper>();
-            services.AddTransient<ISlackHelper, SlackHelper>();
-            services.AddTransient<ISMSHelper, SMSHelper>();
-            services.AddTransient<IJobHelper, JobHelper>();
-            services.AddTransient<ISecurityHelper, SecurityHelper>();
-
-            // Jobs
-            services.AddTransient<DatabaseChecker>();
-            services.AddTransient<WebRequestChecker>();
-            services.AddTransient<PingChecker>();
-            services.AddTransient<CleanupJob>();
-
-            // Notifiers
-            services.AddTransient<SlackNotifier>();
-            services.AddTransient<EmailNotifier>();
-            services.AddTransient<SMSNotifier>();
+            services.AddSystemChecker(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -22,7 +22,12 @@ namespace SystemChecker.Model.Data
     {
         public EmailSettings Email { get; set; }
         public ClickatellSettings Clickatell { get; set; }
-        public dynamic AuthenticationGroup { get; set; }
-        public dynamic SlackToken { get; set; }
+        public string AuthenticationGroup { get; set; }
+        public string SlackToken { get; set; }
+        public string Url { get; set; }
+        public int? ResultRetentionMonths { get; set; }
+        public int? ResultAggregateDays { get; set; }
+        public string CleanupSchedule { get; set; }
+        public int LoginExpireAfterDays { get; set; }
     }
 }

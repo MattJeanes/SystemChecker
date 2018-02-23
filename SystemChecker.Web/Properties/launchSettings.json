@@ -8,23 +8,13 @@
     }
   },
   "profiles": {
-    "Run (No Scheduler)": {
+    "Run": {
       "commandName": "Project",
-      "commandLineArgs": "--no-scheduler",
       "launchBrowser": true,
       "environmentVariables": {
         "ConnectionStrings:SystemChecker": "***REMOVED***",
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "http://localhost:51114/"
-    },
-    "Run (With Scheduler)": {
-      "commandName": "Project",
-      "commandLineArgs": "",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "ConnectionStrings:SystemChecker": "***REMOVED***",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "AppSettings:Url": "http://localhost:51114"
       },
       "applicationUrl": "http://localhost:51114/"
     }

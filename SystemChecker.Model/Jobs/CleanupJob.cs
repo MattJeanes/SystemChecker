@@ -22,18 +22,29 @@ namespace SystemChecker.Model.Jobs
     {
         private readonly IRepository<CheckResult> _checkResults;
         private readonly ILogger _logger;
-        private readonly AppSettings _appSettings;
-        public CleanupJob(IRepository<CheckResult> checkResults, ILogger<CleanupJob> logger, IOptions<AppSettings> appSettings)
+        private readonly ISettingsHelper _settingsHelper;
+        public CleanupJob(IRepository<CheckResult> checkResults, ILogger<CleanupJob> logger, ISettingsHelper settingsHelper)
         {
             _checkResults = checkResults;
             _logger = logger;
-            _appSettings = appSettings.Value;
+            _settingsHelper = settingsHelper;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
+            var global = await _settingsHelper.GetGlobal();
+            if (!global.ResultAggregateDays.HasValue) {
+                _logger.LogWarning("ResultAggregateDays is unset, cannot run cleanup job");
+                return;
+            }
+            if (!global.ResultRetentionMonths.HasValue)
+            {
+                _logger.LogWarning("ResultRetentionMonths is unset, cannot run cleanup job");
+                return;
+            }
+
             var resultsToAggregate = await _checkResults.GetAll()
-                .Where(x => x.DTS < DateTime.Now.AddDays(-_appSettings.ResultAggregateDays))
+                .Where(x => x.DTS < DateTime.Now.AddDays(-global.ResultAggregateDays.Value))
                 .GroupBy(x => new { x.DTS.Hour, x.DTS.Date, x.Status, x.CheckID })
                 .Where(x => x.Count() > 1)
                 .ToListAsync();
@@ -57,7 +68,7 @@ namespace SystemChecker.Model.Jobs
             await _checkResults.SaveChangesAsync();
 
             var resultsToDelete = await _checkResults.GetAll()
-                .Where(x => x.DTS < DateTime.Now.AddMonths(-_appSettings.ResultRetentionMonths))
+                .Where(x => x.DTS < DateTime.Now.AddMonths(-global.ResultRetentionMonths.Value))
                 .ToListAsync();
 
             _checkResults.DeleteRange(resultsToDelete);

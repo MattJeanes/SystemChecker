@@ -165,6 +165,7 @@ namespace SystemChecker.Web.Controllers
         public async Task<ISettings> SetSettings([FromBody]Settings value)
         {
             await _settingsHelper.Set(value);
+            await _manager.UpdateCleanupJob();
             return await GetSettings();
         }
 
