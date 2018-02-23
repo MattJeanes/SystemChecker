@@ -54,6 +54,7 @@ namespace SystemChecker.Web
                     x.Authentication.Schemes = AuthenticationSchemes.NTLM | AuthenticationSchemes.Negotiate;
                     x.Authentication.AllowAnonymous = true;
                 });
+                hostBuilder.UseIISIntegration();
             }
             else
             {
