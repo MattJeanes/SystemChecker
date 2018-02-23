@@ -13,7 +13,6 @@ WORKDIR /build
 
 COPY . .
 COPY --from=yarn /yarn/wwwroot/dist/ ./SystemChecker.Web/wwwroot/dist/
-RUN find . -maxdepth 3 -type d -ls
 RUN dotnet restore
 RUN dotnet publish ./SystemChecker.Web/SystemChecker.Web.csproj --output /app/ --configuration Release
 
