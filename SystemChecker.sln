@@ -7,11 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SystemChecker.Web", "System
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SystemChecker.Model", "SystemChecker.Model\SystemChecker.Model.csproj", "{86B76D67-522D-44CD-8B60-FEFA224DF6DB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SystemChecker.Web.Proxy", "SystemChecker.Web.Proxy", "{547BBDF3-A7EB-4466-A3DA-2847D3AF3825}"
-	ProjectSection(SolutionItems) = preProject
-		SystemChecker.Web.Proxy\Web.config = SystemChecker.Web.Proxy\Web.config
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E7539E52-9B26-422B-AE08-DD785632DB24}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
