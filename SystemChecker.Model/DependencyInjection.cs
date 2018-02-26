@@ -19,6 +19,7 @@ using SystemChecker.Model.Data.Repositories;
 using System.Collections.Specialized;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using StackExchange.Redis;
 
 namespace SystemChecker.Model
 {
@@ -92,6 +93,11 @@ namespace SystemChecker.Model
             services.AddTransient<SlackNotifier>();
             services.AddTransient<EmailNotifier>();
             services.AddTransient<SMSNotifier>();
+
+            // Redis
+            var redisUrl = Configuration.GetValue<string>("RedisUrl");
+            var redis = ConnectionMultiplexer.Connect(redisUrl);
+            services.AddSingleton<IConnectionMultiplexer>(redis);
         }
     }
 }

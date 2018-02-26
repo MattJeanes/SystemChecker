@@ -74,11 +74,10 @@ namespace SystemChecker.Service
                 }
             });
 
-            services.AddSystemChecker(Configuration);
-
             IServiceProvider serviceProvider;
             try
             {
+                services.AddSystemChecker(Configuration);
                 serviceProvider = services.BuildServiceProvider();
             }
             catch (Exception e)

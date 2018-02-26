@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,8 +35,9 @@ namespace SystemChecker.Model.Helpers
         private readonly ISettingsHelper _settingsHelper;
         private readonly IServiceProvider _serviceProvider;
         private readonly ICheckLogger _checkLogger;
+        private readonly IConnectionMultiplexer _connectionMultiplexer;
         public CheckerHelper(IRepository<SubCheckType> subCheckTypes, IRepository<CheckResult> checkResults, ICheckRepository checks, IMapper mapper,
-            ISettingsHelper settingsHelper, IServiceProvider serviceProvider, ICheckLogger checkLogger)
+            ISettingsHelper settingsHelper, IServiceProvider serviceProvider, ICheckLogger checkLogger, IConnectionMultiplexer connectionMultiplexer)
         {
             _subCheckTypes = subCheckTypes;
             _checkResults = checkResults;
@@ -43,6 +45,7 @@ namespace SystemChecker.Model.Helpers
             _settingsHelper = settingsHelper;
             _serviceProvider = serviceProvider;
             _checkLogger = checkLogger;
+            _connectionMultiplexer = connectionMultiplexer;
         }
 
         public async Task<ISettings> GetSettings()
@@ -71,10 +74,8 @@ namespace SystemChecker.Model.Helpers
         {
             _checkResults.Add(result);
             await _checkResults.SaveChangesAsync();
-            // todo: setup for clustering
-            //await _dashboardHub.Clients.All.InvokeAsync("check", result.CheckID);
-            //await _detailsHub.Clients.All.InvokeAsync("check", result.CheckID);
-            //await _checkHub.Clients.All.InvokeAsync("check", result.CheckID);
+            var pubsub = _connectionMultiplexer.GetSubscriber();
+            await pubsub.PublishAsync("check", result.CheckID);
         }
 
         public async Task RunNotifiers(Check check, CheckResult result, ISettings settings, ICheckLogger logger)

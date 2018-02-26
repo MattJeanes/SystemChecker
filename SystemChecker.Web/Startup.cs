@@ -12,6 +12,8 @@ using Newtonsoft.Json;
 using SystemChecker.Model;
 using SystemChecker.Web.Helpers;
 using SystemChecker.Web.Hubs;
+using StackExchange.Redis;
+using Microsoft.AspNetCore.SignalR;
 
 namespace SystemChecker.Web
 {
@@ -66,6 +68,20 @@ namespace SystemChecker.Web
                 routes.MapHub<DashboardHub>("hub/dashboard");
                 routes.MapHub<DetailsHub>("hub/details");
                 routes.MapHub<CheckHub>("hub/check");
+            });
+
+            var dashboardHub = app.ApplicationServices.GetRequiredService<IHubContext<DashboardHub>>();
+            var detailsHub = app.ApplicationServices.GetRequiredService<IHubContext<DetailsHub>>();
+            var checkHub = app.ApplicationServices.GetRequiredService<IHubContext<CheckHub>>();
+
+            var connectionMultiplexer = app.ApplicationServices.GetRequiredService<IConnectionMultiplexer>();
+            var pubsub = connectionMultiplexer.GetSubscriber();
+            pubsub.Subscribe("check", async (channel, value) =>
+            {
+                var checkID = (int)value;
+                await dashboardHub.Clients.All.InvokeAsync("check", checkID);
+                await detailsHub.Clients.All.InvokeAsync("check", checkID);
+                await checkHub.Clients.All.InvokeAsync("check", checkID);
             });
 
             app.UseMvc(routes =>

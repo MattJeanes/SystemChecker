@@ -13,7 +13,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "AppSettings:Url": "http://localhost:51114",
-        "ConnectionStrings:SystemChecker": "***REMOVED***",
+        "ConnectionStrings:SystemChecker": "Database=SystemCheckerDev;Data Source=mb-sql-dev;Integrated Security=True",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:51114/"
