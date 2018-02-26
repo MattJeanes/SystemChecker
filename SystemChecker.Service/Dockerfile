@@ -5,7 +5,7 @@ FROM gcr.io/cloud-builders/csharp/dotnet AS builder
 WORKDIR /build
 
 COPY . .
-RUN dotnet restore
+RUN dotnet restore --configfile ./.nuget/nuget.config
 RUN dotnet publish ./SystemChecker.Service/SystemChecker.Service.csproj --output /app/ --configuration Release
 
 # final
