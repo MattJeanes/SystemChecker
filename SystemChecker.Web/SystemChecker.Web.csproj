@@ -19,12 +19,15 @@
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0-dev-00023" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.2.1" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.0-alpha2-final" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.0-preview2-30187" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="ClientApp\**" />
     <Content Remove="wwwroot\dist\**" />
     <None Remove="logs\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="yarn-error.log" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SystemChecker.Model\SystemChecker.Model.csproj" />

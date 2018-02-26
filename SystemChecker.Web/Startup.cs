@@ -65,9 +65,9 @@ namespace SystemChecker.Web
 
             app.UseSignalR(routes =>
             {
-                routes.MapHub<DashboardHub>("hub/dashboard");
-                routes.MapHub<DetailsHub>("hub/details");
-                routes.MapHub<CheckHub>("hub/check");
+                routes.MapHub<DashboardHub>("/hub/dashboard");
+                routes.MapHub<DetailsHub>("/hub/details");
+                routes.MapHub<CheckHub>("/hub/check");
             });
 
             var dashboardHub = app.ApplicationServices.GetRequiredService<IHubContext<DashboardHub>>();
@@ -79,9 +79,9 @@ namespace SystemChecker.Web
             pubsub.Subscribe("check", async (channel, value) =>
             {
                 var checkID = (int)value;
-                await dashboardHub.Clients.All.InvokeAsync("check", checkID);
-                await detailsHub.Clients.All.InvokeAsync("check", checkID);
-                await checkHub.Clients.All.InvokeAsync("check", checkID);
+                await dashboardHub.Clients.All.SendAsync("check", checkID);
+                await detailsHub.Clients.All.SendAsync("check", checkID);
+                await checkHub.Clients.All.SendAsync("check", checkID);
             });
 
             app.UseMvc(routes =>
