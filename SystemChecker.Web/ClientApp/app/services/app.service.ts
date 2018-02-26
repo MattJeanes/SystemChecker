@@ -125,7 +125,7 @@ export class AppService {
         return check;
     }
     public async delete(id: number) {
-        return await this.baseWebService.delete<boolean>(id.toString());
+        return await this.baseWebService.delete<boolean>(`/api/${id}`);
     }
     public async getTypes() {
         return await this.baseWebService.get<ICheckType[]>("/api/types");
