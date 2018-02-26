@@ -1,6 +1,6 @@
 import { Component, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { HubConnection } from "@aspnet/signalr-client";
+import { HubConnection, TransportType } from "@aspnet/signalr";
 import { TdLoadingService } from "@covalent/core";
 
 import { ICheck, ICheckResults } from "../app.interfaces";
@@ -31,7 +31,7 @@ export class DetailsComponent implements OnInit, OnDestroy {
     public dateFrom: Date = new Date();
     public dateTo: Date = new Date();
     public loadingId = "details-chart-loading";
-    private hub = new HubConnection("hub/details");
+    private hub = new HubConnection("hub/details", { transport: TransportType.WebSockets });
     private hubReady: boolean = false;
     private checkID?: number;
     private selectedKey?: number;

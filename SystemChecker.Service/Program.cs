@@ -147,7 +147,6 @@ namespace SystemChecker.Service
         public string ServiceName => "SystemChecker";
         private readonly ISchedulerManager _schedulerManager;
         private readonly ILogger _logger;
-        private bool stopRequestedByWindows;
         public SchedulerService(IServiceProvider services)
         {
             _schedulerManager = services.GetRequiredService<ISchedulerManager>();

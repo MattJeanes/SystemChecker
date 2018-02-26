@@ -8,3 +8,4 @@ webpack.config.vendor.js
 webpack.config.vendor.js.map
 *.user
 logs
+yarn-error.log

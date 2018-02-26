@@ -58,7 +58,7 @@ module.exports = (env: any) => {
                 "core-js/es7/reflect",
                 "hammerjs",
                 "@swimlane/ngx-charts",
-                "@aspnet/signalr-client",
+                "@aspnet/signalr",
                 "moment",
             ],
         },

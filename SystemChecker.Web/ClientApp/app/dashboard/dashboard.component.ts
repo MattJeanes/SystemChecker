@@ -1,14 +1,12 @@
 import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
-
+import { HubConnection, TransportType } from "@aspnet/signalr";
 import { DataTable, SelectItem } from "primeng/primeng";
 
 import { CheckResultStatus } from "../app.enums";
 import { ICheck, ICheckGroup, ICheckType, IEnvironment, ISettings } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
 import { AppService, MessageService } from "../services";
-
-import { HubConnection } from "@aspnet/signalr-client";
 
 interface IChart {
     name: string;
@@ -79,7 +77,7 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
     };
     public types: ICheckType[] = [];
     @ViewChild("dt") private dataTable: DataTable;
-    private hub = new HubConnection("hub/dashboard");
+    private hub = new HubConnection("hub/dashboard", { transport: TransportType.WebSockets });
     private hubReady: boolean = false;
     private loading: boolean = false;
     constructor(private appService: AppService, private messageService: MessageService, private ngZone: NgZone, private router: Router) {
