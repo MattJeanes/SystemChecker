@@ -177,6 +177,10 @@ namespace SystemChecker.Model.Helpers
 
         public async Task SetGlobal(GlobalSettings global)
         {
+            if (global.LoginExpireAfterDays <= 0)
+            {
+                throw new Exception($"{nameof(global.LoginExpireAfterDays)} must be greater than zero");
+            }
             ((await _globalSettings.Find("Clickatell")) ?? _globalSettings.Add(new GlobalSetting { Key = "Clickatell" })).Value = JsonConvert.SerializeObject(global.Clickatell);
             ((await _globalSettings.Find("Email")) ?? _globalSettings.Add(new GlobalSetting { Key = "Email" })).Value = JsonConvert.SerializeObject(global.Email);
             ((await _globalSettings.Find("AuthenticationGroup")) ?? _globalSettings.Add(new GlobalSetting { Key = "AuthenticationGroup" })).Value = JsonConvert.SerializeObject(global.AuthenticationGroup);

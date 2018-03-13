@@ -32,7 +32,7 @@ namespace SystemChecker.Model
         Task UpdateSchedule(Check check);
         Task RemoveSchedule(Check check);
         Task<List<ITrigger>> GetAllTriggers();
-        Task UpdateCleanupJob();
+        Task UpdateCleanupJob(GlobalSettings global = null);
     }
 
     public class SchedulerManager : ISchedulerManager
@@ -161,9 +161,12 @@ namespace SystemChecker.Model
             return triggers;
         }
 
-        public async Task UpdateCleanupJob()
+        public async Task UpdateCleanupJob(GlobalSettings global = null)
         {
-            var global = await _settingsHelper.GetGlobal();
+            if (global == null)
+            {
+                global = await _settingsHelper.GetGlobal();
+            }
 
             var key = new JobKey("cleanup");
             var existing = await _scheduler.GetJobDetail(key);

@@ -103,7 +103,7 @@ namespace SystemChecker.Model.Notifiers
                     .Where(x => x.CheckID == _check.ID && x.DTS <= dts)
                     .OrderByDescending(x => x.ID)
                     .FirstOrDefaultAsync();
-                if (result.Status <= Enums.CheckResultStatus.Failed)
+                if (result?.Status <= Enums.CheckResultStatus.Failed)
                 {
                     shouldSend = !(await _checkResults.GetAll()
                         .Where(x => x.CheckID == _check.ID && x.Status > Enums.CheckResultStatus.Failed && x.DTS > dts)

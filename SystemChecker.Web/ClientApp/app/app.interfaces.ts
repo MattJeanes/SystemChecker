@@ -85,6 +85,11 @@ export interface IGlobalSettings {
     Clickatell?: IClickatellSettings;
     AuthenticationGroup?: string;
     SlackToken?: string;
+    CleanupSchedule?: string;
+    ResultAggregateDays?: number;
+    ResultRetentionMonths?: number;
+    Url?: string;
+    LoginExpireAfterDays?: number;
 }
 
 export interface ISettings {

@@ -81,6 +81,7 @@ namespace SystemChecker.Web.Helpers
                 }
                 catch (Exception e)
                 {
+                    context.Response.Headers["X-Token-Invalid"] = "true";
                     context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                     await context.Response.WriteAsync(JsonConvert.SerializeObject(new { error = e.Message }, Formatting.Indented));
                     return;

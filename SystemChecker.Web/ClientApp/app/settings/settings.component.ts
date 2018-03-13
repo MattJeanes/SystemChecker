@@ -81,6 +81,11 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
         global.reset({
             authenticationGroup: this.settings.Global.AuthenticationGroup,
             slackToken: this.settings.Global.SlackToken,
+            cleanupSchedule: this.settings.Global.CleanupSchedule,
+            resultAggregateDays: this.settings.Global.ResultAggregateDays,
+            resultRetentionMonths: this.settings.Global.ResultRetentionMonths,
+            url: this.settings.Global.Url,
+            loginExpireAfterDays: this.settings.Global.LoginExpireAfterDays,
         });
 
         const email = this.settings.Global.Email;
@@ -281,6 +286,11 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
                 },
                 AuthenticationGroup: model.global.authenticationGroup,
                 SlackToken: model.global.slackToken,
+                CleanupSchedule: model.global.cleanupSchedule,
+                LoginExpireAfterDays: model.global.loginExpireAfterDays,
+                ResultAggregateDays: model.global.resultAggregateDays,
+                ResultRetentionMonths: model.global.resultRetentionMonths,
+                Url: model.global.url,
             },
         };
         return settings;
@@ -308,6 +318,11 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
                 }),
                 authenticationGroup: [undefined],
                 slackToken: [undefined],
+                cleanupSchedule: [undefined],
+                resultAggregateDays: [undefined],
+                resultRetentionMonths: [undefined],
+                url: [undefined],
+                loginExpireAfterDays: [Validators.required, Validators.min(1)],
             }),
         });
     }
