@@ -1,0 +1,33 @@
+version: 2
+jobs:
+ build:
+   machine: true
+   steps:
+     - checkout
+     - run:
+         name: Login to DockerHub
+         command: docker login -u $DOCKER_USER -p $DOCKER_PASS
+     - run:
+         name: Build SystemChecker.Service
+         command: docker build -t mattjeanes/systemchecker.service -t mattjeanes/systemchecker.service:$CIRCLE_BUILD_NUM -f "SystemChecker.Service/Dockerfile" .
+     - run:
+         name: Build SystemChecker.Web
+         command: docker build -t mattjeanes/systemchecker.web -t mattjeanes/systemchecker.web:$CIRCLE_BUILD_NUM -f "SystemChecker.Web/Dockerfile" .
+     - run:
+         name: Build SystemChecker.Migrations
+         command: docker build -t mattjeanes/systemchecker.migrations -t mattjeanes/systemchecker.migrations:$CIRCLE_BUILD_NUM -f "SystemChecker.Migrations/Dockerfile" "SystemChecker.Migrations"
+     - run:
+         name: Push SystemChecker.Service to DockerHub
+         command: |
+           docker push mattjeanes/systemchecker.service:$CIRCLE_BUILD_NUM
+           docker push mattjeanes/systemchecker.service
+     - run:
+         name: Push SystemChecker.Web to DockerHub
+         command: |
+           docker push mattjeanes/systemchecker.web:$CIRCLE_BUILD_NUM
+           docker push mattjeanes/systemchecker.web
+     - run:
+         name: Push SystemChecker.Migrations to DockerHub
+         command: |
+           docker push mattjeanes/systemchecker.migrations:$CIRCLE_BUILD_NUM
+           docker push mattjeanes/systemchecker.migrations
