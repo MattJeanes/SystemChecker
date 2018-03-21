@@ -34,10 +34,12 @@ namespace SystemChecker.Migrations
                     Console.ResetColor();
                     retVal = 1;
                 }
-
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Success!");
-                Console.ResetColor();
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Success!");
+                    Console.ResetColor();
+                }
             }
             catch (Exception e)
             {
