@@ -22,11 +22,30 @@ export class AuthInterceptor implements HttpInterceptor {
             if (resp instanceof HttpErrorResponse) {
                 const tokenInvalid = resp.headers.get("X-Token-Invalid");
                 if (tokenInvalid) {
-                    this.utilService.alert("Invalid token", "Server rejected token, logged out");
-                    this.appService.logout();
+                    this.utilService.alert("Invalid token", "Server rejected token, logged out").then(() => this.appService.logout());
+                    return ErrorObservable.create(new Error("Invalid token"));
                 }
             }
-            return ErrorObservable.create(resp);
+            return ErrorObservable.create(this.handleError(resp));
         });
+    }
+
+    private handleError(e: any): Error {
+        let errMsg: string;
+        let logged: boolean = false;
+        if (e instanceof HttpErrorResponse) {
+            const err = (e.error && (e.error.error || JSON.stringify(e.error))) || e.message;
+            if (e.error && e.error.stack) {
+                console.error(`${err}\n${e.error.stack}`);
+                logged = true;
+            }
+            errMsg = err;
+        } else {
+            errMsg = e.toString();
+        }
+        if (!logged) {
+            console.error(errMsg);
+        }
+        return new Error(errMsg);
     }
 }
