@@ -175,8 +175,8 @@ namespace SystemChecker.Model.Helpers
             var global = await _settingsHelper.GetGlobal();
             var token = new JwtSecurityToken(
                 claims: claims,
-                notBefore: DateTime.Now,
-                expires: DateTime.Now.AddDays(global.LoginExpireAfterDays),
+                notBefore: DateTime.UtcNow,
+                expires: DateTime.UtcNow.AddDays(global.LoginExpireAfterDays),
                 signingCredentials: creds);
 
             return _tokenHandler.WriteToken(token);

@@ -55,7 +55,7 @@ namespace SystemChecker.Model.Notifiers
                 var sent = false;
                 if (!sent) sent = await CheckCount(message);
                 if (!sent) sent = await CheckMinutes(message);
-                if (sent) notification.Sent = DateTime.Now;
+                if (sent) notification.Sent = DateTime.UtcNow;
             }
             else if (notification.Sent != null)
             {
@@ -98,9 +98,9 @@ namespace SystemChecker.Model.Notifiers
             }
             else
             {
-                var dts = DateTime.Now.AddMinutes(-_notification.FailMinutes.Value);
+                var dts = DateTimeOffset.UtcNow.AddMinutes(-_notification.FailMinutes.Value);
                 var result = await _checkResults.GetAll()
-                    .Where(x => x.CheckID == _check.ID && x.DTS <= dts)
+                    .Where(x => x.CheckID == _check.ID && x.DTS.UtcDateTime <= dts)
                     .OrderByDescending(x => x.ID)
                     .FirstOrDefaultAsync();
                 if (result?.Status <= Enums.CheckResultStatus.Failed)

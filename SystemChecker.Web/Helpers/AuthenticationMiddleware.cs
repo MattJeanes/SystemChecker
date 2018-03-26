@@ -73,7 +73,7 @@ namespace SystemChecker.Web.Helpers
                     var username = _securityHelper.GetUsername(token);
                     SetUsername(context, username);
                     var renewAfter = token.ValidFrom.AddMinutes(token.ValidTo.Subtract(token.ValidFrom).TotalMinutes / 2);
-                    if (DateTime.Now > renewAfter)
+                    if (DateTime.UtcNow > renewAfter)
                     {
                         var newToken = await _securityHelper.GetToken(username);
                         context.Response.Headers["X-Token"] = newToken;

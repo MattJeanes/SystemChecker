@@ -17,7 +17,7 @@ namespace SystemChecker.Model.Data.Entities
         [ForeignKey("CheckID")]
         public Check Check { get; set; }
 
-        public DateTime DTS { get; set; }
+        public DateTimeOffset DTS { get; set; }
 
         public CheckResultStatus Status { get; set; }
 

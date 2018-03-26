@@ -109,17 +109,17 @@ namespace SystemChecker.Web.Controllers
         [HttpGet("results/{id:int}/{dateFrom}/{dateTo}")]
         public async Task<ICheckResults> GetCheckResults(int id, string dateFrom, string dateTo)
         {
-            var from = DateTime.Parse(dateFrom);
+            var from = DateTimeOffset.Parse(dateFrom);
             from = from.Date + new TimeSpan(0, 0, 0);
-            var to = DateTime.Parse(dateTo);
+            var to = DateTimeOffset.Parse(dateTo);
             to = to.Date + new TimeSpan(23, 59, 59);
             var min = await _checkResults.GetAll().Where(x => x.CheckID == id).OrderBy(x => x.DTS).FirstOrDefaultAsync();
             var max = await _checkResults.GetAll().Where(x => x.CheckID == id).OrderByDescending(x => x.DTS).FirstOrDefaultAsync();
             var results = await _checkResults.GetAll().Where(x => x.CheckID == id && x.DTS >= from && x.DTS < to).ToListAsync();
             return new CheckResults
             {
-                MinDate = min?.DTS.ToString("yyyy-MM-dd"),
-                MaxDate = max?.DTS.ToString("yyyy-MM-dd"),
+                MinDate = min?.DTS.LocalDateTime.ToString("yyyy-MM-dd"),
+                MaxDate = max?.DTS.LocalDateTime.ToString("yyyy-MM-dd"),
                 Results = _mapper.Map<List<CheckResultDTO>>(results),
             };
         }
@@ -338,7 +338,7 @@ namespace SystemChecker.Web.Controllers
                     {
                         break;
                     }
-                    next += time.Value.DateTime.ToString("yyyy-mm-dd HH:mm:ss") + "\n";
+                    next += time.Value.LocalDateTime.ToString("yyyy-mm-dd HH:mm:ss") + "\n";
                 }
                 next += "\n" + expression.GetExpressionSummary();
                 return new
