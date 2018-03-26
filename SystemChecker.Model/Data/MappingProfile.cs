@@ -18,7 +18,9 @@ namespace SystemChecker.Model.Data
             CreateMap<CheckDetailDTO, Check>().ReverseMap();
             CreateMap<CheckDTO, Check>().ReverseMap();
             CreateMap<CheckTypeDTO, CheckType>().ReverseMap();
-            CreateMap<CheckResultDTO, CheckResult>().ReverseMap();
+            CreateMap<CheckResultDTO, CheckResult>()
+                .ReverseMap()
+                .ForMember(cr => cr.DTS, opt => opt.MapFrom(crdto => crdto.DTS.LocalDateTime));
             CreateMap<SubCheckTypeDTO, SubCheckType>().ReverseMap();
             CreateMap<CheckNotificationTypeDTO, CheckNotificationType>().ReverseMap();
             CreateMap<ContactTypeDTO, ContactType>().ReverseMap();

@@ -91,7 +91,7 @@ namespace SystemChecker.Model.Jobs
                 {
                     log($"TimeMS: {result.TimeMS}");
                 }
-                result.DTS = DateTime.Now;
+                result.DTS = DateTime.UtcNow;
 
                 try
                 {

@@ -44,17 +44,17 @@ namespace SystemChecker.Model.Jobs
             }
 
             var resultsToAggregate = await _checkResults.GetAll()
-                .Where(x => x.DTS < DateTime.Now.AddDays(-global.ResultAggregateDays.Value))
-                .GroupBy(x => new { x.DTS.Hour, x.DTS.Date, x.Status, x.CheckID })
+                .Where(x => x.DTS < DateTimeOffset.UtcNow.AddDays(-global.ResultAggregateDays.Value))
+                .GroupBy(x => new { x.DTS.UtcDateTime.Hour, x.DTS.UtcDateTime.Date, x.Status, x.CheckID })
                 .Where(x => x.Count() > 1)
                 .ToListAsync();
 
             foreach (var group in resultsToAggregate)
             {
                 var timeMSAverage = Convert.ToInt32(group.Average(x => x.TimeMS));
-                var ticks = group.Select(x => x.DTS.Ticks);
+                var ticks = group.Select(x => x.DTS.UtcTicks);
                 var avgTicks = ticks.Select(i => i / ticks.Count()).Sum() + ticks.Select(i => i % ticks.Count()).Sum() / ticks.Count();
-                var dateAverage = new DateTime(avgTicks);
+                var dateAverage = new DateTimeOffset(avgTicks, TimeSpan.Zero);
                 _checkResults.Add(new CheckResult
                 {
                     CheckID = group.Key.CheckID,
@@ -68,7 +68,7 @@ namespace SystemChecker.Model.Jobs
             await _checkResults.SaveChangesAsync();
 
             var resultsToDelete = await _checkResults.GetAll()
-                .Where(x => x.DTS < DateTime.Now.AddMonths(-global.ResultRetentionMonths.Value))
+                .Where(x => x.DTS < DateTimeOffset.UtcNow.AddMonths(-global.ResultRetentionMonths.Value))
                 .ToListAsync();
 
             _checkResults.DeleteRange(resultsToDelete);
