@@ -2,11 +2,8 @@
 using Quartz;
 using SystemChecker.Model.Jobs;
 using Quartz.Spi;
-using System.Diagnostics;
-using Microsoft.Extensions.Options;
 using SystemChecker.Model.Data.Interfaces;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Quartz.Impl.Matchers;
 using SystemChecker.Model.Data.Entities;
@@ -17,9 +14,6 @@ using SystemChecker.Model.Helpers;
 using SystemChecker.Model.Loggers;
 using SystemChecker.Model.Data;
 using AutoMapper;
-using SystemChecker.Model.DTO;
-using Microsoft.Extensions.DependencyInjection;
-using TimeZoneConverter;
 
 namespace SystemChecker.Model
 {
@@ -47,7 +41,7 @@ namespace SystemChecker.Model
         private readonly ICheckLogger _checkLogger;
         private readonly IJobHelper _jobHelper;
         private readonly IMapper _mapper;
-        private readonly TimeZoneInfo timeZone = TZConvert.GetTimeZoneInfo("GMT Standard Time");
+        private readonly TimeZoneInfo timeZone = TimeZoneInfo.Utc;
         public SchedulerManager(ISchedulerFactory factory, IJobFactory jobFactory, ISettingsHelper settingsHelper, ICheckRepository checks,
             ILogger<SchedulerManager> logger, IServiceProvider container, ILoggerFactory loggerFactory, ICheckLogger checkLogger, IJobHelper jobHelper, IMapper mapper)
         {
