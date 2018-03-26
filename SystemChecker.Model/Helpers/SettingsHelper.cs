@@ -14,6 +14,7 @@ using SystemChecker.Model.Data;
 using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Data.Interfaces;
 using SystemChecker.Model.DTO;
+using TimeZoneConverter;
 
 namespace SystemChecker.Model.Helpers
 {
@@ -160,6 +161,7 @@ namespace SystemChecker.Model.Helpers
             var resultAggregateDays = await _globalSettings.Find("ResultAggregateDays");
             var cleanupSchedule = await _globalSettings.Find("CleanupSchedule");
             var loginExpireAfterDays = await _globalSettings.Find("LoginExpireAfterDays");
+            var timeZoneId = await _globalSettings.Find("TimeZoneId");
 
             return new GlobalSettings
             {
@@ -172,6 +174,7 @@ namespace SystemChecker.Model.Helpers
                 ResultAggregateDays = JsonConvert.DeserializeObject<int?>(resultAggregateDays.Value),
                 CleanupSchedule = JsonConvert.DeserializeObject<string>(cleanupSchedule.Value),
                 LoginExpireAfterDays = JsonConvert.DeserializeObject<int>(loginExpireAfterDays.Value),
+                TimeZoneId = timeZoneId != null ? JsonConvert.DeserializeObject<string>(timeZoneId.Value) : null
             };
         }
 
@@ -180,6 +183,15 @@ namespace SystemChecker.Model.Helpers
             if (global.LoginExpireAfterDays <= 0)
             {
                 throw new Exception($"{nameof(global.LoginExpireAfterDays)} must be greater than zero");
+            }
+            if (string.IsNullOrEmpty(global.TimeZoneId))
+            {
+                throw new Exception($"{nameof(global.TimeZoneId)} must be set");
+            }
+            var tz = TZConvert.GetTimeZoneInfo(global.TimeZoneId);
+            if (tz == null)
+            {
+                throw new Exception($"{nameof(global.TimeZoneId)} is invalid");
             }
             ((await _globalSettings.Find("Clickatell")) ?? _globalSettings.Add(new GlobalSetting { Key = "Clickatell" })).Value = JsonConvert.SerializeObject(global.Clickatell);
             ((await _globalSettings.Find("Email")) ?? _globalSettings.Add(new GlobalSetting { Key = "Email" })).Value = JsonConvert.SerializeObject(global.Email);
@@ -190,6 +202,7 @@ namespace SystemChecker.Model.Helpers
             ((await _globalSettings.Find("ResultAggregateDays")) ?? _globalSettings.Add(new GlobalSetting { Key = "ResultAggregateDays" })).Value = JsonConvert.SerializeObject(global.ResultAggregateDays);
             ((await _globalSettings.Find("CleanupSchedule")) ?? _globalSettings.Add(new GlobalSetting { Key = "CleanupSchedule" })).Value = JsonConvert.SerializeObject(global.CleanupSchedule);
             ((await _globalSettings.Find("LoginExpireAfterDays")) ?? _globalSettings.Add(new GlobalSetting { Key = "LoginExpireAfterDays" })).Value = JsonConvert.SerializeObject(global.LoginExpireAfterDays);
+            ((await _globalSettings.Find("TimeZoneId")) ?? _globalSettings.Add(new GlobalSetting { Key = "TimeZoneId" })).Value = JsonConvert.SerializeObject(global.TimeZoneId);
             await _globalSettings.SaveChangesAsync();
         }
     }
