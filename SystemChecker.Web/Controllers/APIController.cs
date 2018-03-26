@@ -14,6 +14,7 @@ using Quartz;
 using SystemChecker.Model;
 using SystemChecker.Model.Helpers;
 using SlackAPI;
+using Microsoft.Extensions.Logging;
 
 namespace SystemChecker.Web.Controllers
 {
@@ -33,9 +34,10 @@ namespace SystemChecker.Web.Controllers
         private readonly IJobHelper _jobHelper;
         private readonly ISecurityHelper _securityHelper;
         private readonly IUserRepository _users;
+        private readonly ILogger _logger;
         public APIController(ICheckRepository checks, IRepository<CheckResult> checkResults, ISubCheckTypeRepository subCheckTypes, ICheckTypeRepository checkTypes, ICheckNotificationTypeRepository checkNotificationTypes,
             IRepository<ContactType> contactTypes, IMapper mapper, ISchedulerManager manager, ISettingsHelper settingsHelper, ISlackHelper slackHelper, IJobHelper jobHelper, ISecurityHelper securityHelper,
-            IUserRepository users)
+            IUserRepository users, ILogger<APIController> logger)
         {
             _checks = checks;
             _checkResults = checkResults;
@@ -50,6 +52,7 @@ namespace SystemChecker.Web.Controllers
             _jobHelper = jobHelper;
             _securityHelper = securityHelper;
             _users = users;
+            _logger = logger;
         }
 
         [HttpGet("{simpleStatus:bool?}")]
@@ -164,8 +167,14 @@ namespace SystemChecker.Web.Controllers
         [HttpPost("settings")]
         public async Task<ISettings> SetSettings([FromBody]Settings value)
         {
+            var global = await _settingsHelper.GetGlobal();
             await _settingsHelper.Set(value);
-            await _manager.UpdateCleanupJob(value.Global);
+            if (global.TimeZoneId != value.Global.TimeZoneId)
+            {
+                _logger.LogInformation($"TimeZoneId changed from {global.TimeZoneId} to {value.Global.TimeZoneId}, updating schedules");
+                await _manager.UpdateSchedules();
+            }
+            await _manager.UpdateMaintenanceJobs(value.Global);
             return await GetSettings();
         }
 
@@ -315,11 +324,14 @@ namespace SystemChecker.Web.Controllers
         }
 
         [HttpPost("cron/{validateOnly:bool?}")]
-        public object ValidateCronExpression(bool? validateOnly, [FromBody]string cron)
+        public async Task<object> ValidateCronExpression(bool? validateOnly, [FromBody]string cron)
         {
             try
             {
-                var expression = new CronExpression(cron);
+                var expression = new CronExpression(cron)
+                {
+                    TimeZone = await _jobHelper.GetTimeZone()
+                };
                 if (validateOnly ?? false)
                 {
                     return new

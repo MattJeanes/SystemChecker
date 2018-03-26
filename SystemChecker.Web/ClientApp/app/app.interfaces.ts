@@ -90,6 +90,7 @@ export interface IGlobalSettings {
     ResultRetentionMonths?: number;
     Url?: string;
     LoginExpireAfterDays?: number;
+    TimeZoneId?: string;
 }
 
 export interface ISettings {

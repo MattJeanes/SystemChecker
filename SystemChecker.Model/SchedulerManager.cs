@@ -27,6 +27,7 @@ namespace SystemChecker.Model
         Task RemoveSchedule(Check check);
         Task<List<ITrigger>> GetAllTriggers();
         Task UpdateCleanupJob(GlobalSettings global = null);
+        Task UpdateMaintenanceJobs(GlobalSettings global);
     }
 
     public class SchedulerManager : ISchedulerManager
@@ -41,7 +42,6 @@ namespace SystemChecker.Model
         private readonly ICheckLogger _checkLogger;
         private readonly IJobHelper _jobHelper;
         private readonly IMapper _mapper;
-        private readonly TimeZoneInfo timeZone = TimeZoneInfo.Utc;
         public SchedulerManager(ISchedulerFactory factory, IJobFactory jobFactory, ISettingsHelper settingsHelper, ICheckRepository checks,
             ILogger<SchedulerManager> logger, IServiceProvider container, ILoggerFactory loggerFactory, ICheckLogger checkLogger, IJobHelper jobHelper, IMapper mapper)
         {
@@ -76,9 +76,13 @@ namespace SystemChecker.Model
             _logger.LogInformation("Scheduler stopped");
         }
 
-        public async Task UpdateMaintenanceJobs()
+        public async Task UpdateMaintenanceJobs(GlobalSettings global = null)
         {
-            await UpdateCleanupJob();
+            if (global == null)
+            {
+                global = await _settingsHelper.GetGlobal();
+            }
+            await UpdateCleanupJob(global);
         }
 
         public async Task UpdateSchedules()
@@ -115,6 +119,8 @@ namespace SystemChecker.Model
                 .Build();
 
             await _scheduler.AddJob(job, false, true);
+
+            var timeZone = await _jobHelper.GetTimeZone();
 
             foreach (var schedule in check.Schedules.Where(x => x.Active))
             {
@@ -155,13 +161,8 @@ namespace SystemChecker.Model
             return triggers;
         }
 
-        public async Task UpdateCleanupJob(GlobalSettings global = null)
+        public async Task UpdateCleanupJob(GlobalSettings global)
         {
-            if (global == null)
-            {
-                global = await _settingsHelper.GetGlobal();
-            }
-
             var key = new JobKey("cleanup");
             var existing = await _scheduler.GetJobDetail(key);
             if (existing != null)
@@ -179,6 +180,8 @@ namespace SystemChecker.Model
                 .Build();
 
             await _scheduler.AddJob(job, false, true);
+
+            var timeZone = await _jobHelper.GetTimeZone();
 
             var trigger = TriggerBuilder.Create()
                 .WithIdentity("cleanup")

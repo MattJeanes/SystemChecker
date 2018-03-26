@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using SystemChecker.Model.DTO;
 
@@ -29,5 +30,6 @@ namespace SystemChecker.Model.Data
         public int? ResultAggregateDays { get; set; }
         public string CleanupSchedule { get; set; }
         public int LoginExpireAfterDays { get; set; }
+        public string TimeZoneId { get; set; }
     }
 }
