@@ -1,7 +1,7 @@
 # SystemChecker
 Scalable system to check other systems
 
-![CircleCI](https://img.shields.io/circleci/project/github/MattJeanes/SystemChecker.svg)
+[![CircleCI](https://img.shields.io/circleci/project/github/MattJeanes/SystemChecker.svg)](https://circleci.com/gh/MattJeanes/SystemChecker)
 
 #### SystemChecker.Web
 [![Docker Stars - SystemChecker.Web](https://img.shields.io/docker/stars/mattjeanes/systemchecker.web.svg)](https://hub.docker.com/r/mattjeanes/systemchecker.web/)
