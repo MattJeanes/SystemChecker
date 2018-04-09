@@ -7,18 +7,25 @@ before_script:
   - export major=$(cat meta.json | jq '.version.major')
   - export minor=$(cat meta.json | jq '.version.minor')
   - export version=$major.$minor.$TRAVIS_BUILD_NUMBER
-  
-script:
-  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash ./travis/run_on_pull_requests; fi'
-  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./travis/run_on_non_pull_requests; fi'
-  
+  - echo "Version: $version"
+
 script:
   - docker build -t mattjeanes/systemchecker.service -t mattjeanes/systemchecker.service:$version -f "SystemChecker.Service/Dockerfile" .
   - docker build -t mattjeanes/systemchecker.web -t mattjeanes/systemchecker.web:$version -f "SystemChecker.Web/Dockerfile" .
   - docker build -t mattjeanes/systemchecker.migrations -t mattjeanes/systemchecker.migrations:$version -f "SystemChecker.Migrations/Dockerfile" "SystemChecker.Migrations"
 
 before_deploy:
-  - ./.travis/deploy.sh
+  - docker login -u $DOCKER_USER -p $DOCKER_PASS
+  - docker push mattjeanes/systemchecker.service:$version
+  - docker push mattjeanes/systemchecker.service
+  - docker push mattjeanes/systemchecker.web:$version
+  - docker push mattjeanes/systemchecker.web
+  - docker push mattjeanes/systemchecker.migrations:$version
+  - docker push mattjeanes/systemchecker.migrations
+  - git config --local user.name "$GITHUB_USER"
+  - git config --local user.email "$GITHUB_EMAIL"
+  - deploy=false
+  - if [ ! $(git tag -l "$version") ]; then git tag "$version"; deploy=true; fi
 deploy:
   provider: releases
   api_key: "${GITHUB_TOKEN}"
@@ -27,5 +34,4 @@ deploy:
     - "./publish/SystemChecker.Web.zip"
     - "./publish/SystemChecker.Migrations.zip"
   skip_cleanup: true
-  on:
-    tags: true
+  condition: $deploy = true
