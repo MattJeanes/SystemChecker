@@ -26,7 +26,10 @@ script:
 after_success:
   - git config --local user.name "$GITHUB_USER"
   - git config --local user.email "$GITHUB_EMAIL"
-  - git rev-parse "$version" >/dev/null 2>&1 && (echo "$version tag already exists, not deploying") || (git tag "$version"; TRAVIS_TAG="$version"; echo "$version tag created, deploying")
+  - deploy=false
+  - git tag
+  - git rev-parse "$version"
+  - git rev-parse "$version" >/dev/null 2>&1 && (echo "$version tag already exists, not deploying") || (git tag "$version"; deploy="true"; echo "$version tag created, deploying")
 
 before_deploy:
   - docker login -u $DOCKER_USER -p $DOCKER_PASS
@@ -47,4 +50,4 @@ deploy:
   skip_cleanup: true
   on:
     all_branches: true
-    tags: true
+    condition: $deploy = "true"
