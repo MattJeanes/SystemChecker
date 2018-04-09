@@ -3,16 +3,29 @@ sudo: required
 services:
   - docker
   
+before_script:
+  - export major=$(cat meta.json | jq '.version.major')
+  - export minor=$(cat meta.json | jq '.version.minor')
+  - export version=$major.$minor.$TRAVIS_BUILD_NUMBER
+  
 script:
-  - docker build -t mattjeanes/systemchecker.service -t mattjeanes/systemchecker.service:$CIRCLE_BUILD_NUM -f "SystemChecker.Service/Dockerfile" .
-  - docker build -t mattjeanes/systemchecker.web -t mattjeanes/systemchecker.web:$CIRCLE_BUILD_NUM -f "SystemChecker.Web/Dockerfile" .
-  - docker build -t mattjeanes/systemchecker.migrations -t mattjeanes/systemchecker.migrations:$CIRCLE_BUILD_NUM -f "SystemChecker.Migrations/Dockerfile" "SystemChecker.Migrations"
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash ./travis/run_on_pull_requests; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./travis/run_on_non_pull_requests; fi'
+  
+script:
+  - docker build -t mattjeanes/systemchecker.service -t mattjeanes/systemchecker.service:$version -f "SystemChecker.Service/Dockerfile" .
+  - docker build -t mattjeanes/systemchecker.web -t mattjeanes/systemchecker.web:$version -f "SystemChecker.Web/Dockerfile" .
+  - docker build -t mattjeanes/systemchecker.migrations -t mattjeanes/systemchecker.migrations:$version -f "SystemChecker.Migrations/Dockerfile" "SystemChecker.Migrations"
 
+before_deploy:
+  - ./.travis/deploy.sh
 deploy:
-  - docker login -u $DOCKER_USER -p $DOCKER_PASS
-  - docker push mattjeanes/systemchecker.service:$CIRCLE_BUILD_NUM
-  - docker push mattjeanes/systemchecker.service
-  - docker push mattjeanes/systemchecker.web:$CIRCLE_BUILD_NUM
-  - docker push mattjeanes/systemchecker.web
-  - docker push mattjeanes/systemchecker.migrations:$CIRCLE_BUILD_NUM
-  - docker push mattjeanes/systemchecker.migrations
+  provider: releases
+  api_key: "${GITHUB_TOKEN}"
+  file:
+    - "./publish/SystemChecker.Service.zip"
+    - "./publish/SystemChecker.Web.zip"
+    - "./publish/SystemChecker.Migrations.zip"
+  skip_cleanup: true
+  on:
+    tags: true
