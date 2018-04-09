@@ -36,16 +36,14 @@ before_deploy:
   - docker push mattjeanes/systemchecker.web
   - docker push mattjeanes/systemchecker.migrations:$version
   - docker push mattjeanes/systemchecker.migrations
-  - zip -r SystemChecker.Service.zip SystemChecker.Service
-  - zip -r SystemChecker.Web.zip SystemChecker.Web
-  - zip -r SystemChecker.Migrations.zip SystemChecker.Migrations
+  - zip -q -r SystemChecker.Service.zip SystemChecker.Service
+  - zip -q -r SystemChecker.Web.zip SystemChecker.Web
+  - zip -q -r SystemChecker.Migrations.zip SystemChecker.Migrations
 deploy:
   provider: releases
   api_key: "${GITHUB_TOKEN}"
-  file:
-    - "./publish/SystemChecker.Service.zip"
-    - "./publish/SystemChecker.Web.zip"
-    - "./publish/SystemChecker.Migrations.zip"
+  file_glob: true
+  file: publish/*.zip
   skip_cleanup: true
   condition: $deploy = true
   on:
