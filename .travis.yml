@@ -1,0 +1,18 @@
+sudo: required
+
+services:
+  - docker
+  
+script:
+  - docker build -t mattjeanes/systemchecker.service -t mattjeanes/systemchecker.service:$CIRCLE_BUILD_NUM -f "SystemChecker.Service/Dockerfile" .
+  - docker build -t mattjeanes/systemchecker.web -t mattjeanes/systemchecker.web:$CIRCLE_BUILD_NUM -f "SystemChecker.Web/Dockerfile" .
+  - docker build -t mattjeanes/systemchecker.migrations -t mattjeanes/systemchecker.migrations:$CIRCLE_BUILD_NUM -f "SystemChecker.Migrations/Dockerfile" "SystemChecker.Migrations"
+
+deploy:
+  - docker login -u $DOCKER_USER -p $DOCKER_PASS
+  - docker push mattjeanes/systemchecker.service:$CIRCLE_BUILD_NUM
+  - docker push mattjeanes/systemchecker.service
+  - docker push mattjeanes/systemchecker.web:$CIRCLE_BUILD_NUM
+  - docker push mattjeanes/systemchecker.web
+  - docker push mattjeanes/systemchecker.migrations:$CIRCLE_BUILD_NUM
+  - docker push mattjeanes/systemchecker.migrations
