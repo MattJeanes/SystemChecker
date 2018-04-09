@@ -16,9 +16,9 @@ script:
   - docker build -t mattjeanes/systemchecker.service -t mattjeanes/systemchecker.service:$version -f "SystemChecker.Service/Dockerfile" .
   - docker build -t mattjeanes/systemchecker.web -t mattjeanes/systemchecker.web:$version -f "SystemChecker.Web/Dockerfile" .
   - docker build -t mattjeanes/systemchecker.migrations -t mattjeanes/systemchecker.migrations:$version -f "SystemChecker.Migrations/Dockerfile" "SystemChecker.Migrations"
-  - dotnet publish ./SystemChecker.Service\SystemChecker.Service.csproj -o "../publish/SystemChecker.Service"
-  - dotnet publish ./SystemChecker.Service\SystemChecker.Web.csproj -o "../publish/SystemChecker.Web"
-  - dotnet publish ./SystemChecker.Service\SystemChecker.Migrations.csproj -o "../publish/SystemChecker.Migrations"
+  - dotnet publish ./SystemChecker.Service/SystemChecker.Service.csproj -o "../publish/SystemChecker.Service"
+  - dotnet publish ./SystemChecker.Service/SystemChecker.Web.csproj -o "../publish/SystemChecker.Web"
+  - dotnet publish ./SystemChecker.Service/SystemChecker.Migrations.csproj -o "../publish/SystemChecker.Migrations"
   
 after_success:
   - git config --local user.name "$GITHUB_USER"
