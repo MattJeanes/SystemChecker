@@ -3,6 +3,7 @@ language: csharp
 mono: none
 cache: yarn
 dotnet: 2.0.3
+if: tag IS blank
 
 services:
   - docker
@@ -45,6 +46,6 @@ deploy:
   file_glob: true
   file: publish/*.zip
   skip_cleanup: true
-  condition: $deploy = true
   on:
+    condition: $deploy = true
     all_branches: true
