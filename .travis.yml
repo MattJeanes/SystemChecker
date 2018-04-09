@@ -34,3 +34,5 @@ deploy:
     - "./publish/SystemChecker.Migrations.zip"
   skip_cleanup: true
   condition: $deploy = true
+  on:
+    all_branches: true
