@@ -27,7 +27,7 @@ after_success:
   - git config --local user.name "$GITHUB_USER"
   - git config --local user.email "$GITHUB_EMAIL"
   - deploy=false
-  - if [ ! $(git tag -l "$version") ]; then git tag "$version"; deploy=true; fi
+  - if ! git rev-parse "$version" >/dev/null 2>&1; then git tag "$version"; deploy=true; fi
 
 before_deploy:
   - docker login -u $DOCKER_USER -p $DOCKER_PASS
