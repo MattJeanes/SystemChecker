@@ -72,7 +72,7 @@ Environment variables:
   - Used for communication between backend (service) and frontend (web), must be the same between everything
 - `ASPNETCORE_URLS`
   - Example: `localhost:5000`
-  - Used by ASP.NET Core to bind the frontend site to. 
+  - Used by ASP.NET Core to bind the frontend site to
   
 ## First-time setup
 Before first start, create a new empty database and create a user with read/write permissions and configure the `ConnectionStrings__SystemChecker` environment variable accordingly.
