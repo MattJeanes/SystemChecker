@@ -7,7 +7,6 @@ before_script:
   - export major=$(cat meta.json | jq '.version.major')
   - export minor=$(cat meta.json | jq '.version.minor')
   - export version=$major.$minor.$TRAVIS_BUILD_NUMBER
-  - echo "Version: $version"
 
 script:
   - docker build -t mattjeanes/systemchecker.service -t mattjeanes/systemchecker.service:$version -f "SystemChecker.Service/Dockerfile" .
