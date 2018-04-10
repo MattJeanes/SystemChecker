@@ -1,8 +1,6 @@
 sudo: required
-language: csharp
-mono: none
 cache: yarn
-dotnet: 2.0.3
+dotnet: 2.1.104
 if: tag IS blank
 
 services:
