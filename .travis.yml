@@ -48,5 +48,4 @@ deploy:
   file: publish/*.zip
   skip_cleanup: true
   on:
-    all_branches: true
     condition: $deploy = true
