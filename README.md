@@ -73,19 +73,22 @@ Environment variables:
 - `ASPNETCORE_URLS`
   - Example: `localhost:5000`
   - Used by ASP.NET Core to bind the frontend site to
+- `UseHttps`
+  - Boolean, defaults to `true`
+  - If enabled, redirects all http traffic to https
   
 ## First-time setup
 Before first start, create a new empty database and create a user with read/write permissions and configure the `ConnectionStrings__SystemChecker` environment variable accordingly.
 
 Make sure a redis server is running and configure the `RedisUrl` environment variable accordingly.
 
-Finally, make sure the `AppSettings__Url` is set to the reachable address of where you plan to host the site. 
+Finally, make sure the `AppSettings__Url` is set to the reachable address of where you plan to host the site.
 
 ## Database Migrations (SystemChecker.Migrations)
 On first-start or when upgrading, run the migrations tool with an appropriate `ConnectionStrings__SystemChecker` environment variable with enough permissions to modify the database schema or the migrations will fail.
 
 ## Frontend (SystemChecker.Web)
-Start the program with the appropriate `ConnectionStrings__SystemChecker`, `AppSettings__Url`, `RedisUrl` and `ASPNETCORE_URLS` environment variables, depending on your deployment you may have a Windows executable or you may need to call `dotnet SystemChecker.Web.dll`
+Start the program with the appropriate `ConnectionStrings__SystemChecker`, `AppSettings__Url`, `RedisUrl`, `ASPNETCORE_URLS` and optionally `UseHttps` environment variables, depending on your deployment you may have a Windows executable or you may need to call `dotnet SystemChecker.Web.dll`
 
 ## Backend (SystemChecker.Service)
 Start the program with the appropriate `ConnectionStrings__SystemChecker`, `AppSettings__Url` and `RedisUrl` environment variables, as above you may have a Windows executable or you may need to call `dotnet SystemChecker.Service.dll`

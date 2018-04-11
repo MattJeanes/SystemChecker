@@ -14,6 +14,8 @@ using SystemChecker.Web.Helpers;
 using SystemChecker.Web.Hubs;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Rewrite;
+using Microsoft.AspNetCore.Mvc;
 
 namespace SystemChecker.Web
 {
@@ -35,6 +37,10 @@ namespace SystemChecker.Web
                 .AddMvc(options =>
                 {
                     options.InputFormatters.Add(new TextPlainInputFormatter());
+                    if (!_env.IsDevelopment() && Configuration.GetValue<bool>("UseHttps"))
+                    {
+                        options.Filters.Add(new RequireHttpsAttribute());
+                    }
                 })
                 .AddJsonOptions(options =>
                 {
@@ -49,6 +55,15 @@ namespace SystemChecker.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
+            app.UseSecurityHeaders();
+            if (!_env.IsDevelopment() && Configuration.GetValue<bool>("UseHttps"))
+            {
+                var options = new RewriteOptions()
+                    .AddRedirectToHttps();
+
+                app.UseRewriter(options);
+            }
+
             app.UseAuthenticationMiddleware();
             app.UseErrorHandlingMiddleware();
 
