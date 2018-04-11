@@ -47,7 +47,7 @@ deploy:
   provider: releases
   api_key: "${GITHUB_TOKEN}"
   file_glob: true
-  file: publish/*.zip
+  file: *.zip
   skip_cleanup: true
   on:
     condition: $deploy = true
