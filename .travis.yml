@@ -2,7 +2,7 @@ sudo: required
 language: csharp
 mono: none
 cache: yarn
-dotnet: 2.0.3
+dotnet: 2.1.104
 if: tag IS blank
 
 services:
@@ -18,9 +18,9 @@ script:
   - docker build -t mattjeanes/systemchecker.service -t mattjeanes/systemchecker.service:$version -f "SystemChecker.Service/Dockerfile" .
   - docker build -t mattjeanes/systemchecker.web -t mattjeanes/systemchecker.web:$version -f "SystemChecker.Web/Dockerfile" .
   - docker build -t mattjeanes/systemchecker.migrations -t mattjeanes/systemchecker.migrations:$version -f "SystemChecker.Migrations/Dockerfile" "SystemChecker.Migrations"
-  - dotnet publish ./SystemChecker.Service/SystemChecker.Service.csproj -o "../publish/SystemChecker.Service" --configfile ../.nuget/nuget.config
+  - dotnet publish ./SystemChecker.Service/SystemChecker.Service.csproj -o "../publish/SystemChecker.Service" --configfile ./.nuget/nuget.config
   - yarn --cwd SystemChecker.Web
-  - dotnet publish ./SystemChecker.Web/SystemChecker.Web.csproj -o "../publish/SystemChecker.Web" --configfile ../.nuget/nuget.config
+  - dotnet publish ./SystemChecker.Web/SystemChecker.Web.csproj -o "../publish/SystemChecker.Web" --configfile ./.nuget/nuget.config
   - dotnet publish ./SystemChecker.Migrations/SystemChecker.Migrations.csproj -o "../publish/SystemChecker.Migrations"
   
 after_success:
