@@ -42,12 +42,12 @@ before_deploy:
   - cd ./publish/SystemChecker.Service && zip -q -r ../SystemChecker.Service.zip *
   - cd ../SystemChecker.Web && zip -q -r ../SystemChecker.Web.zip *
   - cd ../SystemChecker.Migrations && zip -q -r ../SystemChecker.Migrations.zip *
-  - cd ../ && pwd && ls
+  - cd ../ && pwd && ls && cd ../
 deploy:
   provider: releases
   api_key: "${GITHUB_TOKEN}"
   file_glob: true
-  file: *.zip
+  file: publish/*.zip
   skip_cleanup: true
   on:
     condition: $deploy = true
