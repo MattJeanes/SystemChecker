@@ -74,7 +74,7 @@ Environment variables:
   - Example: `localhost:5000`
   - Used by ASP.NET Core to bind the frontend site to
 - `UseHttps`
-  - Boolean, defaults to `true`
+  - Boolean, defaults to `false`
   - If enabled, redirects all http traffic to https
   
 ## First-time setup
