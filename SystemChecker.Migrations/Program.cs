@@ -1,7 +1,7 @@
 ﻿using DbUp;
 using Microsoft.Extensions.Configuration;
-using NDesk.Options;
 using System;
+using System.Data.SqlClient;
 using System.IO;
 
 namespace SystemChecker.Migrations
@@ -16,8 +16,12 @@ namespace SystemChecker.Migrations
             var database = "SystemChecker";
             try
             {
+                var connString = _config.GetConnectionString(database);
+                var builder = new SqlConnectionStringBuilder(connString);
+                Console.WriteLine($"Running migrations, database: {builder.InitialCatalog}, server: {builder.DataSource}");
+
                 var upgrader = DeployChanges.To
-                    .SqlDatabase(_config.GetConnectionString(database))
+                    .SqlDatabase(connString)
                     .JournalToSqlTable("dbo", "tblVersionInfo")
                     .WithExecutionTimeout(TimeSpan.FromSeconds(120))
                     .WithScriptsFromFileSystem(scriptsFolder)
@@ -29,9 +33,6 @@ namespace SystemChecker.Migrations
 
                 if (!result.Successful)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(result.Error);
-                    Console.ResetColor();
                     retVal = 1;
                 }
                 else
@@ -61,7 +62,8 @@ namespace SystemChecker.Migrations
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json");
+                .AddJsonFile("appsettings.json")
+                .AddEnvironmentVariables();
 
             return builder.Build();
         }
