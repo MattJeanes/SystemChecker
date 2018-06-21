@@ -49,12 +49,6 @@ import {
 } from "@angular/material";
 
 import {
-    DataTableModule,
-    DropdownModule,
-    GrowlModule,
-} from "primeng/primeng";
-
-import {
     CovalentDialogsModule,
     CovalentLoadingModule,
 } from "@covalent/core";
@@ -64,6 +58,10 @@ import {
 } from "@swimlane/ngx-charts";
 
 registerLocaleData(localeGB);
+
+export function JwtTokenGetter(): string {
+    return store.get("token");
+}
 
 const routes: Routes = [
     { path: "", redirectTo: "dashboard", pathMatch: "full" },
@@ -100,8 +98,11 @@ routes.forEach(x => {
         HttpModule,
         FormsModule,
         RouterModule.forRoot(routes),
-        DataTableModule,
-        DropdownModule,
+        JwtModule.forRoot({
+            config: {
+                tokenGetter: JwtTokenGetter,
+            },
+        }),
         MatButtonModule,
         MatCardModule,
         MatInputModule,
@@ -111,20 +112,12 @@ routes.forEach(x => {
         ReactiveFormsModule,
         MatDatepickerModule,
         MatNativeDateModule,
-        GrowlModule,
         CovalentDialogsModule,
         NgxChartsModule,
         MatTooltipModule,
         CovalentLoadingModule,
         MatIconModule,
         HttpClientModule,
-        JwtModule.forRoot({
-            config: {
-                tokenGetter: () => {
-                    return store.get("token");
-                },
-            },
-        }),
     ],
     declarations: [
         AppComponent,

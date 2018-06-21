@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
+import { first } from "rxjs/operators";
 import { AppService, UtilService } from "../services";
 
 @Component({
@@ -20,7 +21,7 @@ export class LoginComponent implements OnInit {
             this.router.navigate(["/"]);
             return;
         }
-        const queryParams = await this.activatedRoute.queryParams.first().toPromise();
+        const queryParams = await this.activatedRoute.queryParams.pipe(first()).toPromise();
         this.returnUrl = queryParams.return;
         try {
             this.auto = true;

@@ -1,7 +1,8 @@
 import { Component, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { HubConnectionBuilder, HttpTransportType } from "@aspnet/signalr";
+import { HttpTransportType, HubConnectionBuilder } from "@aspnet/signalr";
 import { TdLoadingService } from "@covalent/core";
+import { first } from "rxjs/operators";
 
 import { ICheck, ICheckResults } from "../app.interfaces";
 import { AppService, MessageService, UtilService } from "../services";
@@ -51,7 +52,7 @@ export class DetailsComponent implements OnInit, OnDestroy {
     }
     public async ngOnInit() {
         try {
-            const params = await this.activatedRoute.params.first().toPromise();
+            const params = await this.activatedRoute.params.pipe(first()).toPromise();
             this.checkID = parseInt(params.id);
             this.check = await this.appService.get(this.checkID);
             await this.loadResults();

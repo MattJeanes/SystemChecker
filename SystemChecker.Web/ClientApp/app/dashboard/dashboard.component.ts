@@ -1,7 +1,6 @@
-import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, NgZone, OnDestroy, OnInit /*ViewChild*/ } from "@angular/core";
 import { Router } from "@angular/router";
-import { HubConnectionBuilder, HttpTransportType } from "@aspnet/signalr";
-import { DataTable, SelectItem } from "primeng/primeng";
+import { HttpTransportType, HubConnectionBuilder } from "@aspnet/signalr";
 
 import { CheckResultStatus } from "../app.enums";
 import { ICheck, ICheckGroup, ICheckType, IEnvironment, ISettings } from "../app.interfaces";
@@ -37,31 +36,31 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
             }],
         }];
     public checks: ICheck[] = [];
-    public activeOptions: SelectItem[] = [
-        { label: "Yes", value: true },
-        { label: "No", value: false },
-        { label: "All", value: null },
-    ];
-    public resultOptions: SelectItem[] = [
-        { label: "All", value: null },
-        { label: "Successful", value: CheckResultStatus.Success },
-        { label: "Warning", value: CheckResultStatus.Warning },
-        { label: "Failed", value: CheckResultStatus.Failed },
-        { label: "Not run", value: CheckResultStatus.NotRun },
-    ];
+    //public activeOptions: SelectItem[] = [
+    //    { label: "Yes", value: true },
+    //    { label: "No", value: false },
+    //    { label: "All", value: null },
+    //];
+    //public resultOptions: SelectItem[] = [
+    //    { label: "All", value: null },
+    //    { label: "Successful", value: CheckResultStatus.Success },
+    //    { label: "Warning", value: CheckResultStatus.Warning },
+    //    { label: "Failed", value: CheckResultStatus.Failed },
+    //    { label: "Not run", value: CheckResultStatus.NotRun },
+    //];
     public activeOption: boolean | null = true;
     public resultOption: CheckResultStatus | null = null;
-    public environmentOptions: SelectItem[] = [];
+    //public environmentOptions: SelectItem[] = [];
     public environmentOption: number | null = null;
     public environmentLookup: {
         [key: string]: IEnvironment;
     };
-    public checkGroupOptions: SelectItem[] = [];
+    //public checkGroupOptions: SelectItem[] = [];
     public checkGroupOption: number | null = null;
     public checkGroupLookup: {
         [key: string]: ICheckGroup;
     };
-    public typeOptions: SelectItem[] = [];
+    //public typeOptions: SelectItem[] = [];
     public typeOption: number | null = null;
     public typeLookup: {
         [key: string]: ICheckType;
@@ -76,7 +75,7 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
         Global: {},
     };
     public types: ICheckType[] = [];
-    @ViewChild("dt") private dataTable: DataTable;
+    //@ViewChild("dt") private dataTable: DataTable;
     private hub = new HubConnectionBuilder()
         .withUrl("hub/dashboard", { transport: HttpTransportType.WebSockets })
         .build();
@@ -100,32 +99,32 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
             delete this.types;
             this.types = await this.appService.getTypes();
 
-            delete this.environmentLookup;
-            this.environmentLookup = {};
-            delete this.environmentOptions;
-            this.environmentOptions = [{ label: "All", value: null }];
-            this.settings.Environments.map(x => {
-                this.environmentLookup[x.ID] = x;
-                this.environmentOptions.push({ label: x.Name, value: x.ID });
-            });
+            //delete this.environmentLookup;
+            //this.environmentLookup = {};
+            //delete this.environmentOptions;
+            //this.environmentOptions = [{ label: "All", value: null }];
+            //this.settings.Environments.map(x => {
+            //    this.environmentLookup[x.ID] = x;
+            //    this.environmentOptions.push({ label: x.Name, value: x.ID });
+            //});
 
-            delete this.typeLookup;
-            this.typeLookup = {};
-            delete this.typeOptions;
-            this.typeOptions = [{ label: "All", value: null }];
-            this.types.map(x => {
-                this.typeLookup[x.ID] = x;
-                this.typeOptions.push({ label: x.Name, value: x.ID });
-            });
+            //delete this.typeLookup;
+            //this.typeLookup = {};
+            //delete this.typeOptions;
+            //this.typeOptions = [{ label: "All", value: null }];
+            //this.types.map(x => {
+            //    this.typeLookup[x.ID] = x;
+            //    this.typeOptions.push({ label: x.Name, value: x.ID });
+            //});
 
-            delete this.checkGroupLookup;
-            this.checkGroupLookup = {};
-            delete this.checkGroupOptions;
-            this.checkGroupOptions = [{ label: "All", value: null }];
-            this.settings.CheckGroups.map(x => {
-                this.checkGroupLookup[x.ID] = x;
-                this.checkGroupOptions.push({ label: x.Name, value: x.ID });
-            });
+            //delete this.checkGroupLookup;
+            //this.checkGroupLookup = {};
+            //delete this.checkGroupOptions;
+            //this.checkGroupOptions = [{ label: "All", value: null }];
+            //this.settings.CheckGroups.map(x => {
+            //    this.checkGroupLookup[x.ID] = x;
+            //    this.checkGroupOptions.push({ label: x.Name, value: x.ID });
+            //});
 
             delete this.checks;
             this.checks = await this.appService.getAll(true);
@@ -150,8 +149,8 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
         }
     }
     public updateActiveFilter() {
-        const col = this.dataTable.columns.find(x => x.header === "Active")!;
-        this.dataTable.filter(this.activeOption, col.field, col.filterMatchMode);
+        //const col = this.dataTable.columns.find(x => x.header === "Active")!;
+        //this.dataTable.filter(this.activeOption, col.field, col.filterMatchMode);
         this.updateCharts();
     }
     public async run(check: ICheck) {
@@ -209,29 +208,29 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
             };
         });
     }
-    public updateResultFilter() {
-        const col = this.dataTable.columns.find(x => x.header === "Last Result Status")!;
-        this.dataTable.filter(this.resultOption, col.field, col.filterMatchMode);
-    }
-    public updateEnvironmentFilter() {
-        const col = this.dataTable.columns.find(x => x.header === "Environment")!;
-        this.dataTable.filter(this.environmentOption, col.field, col.filterMatchMode);
-    }
-    public updateTypeFilter() {
-        const col = this.dataTable.columns.find(x => x.header === "Type")!;
-        this.dataTable.filter(this.typeOption, col.field, col.filterMatchMode);
-    }
-    public updateCheckGroupFilter() {
-        const col = this.dataTable.columns.find(x => x.header === "Group")!;
-        this.dataTable.filter(this.checkGroupOption, col.field, col.filterMatchMode);
-    }
+    //public updateResultFilter() {
+    //    const col = this.dataTable.columns.find(x => x.header === "Last Result Status")!;
+    //    this.dataTable.filter(this.resultOption, col.field, col.filterMatchMode);
+    //}
+    //public updateEnvironmentFilter() {
+    //    const col = this.dataTable.columns.find(x => x.header === "Environment")!;
+    //    this.dataTable.filter(this.environmentOption, col.field, col.filterMatchMode);
+    //}
+    //public updateTypeFilter() {
+    //    const col = this.dataTable.columns.find(x => x.header === "Type")!;
+    //    this.dataTable.filter(this.typeOption, col.field, col.filterMatchMode);
+    //}
+    //public updateCheckGroupFilter() {
+    //    const col = this.dataTable.columns.find(x => x.header === "Group")!;
+    //    this.dataTable.filter(this.checkGroupOption, col.field, col.filterMatchMode);
+    //}
     public onChartSelect(results: IChart, event: { name: string, value: number }) {
         const selected = results.results.find(x => x.name === event.name);
         if (selected) {
             this.resultOption = selected.type;
             this.environmentOption = results.environmentID;
-            this.updateResultFilter();
-            this.updateEnvironmentFilter();
+            //this.updateResultFilter();
+            //this.updateEnvironmentFilter();
         }
     }
     public onCheckSelected(event: { data: ICheck }) {
@@ -240,8 +239,8 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
     public setEnvironment(id: number) {
         this.environmentOption = id;
         this.resultOption = null;
-        this.updateEnvironmentFilter();
-        this.updateResultFilter();
+        //this.updateEnvironmentFilter();
+        //this.updateResultFilter();
     }
     public trackChart(index: number, chart: IChart) {
         return chart ? chart.environmentID : undefined;

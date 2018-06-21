@@ -2,6 +2,7 @@ import { Location } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
+import { first } from "rxjs/operators";
 
 import { ICheckDetail, ICheckNotification, ICheckNotificationType, ICheckSchedule, ICheckType, IOption, ISettings, ISubCheck, ISubCheckType } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
@@ -73,7 +74,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
         private router: Router, private formBuilder: FormBuilder) { this.createForm(); }
     public async ngOnInit() {
         try {
-            const params = await this.activatedRoute.params.first().toPromise();
+            const params = await this.activatedRoute.params.pipe(first()).toPromise();
             const id = parseInt(params.id);
             if (id) {
                 this.check = await this.appService.getDetails(id);

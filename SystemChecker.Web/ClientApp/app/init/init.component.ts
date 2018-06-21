@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
+import { first } from "rxjs/operators";
 import { AppService, UtilService } from "../services";
 
 @Component({
@@ -18,7 +19,7 @@ export class InitComponent implements OnInit {
     public async ngOnInit() {
         try {
             this.loading = true;
-            const queryParams = await this.activatedRoute.queryParams.first().toPromise();
+            const queryParams = await this.activatedRoute.queryParams.pipe(first()).toPromise();
             this.returnUrl = queryParams.return;
             const result = await this.appService.getInit();
             if (!result.Required) {
