@@ -76,9 +76,9 @@
   dependencies:
     tslib "^1.7.1"
 
-"@aspnet/signalr@^1.0.0-preview2-30187":
-  version "1.0.0-preview2-30187"
-  resolved "https://dotnet.myget.org/F/aspnetcore-dev/npm/@aspnet/signalr/-/@aspnet/signalr-1.0.0-preview2-30187.tgz#f19fda67a74f149d91b8a1ebb6cb746a0fe151c9"
+"@aspnet/signalr@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@aspnet/signalr/-/signalr-1.0.0.tgz#26b10a32014a65c540cc5053cffa883c320788ce"
 
 "@auth0/angular-jwt@1.0.0-beta.9":
   version "1.0.0-beta.9"

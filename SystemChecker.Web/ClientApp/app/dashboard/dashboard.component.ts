@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
-import { HubConnection, TransportType } from "@aspnet/signalr";
+import { HubConnectionBuilder, HttpTransportType } from "@aspnet/signalr";
 import { DataTable, SelectItem } from "primeng/primeng";
 
 import { CheckResultStatus } from "../app.enums";
@@ -77,7 +77,9 @@ export class DashboardComponent implements AfterViewInit, OnInit, OnDestroy {
     };
     public types: ICheckType[] = [];
     @ViewChild("dt") private dataTable: DataTable;
-    private hub = new HubConnection("hub/dashboard", { transport: TransportType.WebSockets });
+    private hub = new HubConnectionBuilder()
+        .withUrl("hub/dashboard", { transport: HttpTransportType.WebSockets })
+        .build();
     private hubReady: boolean = false;
     private loading: boolean = false;
     constructor(private appService: AppService, private messageService: MessageService, private ngZone: NgZone, private router: Router) {

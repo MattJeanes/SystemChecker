@@ -14,9 +14,6 @@ namespace SystemChecker.Model.Data.Entities
         [Key]
         public int ID { get; set; }
 
-        [Column("ID")]
-        public Enums.CheckType Type { get; set; }
-
         public string Name { get; set; }
 
         public List<CheckTypeOption> Options { get; set; }
