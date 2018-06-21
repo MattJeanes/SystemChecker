@@ -22,3 +22,20 @@
 .chart {
     height: 300px;
 }
+
+.mat-row {
+    cursor: pointer;
+
+    &:hover {
+        background-color: #efefef;
+    }
+}
+
+.table-header {
+    min-height: 64px;
+
+    .mat-form-field {
+        font-size: 14px;
+        width: 100%;
+    }
+}

@@ -8,7 +8,6 @@ using System.Diagnostics;
 using SystemChecker.Web.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using SystemChecker.Model;
-using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.AspNetCore.Server.HttpSys;
 using System.Runtime.InteropServices;
 using System.Reflection;

@@ -80,6 +80,7 @@
     "zone.js": "^0.8.26"
   },
   "resolutions": {
-    "@types/tapable": "1.0.0"
+    "@types/tapable": "1.0.0",
+    "@types/webpack": "^4.4.0"
   }
 }

@@ -94,7 +94,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
             await this.updateForm();
             this.updateUrl();
         } catch (e) {
-            this.messageService.error(`Failed to load: ${e.toString()}`);
+            this.messageService.error("Failed to load", e.toString());
             console.error(e);
         }
     }
@@ -110,7 +110,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
             this.updateUrl();
             this.messageService.success("Saved check");
         } catch (e) {
-            this.messageService.error(`Failed to save: ${e.toString()}`);
+            this.messageService.error("Failed to save", e.toString());
         } finally {
             this.saving = false;
         }
@@ -124,7 +124,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
                 this.router.navigate(["/dashboard"]);
             }
         } catch (e) {
-            this.messageService.error(`Failed to delete: ${e.toString()}`);
+            this.messageService.error("Failed to delete", e.toString());
         }
     }
     public addSchedule() {

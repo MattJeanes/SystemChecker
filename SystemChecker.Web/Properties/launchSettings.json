@@ -12,7 +12,9 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings:SystemChecker": "Database=SystemCheckerDev;Data Source=mb-sql-dev;Integrated Security=True",
+        "AppSettings:Url": "http://localhost:51114"
       }
     },
     "SystemChecker.Web": {
