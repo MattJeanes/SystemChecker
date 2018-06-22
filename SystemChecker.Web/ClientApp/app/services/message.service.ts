@@ -14,7 +14,7 @@ export class MessageService {
     public addMessage(message: IMessage) {
         this.snackbar.open(message.summary, (message.detail ? "Details" : "Okay").toUpperCase(), {
             panelClass: `snackbar-${message.severity}`,
-            duration: message.severity == "error" ? 5000 : 2000,
+            duration: message.severity === "error" ? 5000 : 2000,
         }).onAction().subscribe(() => {
             if (message.detail) {
                 this.dialogService.openAlert({
