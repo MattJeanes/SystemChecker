@@ -13,7 +13,8 @@ export class MessageService {
     constructor(private snackbar: MatSnackBar, private dialogService: TdDialogService) { }
     public addMessage(message: IMessage) {
         this.snackbar.open(message.summary, (message.detail ? "Details" : "Okay").toUpperCase(), {
-            panelClass: message.severity,
+            panelClass: `snackbar-${message.severity}`,
+            duration: message.severity == "error" ? 5000 : 2000,
         }).onAction().subscribe(() => {
             if (message.detail) {
                 this.dialogService.openAlert({

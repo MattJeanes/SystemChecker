@@ -43,13 +43,13 @@ import {
     MatIconModule,
     MatInputModule,
     MatNativeDateModule,
+    MatPaginatorModule,
     MatSelectModule,
+    MatSnackBarModule,
+    MatSortModule,
+    MatTableModule,
     MatTabsModule,
     MatTooltipModule,
-    MatSnackBarModule,
-    MatTableModule,
-    MAT_SNACK_BAR_DEFAULT_OPTIONS,
-    MatSortModule,
 } from "@angular/material";
 
 import {
@@ -125,6 +125,7 @@ routes.forEach(x => {
         MatSnackBarModule,
         MatTableModule,
         MatSortModule,
+        MatPaginatorModule,
     ],
     declarations: [
         AppComponent,
@@ -153,7 +154,6 @@ routes.forEach(x => {
         { provide: LOCALE_ID, useValue: "en-GB" },
         { provide: MAT_DATE_LOCALE, useValue: "en-GB" },
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-        { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 5000 } },
     ],
     entryComponents: [
         RunCheckComponent,

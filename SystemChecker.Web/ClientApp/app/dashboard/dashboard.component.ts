@@ -2,11 +2,11 @@ import { Component, NgZone, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
 import { HttpTransportType, HubConnectionBuilder } from "@aspnet/signalr";
 
+import { MatPaginator, MatSort, MatTableDataSource } from "@angular/material";
 import { CheckResultStatus } from "../app.enums";
 import { ICheck, ICheckGroup, ICheckType, IEnvironment, ISettings } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
 import { AppService, MessageService } from "../services";
-import { MatTableDataSource, MatSort } from "@angular/material";
 
 interface IChart {
     name: string;
@@ -39,7 +39,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     public checks: ICheck[] = [];
     public dataSource: MatTableDataSource<ICheck>;
     public displayedColumns = ["name", "active", "group", "environment", "type", "lastResultStatus", "options"];
-    @ViewChild("sort") public sort: MatSort;
+    @ViewChild(MatSort) public sort: MatSort;
+    @ViewChild(MatPaginator) public paginator: MatPaginator;
 
     public filter: string;
     public activeOnly: boolean = true;
@@ -107,15 +108,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.checks = await this.appService.getAll(true);
             this.dataSource = new MatTableDataSource(this.checks);
             this.dataSource.sort = this.sort;
+            this.dataSource.paginator = this.paginator;
             console.log(this.sort);
-            this.dataSource.filterPredicate = (check, value) => {
-                return `${check.Name}
-${check.Active ? "Yes" : "No"}
-${check.GroupID ? this.checkGroupLookup[check.GroupID].Name : "None"}
-${this.environmentLookup[check.EnvironmentID!].Name}
-${this.typeLookup[check.TypeID!].Name}
-${CheckResultStatus[check.LastResultStatus!]}
-`.toLowerCase().includes(value);
+            this.dataSource.filterPredicate = (check, valueRaw) => {
+                if (!valueRaw) { return true; }
+                const fields = [
+                    `name: ${check.Name}`,
+                    `active: ${check.Active ? "Yes" : "No"}`,
+                    `group: ${check.GroupID ? this.checkGroupLookup[check.GroupID].Name : "None"}`,
+                    `env: ${this.environmentLookup[check.EnvironmentID!].Name}`,
+                    `type: ${this.typeLookup[check.TypeID!].Name}`,
+                    `status: ${CheckResultStatus[check.LastResultStatus!]}`,
+                ].map(x => x.replace(/ /g, "").toLowerCase());
+                const values = valueRaw.split(",").filter(x => x);
+                for (const value of values) {
+                    let match = false;
+                    for (const field of fields) {
+                        if (field.includes(value)) {
+                            match = true;
+                        }
+                    }
+                    if (!match) { return false; }
+                }
+                return true;
             };
             this.dataSource.sortingDataAccessor = (check, header) => {
                 console.log(header);
@@ -127,11 +142,11 @@ ${CheckResultStatus[check.LastResultStatus!]}
                     case "group":
                         return check.GroupID ? this.checkGroupLookup[check.GroupID].Name : "None";
                     case "environment":
-                        return this.environmentLookup[check.EnvironmentID!].Name
+                        return this.environmentLookup[check.EnvironmentID!].Name;
                     case "type":
-                        return this.typeLookup[check.TypeID!].Name
+                        return this.typeLookup[check.TypeID!].Name;
                     case "lastResultStatus":
-                        return CheckResultStatus[check.LastResultStatus!]
+                        return CheckResultStatus[check.LastResultStatus!];
                     default:
                         return check[header];
                 }
@@ -154,7 +169,7 @@ ${CheckResultStatus[check.LastResultStatus!]}
         }
     }
     public applyFilter() {
-        this.dataSource.filter = this.filter.replace(/ /g, "").toLowerCase();
+        this.dataSource.filter = this.filter ? this.filter.replace(/ /g, "").toLowerCase() : "";
     }
     public async run(check: ICheck) {
         await this.appService.run(RunCheckComponent, check);
@@ -214,7 +229,7 @@ ${CheckResultStatus[check.LastResultStatus!]}
     public onChartSelect(results: IChart, event: { name: string, value: number }) {
         const selected = results.results.find(x => x.name === event.name);
         if (selected) {
-            this.filter = `${this.environmentLookup[results.environmentID].Name} ${CheckResultStatus[selected.type!]}`;
+            this.filter = `env:${this.environmentLookup[results.environmentID].Name}, status:${CheckResultStatus[selected.type!]}`;
             this.applyFilter();
         }
     }
@@ -222,7 +237,7 @@ ${CheckResultStatus[check.LastResultStatus!]}
         this.router.navigate(["/details", event.data.ID]);
     }
     public setEnvironment(id: number) {
-        this.filter = this.environmentLookup[id].Name;
+        this.filter = `env:${this.environmentLookup[id].Name}`;
         this.applyFilter();
     }
     public trackChart(index: number, chart: IChart) {
