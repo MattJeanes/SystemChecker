@@ -8,7 +8,7 @@ const path = require("path");
 const fs = require("fs");
 
 const outputDir = "./wwwroot/dist";
-global.aot = true;
+global.aot = false; // TEMP DISABLED, TODO FIX: https://github.com/webpack-contrib/mini-css-extract-plugin/issues/186
 
 function getEnvOptions() {
     const options = [];
