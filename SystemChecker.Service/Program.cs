@@ -54,7 +54,7 @@ namespace SystemChecker.Service
             var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             var config = new ConfigurationBuilder();
             config.SetBasePath(workingDirectory)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true);
             config.AddEnvironmentVariables();
 
