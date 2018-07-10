@@ -73,7 +73,7 @@ const routes: Routes = [
     { path: "edit", component: EditComponent, data: { title: "New Check" } },
     { path: "edit/:id", component: EditComponent, data: { title: "Edit Check" } },
     { path: "edit/:id/:copy", component: EditComponent, data: { title: "Copy Check" } },
-    { path: "settings", component: SettingsComponent, data: { title: "Settings" } },
+    { path: "settings", component: SettingsComponent, data: { title: "Settings", noSettingsLink: true } },
     { path: "details/:id", component: DetailsComponent, data: { title: "Details" } },
     { path: "login", component: LoginComponent, data: { title: "Login", noDashboardLink: true } },
     { path: "user", component: UserComponent, data: { title: "User" } },

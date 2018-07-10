@@ -23,6 +23,10 @@ export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy 
 
     public settings: ISettings;
     public slackChannels?: ISlackChannel[];
+    public httpMethods = [
+        "GET",
+        "POST",
+    ];
 
     get connStrings(): IConnString[] | undefined {
         if (this.settings) {

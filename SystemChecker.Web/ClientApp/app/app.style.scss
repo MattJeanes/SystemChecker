@@ -1,9 +1,29 @@
 .link {
-    cursor: pointer;
-    width: fit-content;
+    color: inherit;
+    text-decoration: inherit;
 }
 
 .user {
+    text-align: center;
+}
+
+.fit {
+    width: fit-content;
+}
+
+.buttons {
     float: right;
-    text-align:center;
+    display: flex;
+    justify-content: space-between;
+    > div {
+        padding-right: 20px;
+    }
+}
+
+.settings {
+    display: flex;
+
+    a {
+        align-self: center;
+    }
 }

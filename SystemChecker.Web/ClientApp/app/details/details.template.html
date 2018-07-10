@@ -48,6 +48,6 @@
     <mat-card-actions>
         <button mat-raised-button (click)="back()">Back</button>
         <button mat-raised-button color="primary" (click)="run()">Run</button>
-        <button mat-raised-button color="accent" routerLink="/edit/{{checkID}}" [disabled]="!checkID">Edit</button>
+        <a mat-raised-button color="accent" routerLink="/edit/{{checkID}}" [disabled]="!checkID">Edit</a>
     </mat-card-actions>
 </mat-card>

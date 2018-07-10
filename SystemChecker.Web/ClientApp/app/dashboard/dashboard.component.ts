@@ -1,8 +1,8 @@
 import { Component, NgZone, OnDestroy, OnInit, ViewChild } from "@angular/core";
-import { Router } from "@angular/router";
-import { HttpTransportType, HubConnectionBuilder } from "@aspnet/signalr";
-
 import { MatPaginator, MatSort, MatTableDataSource } from "@angular/material";
+import { HttpTransportType, HubConnectionBuilder } from "@aspnet/signalr";
+import * as store from "store";
+
 import { CheckResultStatus } from "../app.enums";
 import { ICheck, ICheckGroup, ICheckType, IEnvironment, ISettings } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
@@ -43,7 +43,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     @ViewChild(MatPaginator) public paginator: MatPaginator;
 
     public filter: string;
-    public activeOnly: boolean = true;
+    public get activeOnly() {
+        return store.get("activeOnly", true) as boolean;
+    }
+    public set activeOnly(value: boolean) {
+        store.set("activeOnly", value);
+    }
     public environmentLookup: {
         [key: string]: IEnvironment;
     };
@@ -68,7 +73,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         .build();
     private hubReady: boolean = false;
     private loading: boolean = false;
-    constructor(private appService: AppService, private messageService: MessageService, private ngZone: NgZone, private router: Router) {
+    constructor(private appService: AppService, private messageService: MessageService, private ngZone: NgZone) {
         this.hub.on("check", () => {
             if (this.loading) { return; }
             // Because this is a call from the server, Angular change detection won't detect it so we must force ngZone to run
@@ -109,8 +114,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.dataSource = new MatTableDataSource(this.checks);
             this.dataSource.sort = this.sort;
             this.dataSource.paginator = this.paginator;
-            console.log(this.sort);
             this.dataSource.filterPredicate = (check, valueRaw) => {
+                if (this.activeOnly && !check.Active) { return false; }
                 if (!valueRaw) { return true; }
                 const fields = [
                     `name: ${check.Name}`,
@@ -152,6 +157,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 }
             };
             this.updateCharts();
+            this.applyFilter();
         } catch (e) {
             this.messageService.error("Failed to load checks", e.toString());
         } finally {
@@ -169,7 +175,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
     }
     public applyFilter() {
-        this.dataSource.filter = this.filter ? this.filter.replace(/ /g, "").toLowerCase() : "";
+        this.dataSource.filter = `${(this.activeOnly ? "active:yes," : "")}${(this.filter ? this.filter.replace(/ /g, "").toLowerCase() : "")}`;
     }
     public async run(check: ICheck) {
         await this.appService.run(RunCheckComponent, check);
@@ -233,8 +239,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.applyFilter();
         }
     }
-    public onCheckSelected(event: { data: ICheck }) {
-        this.router.navigate(["/details", event.data.ID]);
+    public onActiveOnlyChange() {
+        this.updateCharts();
+        this.applyFilter();
     }
     public setEnvironment(id: number) {
         this.filter = `env:${this.environmentLookup[id].Name}`;

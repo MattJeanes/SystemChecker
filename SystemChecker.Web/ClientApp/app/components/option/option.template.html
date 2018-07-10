@@ -70,4 +70,11 @@
             </mat-select>
         </mat-form-field>
     </div>
+    <div *ngIf="option.OptionType === OptionType.HttpMethod">
+        <mat-form-field>
+            <mat-select [multiple]="option.Multiple" [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired">
+                <mat-option *ngFor="let method of httpMethods" [value]="method">{{method}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
 </div>

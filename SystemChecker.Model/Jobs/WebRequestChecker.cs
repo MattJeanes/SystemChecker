@@ -26,6 +26,7 @@ namespace SystemChecker.Model.Jobs
             Authentication = 6,
             TimeoutMS = 9,
             TimeWarnMS = 10,
+            HttpMethod = 14,
         }
         private enum SubChecks
         {
@@ -51,6 +52,7 @@ namespace SystemChecker.Model.Jobs
             int? authId = _check.Data.TypeOptions[((int)Settings.Authentication).ToString()];
             int timeoutMS = _check.Data.TypeOptions[((int)Settings.TimeoutMS).ToString()];
             int? timeWarnMS = _check.Data.TypeOptions[((int)Settings.TimeWarnMS).ToString()];
+            string httpMethod = _check.Data.TypeOptions[((int)Settings.HttpMethod).ToString()];
 
             if (authId.HasValue && authId.Value > 0)
             {
@@ -71,14 +73,13 @@ namespace SystemChecker.Model.Jobs
                 client.Timeout = TimeSpan.FromMilliseconds(timeoutMS);
 
                 var headers = client.DefaultRequestHeaders;
-
                 headers.UserAgent.TryParseAdd("SystemChecker");
 
                 try
                 {
                     _logger.Info($"Calling {url}");
                     timer.Start();
-                    var response = await client.GetAsync("");
+                    var response = await client.SendAsync(new HttpRequestMessage(new HttpMethod(httpMethod ?? "GET"), ""));
                     timer.Stop();
                     if (timer.ElapsedMilliseconds > timeWarnMS)
                     {

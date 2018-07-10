@@ -25,7 +25,7 @@
                         </mat-select>
                     </mat-form-field>
                     <mat-form-field class="ui-g-12 full">
-                        <mat-select placeholder="Type" formControlName="type" (change)="onTypeChange()">
+                        <mat-select placeholder="Type" formControlName="type" (ngModelChange)="onTypeChange()">
                             <mat-option *ngFor="let type of types" [value]="type.ID">{{type.Name}}</mat-option>
                         </mat-select>
                     </mat-form-field>
@@ -44,7 +44,7 @@
                         <div *ngFor="let subcheck of subChecks.controls; let i=index" [formGroupName]="i">
                             <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
                             <mat-form-field class="ui-g-12 full">
-                                <mat-select placeholder="Type" formControlName="type" (change)="onSubCheckTypeChange(i)">
+                                <mat-select placeholder="Type" formControlName="type" (ngModelChange)="onSubCheckTypeChange(i)">
                                     <mat-option *ngFor="let type of subCheckTypes" [value]="type.ID">{{type.Name}}</mat-option>
                                 </mat-select>
                             </mat-form-field>
@@ -91,7 +91,7 @@
                                 </mat-form-field>
                             </div>
                             <mat-form-field class="ui-g-12 full">
-                                <mat-select placeholder="Type" formControlName="type" (change)="onNotificationTypeChange(i)">
+                                <mat-select placeholder="Type" formControlName="type" (ngModelChange)="onNotificationTypeChange(i)">
                                     <mat-option *ngFor="let type of notificationTypes" [value]="type.ID">{{type.Name}}</mat-option>
                                 </mat-select>
                             </mat-form-field>
@@ -116,8 +116,8 @@
         <button mat-raised-button color="primary" (click)="updateForm()" [disabled]="form.pristine || saving">Revert</button>
         <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid || form.pristine || saving">Save</button>
         <button mat-raised-button color="primary" (click)="run()" [disabled]="form.dirty || saving || check.ID === 0">Run</button>
-        <button mat-raised-button color="accent" routerLink="/edit/{{check.ID}}/copy" [disabled]="form.dirty || saving || check.ID === 0">Copy</button>
-        <button mat-raised-button color="accent" routerLink="/details/{{check.ID}}" [disabled]="saving || check.ID === 0">Details</button>
+        <a mat-raised-button color="accent" routerLink="/edit/{{check.ID}}/copy" [disabled]="form.dirty || saving || check.ID === 0">Copy</a>
+        <a mat-raised-button color="accent" routerLink="/details/{{check.ID}}" [disabled]="saving || check.ID === 0">Details</a>
         <button *ngIf="check.ID > 0" mat-raised-button color="warn" (click)="delete()">Delete</button>
     </mat-card-actions>
 </mat-card>
