@@ -5,7 +5,7 @@
       "environmentVariables": {
         "ConnectionStrings:SystemChecker": "Database=SystemCheckerDev;Data Source=mb-sql-dev;Integrated Security=True",
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "AppSettings:Url": "http://localhost:51114"
+        "AppSettings:Url": "https://localhost:44394"
       }
     }
   }

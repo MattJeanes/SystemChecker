@@ -1,6 +1,6 @@
 {
   "iisSettings": {
-    "windowsAuthentication": false,
+    "windowsAuthentication": true,
     "anonymousAuthentication": true,
     "iisExpress": {
       "applicationUrl": "http://localhost:51494/",
@@ -14,7 +14,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ConnectionStrings:SystemChecker": "Database=SystemCheckerDev;Data Source=mb-sql-dev;Integrated Security=True",
-        "AppSettings:Url": "http://localhost:51114"
+        "AppSettings:Url": "https://localhost:44394"
       }
     },
     "SystemChecker.Web": {
