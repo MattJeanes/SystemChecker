@@ -70,7 +70,7 @@ namespace SystemChecker.Model.Jobs
             using (var handler = new HttpClientHandler { Credentials = credentials })
             using (var client = new HttpClient(handler))
             {
-                var request = new HttpRequestMessage(new HttpMethod(httpMethod), url);
+                var request = new HttpRequestMessage(new HttpMethod(httpMethod ?? "GET"), url);
                 request.Headers.UserAgent.TryParseAdd("SystemChecker");
 
                 try
