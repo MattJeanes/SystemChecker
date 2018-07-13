@@ -88,6 +88,11 @@ namespace SystemChecker.Model.Jobs
                     {
                         result.Status = CheckResultStatus.TimeWarning;
                     }
+                    _logger.Info("Request headers:");
+                    foreach (var header in response.RequestMessage.Headers)
+                    {
+                        _logger.Info($"\t{header.Key}: {String.Join(",", header.Value)}");
+                    }
                     _logger.Info("Response headers:");
                     foreach (var header in response.Headers)
                     {

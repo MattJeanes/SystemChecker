@@ -59,7 +59,10 @@ namespace SystemChecker.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
-            app.UseSecurityHeaders();
+            if (!_env.IsDevelopment())
+            {
+                app.UseSecurityHeaders();
+            }
             if (Configuration.GetValue<bool>("UseHttps"))
             {
                 app.UseHttpsRedirection();
