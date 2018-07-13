@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using SystemChecker.Model.Data;
 using SystemChecker.Model.Data.Entities;
@@ -69,23 +70,24 @@ namespace SystemChecker.Model.Jobs
             using (var handler = new HttpClientHandler { Credentials = credentials })
             using (var client = new HttpClient(handler))
             {
-                client.BaseAddress = new Uri(url);
-                client.Timeout = TimeSpan.FromMilliseconds(timeoutMS);
-
-                var headers = client.DefaultRequestHeaders;
-                headers.UserAgent.TryParseAdd("SystemChecker");
+                var request = new HttpRequestMessage(new HttpMethod(httpMethod), url);
+                request.Headers.UserAgent.TryParseAdd("SystemChecker");
 
                 try
                 {
                     _logger.Info($"Calling {url}");
-                    timer.Start();
-                    var response = await client.SendAsync(new HttpRequestMessage(new HttpMethod(httpMethod ?? "GET"), ""));
-                    timer.Stop();
+                    HttpResponseMessage response;
+                    using (var cts = new CancellationTokenSource(timeoutMS))
+                    {
+                        timer.Start();
+                        response = await client.SendAsync(request, cts.Token);
+                        timer.Stop();
+                    }
+
                     if (timer.ElapsedMilliseconds > timeWarnMS)
                     {
                         result.Status = CheckResultStatus.TimeWarning;
                     }
-                    response.EnsureSuccessStatusCode(); // Throw in not success
                     _logger.Info("Response headers:");
                     foreach (var header in response.Headers)
                     {
@@ -94,6 +96,7 @@ namespace SystemChecker.Model.Jobs
                     var responseText = await response.Content.ReadAsStringAsync();
                     _logger.Info("Response text (truncated to 2048 characters):");
                     _logger.Info(responseText.Substring(0, Math.Min(responseText.Length, 2048)));
+                    response.EnsureSuccessStatusCode(); // Throw in not success
                     await _helper.RunSubChecks(_check, _logger, subCheck => RunSubCheck(subCheck, responseText, result));
                 }
                 catch (TaskCanceledException e) when (!e.CancellationToken.IsCancellationRequested)
