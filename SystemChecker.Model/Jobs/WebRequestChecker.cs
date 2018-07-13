@@ -67,6 +67,7 @@ namespace SystemChecker.Model.Jobs
             }
 
             var timer = new Stopwatch();
+            // If this fails with a 401.1 IIS error when calling a site on the same server, see: https://serverfault.com/questions/485006/why-cant-i-log-in-to-a-windows-protected-iis-7-5-directory-on-the-server
             using (var handler = new HttpClientHandler { Credentials = credentials })
             using (var client = new HttpClient(handler))
             {
