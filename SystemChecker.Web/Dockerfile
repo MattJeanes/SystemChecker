@@ -1,23 +1,23 @@
 # Dockerfile
 
 # yarn
-FROM gcr.io/cloud-builders/nodejs/yarn AS yarn
+FROM node AS node
 WORKDIR /yarn
 COPY SystemChecker.Web/ ./
 RUN yarn --pure-lockfile
 RUN yarn run publish
 
 # build project
-FROM gcr.io/cloud-builders/csharp/dotnet AS builder
+FROM microsoft/dotnet:2.1-sdk AS builder
 WORKDIR /build
 
 COPY . .
-COPY --from=yarn /yarn/wwwroot/dist/ ./SystemChecker.Web/wwwroot/dist/
+COPY --from=node /yarn/wwwroot/dist/ ./SystemChecker.Web/wwwroot/dist/
 RUN dotnet restore --configfile ./.nuget/nuget.config
 RUN dotnet publish ./SystemChecker.Web/SystemChecker.Web.csproj --output /app/ --configuration Release
 
 # final
-FROM gcr.io/google-appengine/aspnetcore:2.0
+FROM microsoft/dotnet:2.1-aspnetcore-runtime
 WORKDIR /app
 COPY --from=builder /app .
 ENTRYPOINT ["dotnet", "SystemChecker.Web.dll"]

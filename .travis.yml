@@ -2,7 +2,7 @@ sudo: required
 language: csharp
 mono: none
 cache: yarn
-dotnet: 2.1.104
+dotnet: 2.1.302
 if: tag IS blank
 
 services:
@@ -13,6 +13,8 @@ before_script:
   - export minor=$(cat meta.json | jq '.version.minor')
   - export patch=$(cat meta.json | jq '.version.patch')
   - export version=$major.$minor.$patch
+  - nvm install 10.7.0
+  - nvm use 10.7.0
 
 script:
   - docker build -t mattjeanes/systemchecker.service -t mattjeanes/systemchecker.service:$version -f "SystemChecker.Service/Dockerfile" .
