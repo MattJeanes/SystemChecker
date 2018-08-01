@@ -14,9 +14,6 @@ namespace SystemChecker.Model.Data.Entities
         [Key]
         public int ID { get; set; }
 
-        [Column("ID")]
-        public int Type { get; set; }
-
         [Column("CheckTypeID")]
         public CheckType CheckType { get; set; }
 

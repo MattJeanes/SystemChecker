@@ -2,6 +2,7 @@ import { Location } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
+import { first } from "rxjs/operators";
 
 import { ICheckDetail, ICheckNotification, ICheckNotificationType, ICheckSchedule, ICheckType, IOption, ISettings, ISubCheck, ISubCheckType } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
@@ -73,7 +74,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
         private router: Router, private formBuilder: FormBuilder) { this.createForm(); }
     public async ngOnInit() {
         try {
-            const params = await this.activatedRoute.params.first().toPromise();
+            const params = await this.activatedRoute.params.pipe(first()).toPromise();
             const id = parseInt(params.id);
             if (id) {
                 this.check = await this.appService.getDetails(id);
@@ -93,7 +94,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
             await this.updateForm();
             this.updateUrl();
         } catch (e) {
-            this.messageService.error(`Failed to load: ${e.toString()}`);
+            this.messageService.error("Failed to load", e.toString());
             console.error(e);
         }
     }
@@ -109,7 +110,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
             this.updateUrl();
             this.messageService.success("Saved check");
         } catch (e) {
-            this.messageService.error(`Failed to save: ${e.toString()}`);
+            this.messageService.error("Failed to save", e.toString());
         } finally {
             this.saving = false;
         }
@@ -123,7 +124,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
                 this.router.navigate(["/dashboard"]);
             }
         } catch (e) {
-            this.messageService.error(`Failed to delete: ${e.toString()}`);
+            this.messageService.error("Failed to delete", e.toString());
         }
     }
     public addSchedule() {

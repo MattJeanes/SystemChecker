@@ -3,20 +3,22 @@
     "windowsAuthentication": true,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:51114/",
-      "sslPort": 0
+      "applicationUrl": "http://localhost:51494/",
+      "sslPort": 44394
     }
   },
   "profiles": {
-    "SystemChecker.Web": {
+    "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "AppSettings:Url": "http://localhost:51114",
+        "ASPNETCORE_ENVIRONMENT": "Development",
         "ConnectionStrings:SystemChecker": "Database=SystemCheckerDev;Data Source=mb-sql-dev;Integrated Security=True",
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "http://localhost:51114/"
+        "AppSettings:Url": "https://localhost:44394"
+      }
+    },
+    "SystemChecker.Web": {
+      "commandName": "Project"
     }
   }
 }

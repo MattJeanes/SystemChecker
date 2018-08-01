@@ -1,80 +1,75 @@
-<mat-card>
-    <mat-card-content>
-        <div class="buttons">
-            <button mat-raised-button color="primary" routerLink="/edit/0">Add new</button>
-            <button mat-raised-button color="primary" routerLink="/settings">Settings</button>
-        </div>
-        <div *ngFor="let results of chart; trackBy: trackChart" class="ui-g ui-g-12 ui-lg-6 ui-xl-4 chart">
-            <span class="environment" (click)="setEnvironment(results.environmentID)">{{results.name}}</span>
-            <ngx-charts-advanced-pie-chart [scheme]="chartColors"
-                                           [results]="results.results"
-                                           (select)="onChartSelect(results, $event)">
-            </ngx-charts-advanced-pie-chart>
-        </div>
-        <div class="ui-g-12">
-            <p-dataTable #dt [value]="checks" [paginator]="true" [rowsPerPageOptions]="[10,25,50,100]" [rows]="25" [responsive]="true" selectionMode="single" (onRowSelect)="onCheckSelected($event)">
-                <p-column header="Name" field="Name" sortable="true" [filter]="true"></p-column>
-                <p-column header="Active" field="Active" sortable="true" [filter]="true" filterMatchMode="equals" [style]="{'overflow':'visible'}">
-                    <ng-template pTemplate="filter" let-col>
-                        <p-dropdown [options]="activeOptions" [(ngModel)]="activeOption" [style]="{'width':'100%'}" (onChange)="updateActiveFilter()"
-                                    styleClass="ui-column-filter"></p-dropdown>
-                    </ng-template>
-                    <ng-template let-check="rowData" pTemplate="body">
-                        {{check.Active ? "Yes" : "No"}}
-                    </ng-template>
-                </p-column>
-                <p-column header="Group" field="GroupID" sortable="true" [filter]="true" filterMatchMode="equals" [style]="{'overflow':'visible'}">
-                    <ng-template pTemplate="filter" let-col>
-                        <p-dropdown [options]="checkGroupOptions" [(ngModel)]="checkGroupOption" [style]="{'width':'100%'}" (onChange)="updateCheckGroupFilter()"
-                                    styleClass="ui-column-filter"></p-dropdown>
-                    </ng-template>
-                    <ng-template let-check="rowData" pTemplate="body">
-                        {{check.GroupID ? checkGroupLookup[check.GroupID].Name : "None"}}
-                    </ng-template>
-                </p-column>
-                <p-column header="Environment" field="EnvironmentID" sortable="true" [filter]="true" filterMatchMode="equals" [style]="{'overflow':'visible'}">
-                    <ng-template pTemplate="filter" let-col>
-                        <p-dropdown [options]="environmentOptions" [(ngModel)]="environmentOption" [style]="{'width':'100%'}" (onChange)="updateEnvironmentFilter()"
-                                    styleClass="ui-column-filter"></p-dropdown>
-                    </ng-template>
-                    <ng-template let-check="rowData" pTemplate="body">
-                        {{environmentLookup[check.EnvironmentID].Name}}
-                    </ng-template>
-                </p-column>
-                <p-column header="Type" field="TypeID" sortable="true" [filter]="true" filterMatchMode="equals" [style]="{'overflow':'visible'}">
-                    <ng-template pTemplate="filter" let-col>
-                        <p-dropdown [options]="typeOptions" [(ngModel)]="typeOption" [style]="{'width':'100%'}" (onChange)="updateTypeFilter()"
-                                    styleClass="ui-column-filter"></p-dropdown>
-                    </ng-template>
-                    <ng-template let-check="rowData" pTemplate="body">
-                        {{typeLookup[check.TypeID].Name}}
-                    </ng-template>
-                </p-column>
-                <p-column header="Last Result Status" field="LastResultStatus" sortable="true" [filter]="true" filterMatchMode="equals" [style]="{'overflow':'visible'}">
-                    <ng-template pTemplate="filter" let-col>
-                        <p-dropdown [options]="resultOptions" [(ngModel)]="resultOption" [style]="{'width':'100%'}" (onChange)="updateResultFilter()"
-                                    styleClass="ui-column-filter"></p-dropdown>
-                    </ng-template>
-                    <ng-template let-check="rowData" pTemplate="body">
-                        {{CheckResultStatus[check.LastResultStatus]}}
-                    </ng-template>
-                </p-column>
-                <p-column header="Options">
-                    <ng-template let-check="rowData" pTemplate="body">
-                        <div class="rowbuttons">
-                            <button matTooltip="Edit" matTooltipPosition="above" mat-icon-button color="primary" routerLink="/edit/{{check.ID}}">
-                                <mat-icon class="md-24">edit</mat-icon>
-                            </button>
-                            <button matTooltip="Copy" matTooltipPosition="above" mat-icon-button color="primary" routerLink="/edit/{{check.ID}}/copy">
-                                <mat-icon class="md-24">content_copy</mat-icon>
-                            </button>
-                            <button matTooltip="Run" matTooltipPosition="above" mat-icon-button color="primary" (click)="run(check)">
-                                <mat-icon class="md-24">play_arrow</mat-icon>
-                            </button>
-                        </div>
-                    </ng-template>
-                </p-column>
-            </p-dataTable>
-        </div>
-    </mat-card-content>
-</mat-card>
+<div *ngFor="let results of chart; trackBy: trackChart" class="ui-g ui-g-12 ui-lg-6 chart">
+    <span class="environment" (click)="setEnvironment(results.environmentID)">{{results.name}}</span>
+    <ngx-charts-advanced-pie-chart [scheme]="chartColors"
+                                   [results]="results.results"
+                                   (select)="onChartSelect(results, $event)">
+    </ngx-charts-advanced-pie-chart>
+</div>
+<div class="ui-g-12">
+    <a mat-raised-button color="primary" routerLink="/edit/0">Add new</a>
+    <br />
+    <br />
+    <mat-checkbox [(ngModel)]="activeOnly" (ngModelChange)="onActiveOnlyChange()">Active Only</mat-checkbox>
+    <br />
+    <br />
+    <mat-form-field class="full">
+        <input matInput [(ngModel)]="filter" (keyup)="applyFilter()" placeholder="Search">
+    </mat-form-field>
+    <div class="mat-elevation-z2">
+        <table mat-table [dataSource]="dataSource" class="full" matSort #sort="matSort">
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+                <td mat-cell *matCellDef="let check">{{check.Name}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="active">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Active</th>
+                <td mat-cell *matCellDef="let check">{{check.Active ? "Yes" : "No"}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="group">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Group</th>
+                <td mat-cell *matCellDef="let check">{{check.GroupID ? checkGroupLookup[check.GroupID].Name : "None"}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="environment">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Environment</th>
+                <td mat-cell *matCellDef="let check">{{environmentLookup[check.EnvironmentID].Name}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="type">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+                <td mat-cell *matCellDef="let check">{{typeLookup[check.TypeID].Name}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="lastResultStatus">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Result Status</th>
+                <td mat-cell *matCellDef="let check">{{CheckResultStatus[check.LastResultStatus]}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="options">
+                <th mat-header-cell *matHeaderCellDef>Options</th>
+                <td mat-cell *matCellDef="let check">
+                    <div class="rowbuttons">
+                        <a matTooltip="Details" matTooltipPosition="above" mat-icon-button color="primary" routerLink="/details/{{check.ID}}">
+                            <mat-icon class="md-24">show_chart</mat-icon>
+                        </a>
+                        <a matTooltip="Edit" matTooltipPosition="above" mat-icon-button color="primary" routerLink="/edit/{{check.ID}}">
+                            <mat-icon class="md-24">edit</mat-icon>
+                        </a>
+                        <a matTooltip="Copy" matTooltipPosition="above" mat-icon-button color="primary" routerLink="/edit/{{check.ID}}/copy">
+                            <mat-icon class="md-24">content_copy</mat-icon>
+                        </a>
+                        <button matTooltip="Run" matTooltipPosition="above" mat-icon-button color="primary" (click)="run(check)">
+                            <mat-icon class="md-24">play_arrow</mat-icon>
+                        </button>
+                    </div>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+        <mat-paginator [pageSize]="25" [pageSizeOptions]="[10,25,50,100]" showFirstLastButtons></mat-paginator>
+    </div>
+</div>

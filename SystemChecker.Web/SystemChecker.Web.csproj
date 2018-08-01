@@ -1,30 +1,22 @@
-<Project ToolsVersion="15.0" Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project ToolsVersion="15.0" Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <IsPackable>true</IsPackable>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <IsPackable>false</IsPackable>
     <TypeScriptToolsVersion>2.8</TypeScriptToolsVersion>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <WarningsAsErrors>NU1605</WarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation" Version="2.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Rewrite" Version="2.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Server.HttpSys" Version="2.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="2.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.1" />
-    <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.1" />
     <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.7.0" />
-    <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0-dev-00023" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.2.1" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.0-preview2-30187" />
+    <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0-dev-00024" />
+
   </ItemGroup>
   <ItemGroup>
     <Content Remove="ClientApp\**" />
+    
+    <Compile Remove="wwwroot\dist\**" />
     <Content Remove="wwwroot\dist\**" />
+    <EmbeddedResource Remove="wwwroot\dist\**" />
+    <None Remove="wwwroot\dist\**" />
     <None Remove="logs\**" />
   </ItemGroup>
   <ItemGroup>
@@ -39,6 +31,9 @@
   <!--<Target Name="NpmCommandsRelease" Condition="'$(Configuration)'=='Release'" AfterTargets="Build">
     <Exec Command="npm run publish" />
   </Target>-->
+  <Target Name="NpmCommandsClean" AfterTargets="Clean">
+    <Exec Command="npm run clean" />
+  </Target>
   <Target Name="RunWebpack" AfterTargets="ComputeFilesToPublish">
     <ItemGroup>
       <DistFiles Include="wwwroot\dist\**" />

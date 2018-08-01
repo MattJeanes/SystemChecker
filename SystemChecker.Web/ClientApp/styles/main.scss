@@ -3,6 +3,7 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400');
 
 @import '_theme.scss';
+@import '_grid.scss';
 
 body {
     font-size: 16px;
@@ -15,11 +16,7 @@ h1, h2, h3, h4 {
 }
 
 h3, h4 {
-    font-weight:400;
-}
-
-.ui-growl {
-    top: 20px !important;
+    font-weight: 400;
 }
 
 .panel-dark > mat-dialog-container {
@@ -29,4 +26,28 @@ h3, h4 {
 
 .mat-dialog-container {
     max-width: 100% !important;
+}
+
+.snackbar-error {
+    color: #ffffff;
+    background-color: #ef5350;
+
+    .mat-simple-snackbar-action {
+        color: #ffffff;
+        background-color: #d32f2f;
+    }
+}
+
+.snackbar-success {
+    color: #ffffff;
+    background-color: #43a047;
+
+    .mat-simple-snackbar-action {
+        color: #ffffff;
+        background-color: #388e3c;
+    }
+}
+
+.full {
+    width: 100%;
 }

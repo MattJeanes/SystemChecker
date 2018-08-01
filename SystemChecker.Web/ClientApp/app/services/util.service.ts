@@ -3,6 +3,7 @@
 import { Injectable } from "@angular/core";
 import { Event, NavigationEnd, Router } from "@angular/router";
 import { TdDialogService } from "@covalent/core";
+import { filter, first } from "rxjs/operators";
 
 @Injectable()
 export class UtilService {
@@ -11,7 +12,7 @@ export class UtilService {
     private ignoreNavigation: boolean = false;
     constructor(private dialogService: TdDialogService, private router: Router) {
         this.router.events
-            .filter((e: Event) => e instanceof NavigationEnd)
+            .pipe(filter((e: Event) => e instanceof NavigationEnd))
             .subscribe((e: NavigationEnd) => {
                 if (!this.ignoreNavigation && this.currentUrl) {
                     this.history.push(this.currentUrl);
@@ -41,7 +42,7 @@ export class UtilService {
             message,
         })
             .afterClosed()
-            .first()
+            .pipe(first())
             .toPromise() as Promise<void>;
     }
     public prompt(title: string, message: string) {
@@ -50,7 +51,7 @@ export class UtilService {
             message,
         })
             .afterClosed()
-            .first()
+            .pipe(first())
             .toPromise() as Promise<string | undefined>;
     }
     public accessDenied() {
@@ -63,7 +64,7 @@ export class UtilService {
             acceptButton: "Confirm",
         })
             .afterClosed()
-            .first()
+            .pipe(first())
             .toPromise() as Promise<boolean>;
     }
     public async confirmNavigation() {

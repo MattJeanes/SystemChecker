@@ -10,6 +10,7 @@
     Environment = 9,
     Email = 10,
     Phone = 11,
+    HttpMethod = 12,
 }
 
 export enum CheckLogType {

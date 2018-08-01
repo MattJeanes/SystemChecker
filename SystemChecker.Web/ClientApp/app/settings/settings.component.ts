@@ -64,7 +64,7 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
             this.settings = await this.appService.getSettings();
             this.updateForm();
         } catch (e) {
-            this.messageService.error(`Failed to load: ${e.toString()}`);
+            this.messageService.error("Failed to load", e.toString());
             console.error(e);
         }
     }
@@ -181,7 +181,7 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
             this.updateForm();
             this.messageService.success("Saved settings");
         } catch (e) {
-            this.messageService.error(`Failed to save: ${e.toString()}`);
+            this.messageService.error("Failed to save", e.toString());
         } finally {
             this.saving = false;
         }

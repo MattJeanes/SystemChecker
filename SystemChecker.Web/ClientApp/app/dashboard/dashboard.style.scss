@@ -7,11 +7,6 @@
     justify-content: space-around;
 }
 
-.buttons {
-    display: flex;
-    justify-content: space-between;
-}
-
 .environment {
     font-size: 2em;
     position: relative;
@@ -21,4 +16,13 @@
 
 .chart {
     height: 300px;
+}
+
+.table-header {
+    min-height: 64px;
+
+    .mat-form-field {
+        font-size: 14px;
+        width: 100%;
+    }
 }

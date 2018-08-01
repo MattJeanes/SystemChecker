@@ -16,6 +16,7 @@ using StackExchange.Redis;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace SystemChecker.Web
 {
@@ -32,15 +33,18 @@ namespace SystemChecker.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            if (Configuration.GetValue<bool>("UseHttps"))
+            {
+                services.AddHttpsRedirection(options =>
+                {
+                    options.RedirectStatusCode = StatusCodes.Status301MovedPermanently;
+                });
+            }
             // Add framework services.
             services
                 .AddMvc(options =>
                 {
                     options.InputFormatters.Add(new TextPlainInputFormatter());
-                    if (!_env.IsDevelopment() && Configuration.GetValue<bool>("UseHttps"))
-                    {
-                        options.Filters.Add(new RequireHttpsAttribute());
-                    }
                 })
                 .AddJsonOptions(options =>
                 {
@@ -55,13 +59,13 @@ namespace SystemChecker.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
-            app.UseSecurityHeaders();
-            if (!_env.IsDevelopment() && Configuration.GetValue<bool>("UseHttps"))
+            if (!_env.IsDevelopment())
             {
-                var options = new RewriteOptions()
-                    .AddRedirectToHttps();
-
-                app.UseRewriter(options);
+                app.UseSecurityHeaders();
+            }
+            if (Configuration.GetValue<bool>("UseHttps"))
+            {
+                app.UseHttpsRedirection();
             }
 
             app.UseAuthenticationMiddleware();
@@ -72,7 +76,11 @@ namespace SystemChecker.Web
                 app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
                 {
                     HotModuleReplacement = true,
-                    ConfigFile = "webpack.dev.js"
+                    ConfigFile = "webpack.config.ts",
+                    EnvParam = new
+                    {
+                        aot = false // can't use AOT with HMR currently https://github.com/angular/angular-cli/issues/6347
+                    }
                 });
             }
 

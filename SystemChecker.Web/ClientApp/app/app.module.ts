@@ -43,16 +43,14 @@ import {
     MatIconModule,
     MatInputModule,
     MatNativeDateModule,
+    MatPaginatorModule,
     MatSelectModule,
+    MatSnackBarModule,
+    MatSortModule,
+    MatTableModule,
     MatTabsModule,
     MatTooltipModule,
 } from "@angular/material";
-
-import {
-    DataTableModule,
-    DropdownModule,
-    GrowlModule,
-} from "primeng/primeng";
 
 import {
     CovalentDialogsModule,
@@ -65,13 +63,17 @@ import {
 
 registerLocaleData(localeGB);
 
+export function JwtTokenGetter(): string {
+    return store.get("token");
+}
+
 const routes: Routes = [
     { path: "", redirectTo: "dashboard", pathMatch: "full" },
     { path: "dashboard", component: DashboardComponent, data: { title: "Dashboard", noDashboardLink: true } },
     { path: "edit", component: EditComponent, data: { title: "New Check" } },
     { path: "edit/:id", component: EditComponent, data: { title: "Edit Check" } },
     { path: "edit/:id/:copy", component: EditComponent, data: { title: "Copy Check" } },
-    { path: "settings", component: SettingsComponent, data: { title: "Settings" } },
+    { path: "settings", component: SettingsComponent, data: { title: "Settings", noSettingsLink: true } },
     { path: "details/:id", component: DetailsComponent, data: { title: "Details" } },
     { path: "login", component: LoginComponent, data: { title: "Login", noDashboardLink: true } },
     { path: "user", component: UserComponent, data: { title: "User" } },
@@ -100,8 +102,11 @@ routes.forEach(x => {
         HttpModule,
         FormsModule,
         RouterModule.forRoot(routes),
-        DataTableModule,
-        DropdownModule,
+        JwtModule.forRoot({
+            config: {
+                tokenGetter: JwtTokenGetter,
+            },
+        }),
         MatButtonModule,
         MatCardModule,
         MatInputModule,
@@ -111,20 +116,16 @@ routes.forEach(x => {
         ReactiveFormsModule,
         MatDatepickerModule,
         MatNativeDateModule,
-        GrowlModule,
         CovalentDialogsModule,
         NgxChartsModule,
         MatTooltipModule,
         CovalentLoadingModule,
         MatIconModule,
         HttpClientModule,
-        JwtModule.forRoot({
-            config: {
-                tokenGetter: () => {
-                    return store.get("token");
-                },
-            },
-        }),
+        MatSnackBarModule,
+        MatTableModule,
+        MatSortModule,
+        MatPaginatorModule,
     ],
     declarations: [
         AppComponent,

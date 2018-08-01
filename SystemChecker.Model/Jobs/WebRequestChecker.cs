@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using SystemChecker.Model.Data;
 using SystemChecker.Model.Data.Entities;
@@ -26,6 +27,7 @@ namespace SystemChecker.Model.Jobs
             Authentication = 6,
             TimeoutMS = 9,
             TimeWarnMS = 10,
+            HttpMethod = 14,
         }
         private enum SubChecks
         {
@@ -51,6 +53,7 @@ namespace SystemChecker.Model.Jobs
             int? authId = _check.Data.TypeOptions[((int)Settings.Authentication).ToString()];
             int timeoutMS = _check.Data.TypeOptions[((int)Settings.TimeoutMS).ToString()];
             int? timeWarnMS = _check.Data.TypeOptions[((int)Settings.TimeWarnMS).ToString()];
+            string httpMethod = _check.Data.TypeOptions[((int)Settings.HttpMethod).ToString()];
 
             if (authId.HasValue && authId.Value > 0)
             {
@@ -64,27 +67,33 @@ namespace SystemChecker.Model.Jobs
             }
 
             var timer = new Stopwatch();
+            // If this fails with a 401.1 IIS error when calling a site on the same server, see: https://serverfault.com/questions/485006/why-cant-i-log-in-to-a-windows-protected-iis-7-5-directory-on-the-server
             using (var handler = new HttpClientHandler { Credentials = credentials })
             using (var client = new HttpClient(handler))
             {
-                client.BaseAddress = new Uri(url);
-                client.Timeout = TimeSpan.FromMilliseconds(timeoutMS);
-
-                var headers = client.DefaultRequestHeaders;
-
-                headers.UserAgent.TryParseAdd("SystemChecker");
+                var request = new HttpRequestMessage(new HttpMethod(httpMethod ?? "GET"), url);
+                request.Headers.UserAgent.TryParseAdd("SystemChecker");
 
                 try
                 {
                     _logger.Info($"Calling {url}");
-                    timer.Start();
-                    var response = await client.GetAsync("");
-                    timer.Stop();
+                    HttpResponseMessage response;
+                    using (var cts = new CancellationTokenSource(timeoutMS))
+                    {
+                        timer.Start();
+                        response = await client.SendAsync(request, cts.Token);
+                        timer.Stop();
+                    }
+
                     if (timer.ElapsedMilliseconds > timeWarnMS)
                     {
                         result.Status = CheckResultStatus.TimeWarning;
                     }
-                    response.EnsureSuccessStatusCode(); // Throw in not success
+                    _logger.Info("Request headers:");
+                    foreach (var header in response.RequestMessage.Headers)
+                    {
+                        _logger.Info($"\t{header.Key}: {String.Join(",", header.Value)}");
+                    }
                     _logger.Info("Response headers:");
                     foreach (var header in response.Headers)
                     {
@@ -93,6 +102,7 @@ namespace SystemChecker.Model.Jobs
                     var responseText = await response.Content.ReadAsStringAsync();
                     _logger.Info("Response text (truncated to 2048 characters):");
                     _logger.Info(responseText.Substring(0, Math.Min(responseText.Length, 2048)));
+                    response.EnsureSuccessStatusCode(); // Throw in not success
                     await _helper.RunSubChecks(_check, _logger, subCheck => RunSubCheck(subCheck, responseText, result));
                 }
                 catch (TaskCanceledException e) when (!e.CancellationToken.IsCancellationRequested)

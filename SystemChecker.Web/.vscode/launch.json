@@ -2,42 +2,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run (No Scheduler)",
-            "type": "clr",
+            "name": ".NET Core Launch",
+            "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceRoot}/bin/Debug/net471/win-x64/SystemChecker.Web.exe",
-            "args": ["--port", "51114", "--no-scheduler"],
-            "cwd": "${workspaceRoot}",
-            "stopAtEntry": true,
-            "launchBrowser": {
-                "enabled": true,
-                "args": "${auto-detect-url}",
-                "windows": {
-                    "command": "cmd.exe",
-                    "args": "/C start ${auto-detect-url}"
-                },
-                "osx": {
-                    "command": "open"
-                },
-                "linux": {
-                    "command": "xdg-open"
-                }
-            },
-            "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
-            },
-            "sourceFileMap": {
-                "/Views": "${workspaceRoot}/Views"
-            }
-        },
-        {
-            "name": "Run (With Scheduler)",
-            "type": "clr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceRoot}/bin/Debug/net471/win-x64/SystemChecker.Web.exe",
-            "args": ["--port", "51114"],
+            "program": "${workspaceRoot}/bin/Debug/netcoreapp2.1/SystemChecker.Web.dll",
+            "args": [],
             "cwd": "${workspaceRoot}",
             "stopAtEntry": false,
             "launchBrowser": {
