@@ -1,11 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SystemChecker.Model.Data;
-using SystemChecker.Model.Enums;
+﻿using SystemChecker.Contracts.Enums;
 
 namespace SystemChecker.Model.Loggers
 {

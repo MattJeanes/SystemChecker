@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using SystemChecker.Model.Data;
 using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Data.Interfaces;
-using SystemChecker.Model.Enums;
 using SystemChecker.Model.Helpers;
 using SystemChecker.Model.Loggers;
 

@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using SystemChecker.Model.DTO;
-using SystemChecker.Model.Data.Entities;
 using AutoMapper.EquivalencyExpression;
+using SystemChecker.Contracts.DTO;
+using SystemChecker.Model.Data.Entities;
 
 namespace SystemChecker.Model.Data
 {
@@ -53,6 +53,7 @@ namespace SystemChecker.Model.Data
             CreateMap<ApiKeyDTO, ApiKey>()
                 .EqualityComparison((odto, o) => odto.ID == o.ID)
                 .ReverseMap();
+            CreateMap<SlackAPI.Channel, ChannelDTO>().ReverseMap();
         }
     }
 }

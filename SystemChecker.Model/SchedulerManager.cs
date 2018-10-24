@@ -1,19 +1,19 @@
-﻿using System;
+﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using Quartz;
-using SystemChecker.Model.Jobs;
+using Quartz.Impl.Matchers;
 using Quartz.Spi;
-using SystemChecker.Model.Data.Interfaces;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Quartz.Impl.Matchers;
+using SystemChecker.Contracts.Data;
 using SystemChecker.Model.Data.Entities;
-using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
-using SystemChecker.Model.Listeners;
+using SystemChecker.Model.Data.Interfaces;
 using SystemChecker.Model.Helpers;
+using SystemChecker.Model.Jobs;
+using SystemChecker.Model.Listeners;
 using SystemChecker.Model.Loggers;
-using SystemChecker.Model.Data;
-using AutoMapper;
 
 namespace SystemChecker.Model
 {

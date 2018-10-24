@@ -1,17 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Quartz;
-using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Diagnostics;
-using System.Dynamic;
-using System.Linq;
+﻿using System;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
+using SystemChecker.Contracts.Enums;
 using SystemChecker.Model.Data.Entities;
-using SystemChecker.Model.Enums;
 using SystemChecker.Model.Helpers;
 
 namespace SystemChecker.Model.Jobs

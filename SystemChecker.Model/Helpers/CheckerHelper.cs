@@ -1,17 +1,13 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
-using SystemChecker.Model.Data;
+using SystemChecker.Contracts.Data;
+using SystemChecker.Contracts;
 using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Data.Interfaces;
-using SystemChecker.Model.DTO;
 using SystemChecker.Model.Loggers;
 using SystemChecker.Model.Notifiers;
 
@@ -19,11 +15,11 @@ namespace SystemChecker.Model.Helpers
 {
     public interface ICheckerHelper
     {
-        Task<ISettings> GetSettings();
+        Task<CheckerSettings> GetSettings();
         ICheckLogger GetCheckLogger();
         Task SaveResult(CheckResult result);
         Task RunSubChecks(Check check, ICheckLogger logger, Action<SubCheck> action);
-        Task RunNotifiers(Check check, CheckResult result, ISettings settings, ICheckLogger logger);
+        Task RunNotifiers(Check check, CheckResult result, CheckerSettings settings, ICheckLogger logger);
         Task<Check> GetDetails(int value);
         Task SaveChangesAsync();
     }
@@ -48,7 +44,7 @@ namespace SystemChecker.Model.Helpers
             _connectionMultiplexer = connectionMultiplexer;
         }
 
-        public async Task<ISettings> GetSettings()
+        public async Task<CheckerSettings> GetSettings()
         {
             return await _settingsHelper.Get();
         }
@@ -78,7 +74,7 @@ namespace SystemChecker.Model.Helpers
             await pubsub.PublishAsync("check", result.CheckID);
         }
 
-        public async Task RunNotifiers(Check check, CheckResult result, ISettings settings, ICheckLogger logger)
+        public async Task RunNotifiers(Check check, CheckResult result, CheckerSettings settings, ICheckLogger logger)
         {
             var notifications = check.Notifications.Where(x => x.Active);
             if (!notifications.Any())
@@ -89,28 +85,28 @@ namespace SystemChecker.Model.Helpers
             logger.Info("Running notifiers");
             foreach (var notification in notifications)
             {
-                if (!Enum.IsDefined(typeof(Enums.CheckNotificationType), notification.TypeID))
+                if (!Enum.IsDefined(typeof(Contracts.Enums.CheckNotificationType), notification.TypeID))
                 {
                     logger.Warn($"Unknown notification type: {notification.TypeID} - ignoring");
                     continue;
                 }
-                var notifier = GetNotifier((Enums.CheckNotificationType)notification.TypeID);
+                var notifier = GetNotifier((Contracts.Enums.CheckNotificationType)notification.TypeID);
                 await notifier.Run(check, notification, result, settings, logger);
             }
         }
 
-        private BaseNotifier GetNotifier(Enums.CheckNotificationType notificationType)
+        private BaseNotifier GetNotifier(Contracts.Enums.CheckNotificationType notificationType)
         {
             Type type;
             switch (notificationType)
             {
-                case Enums.CheckNotificationType.Slack:
+                case Contracts.Enums.CheckNotificationType.Slack:
                     type = typeof(SlackNotifier);
                     break;
-                case Enums.CheckNotificationType.Email:
+                case Contracts.Enums.CheckNotificationType.Email:
                     type = typeof(EmailNotifier);
                     break;
-                case Enums.CheckNotificationType.SMS:
+                case Contracts.Enums.CheckNotificationType.SMS:
                     type = typeof(SMSNotifier);
                     break;
                 default:

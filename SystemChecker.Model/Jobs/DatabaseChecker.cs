@@ -5,8 +5,8 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using SystemChecker.Contracts.DTO;
 using SystemChecker.Model.Data.Entities;
-using SystemChecker.Model.DTO;
 using SystemChecker.Model.Extensions;
 using SystemChecker.Model.Helpers;
 

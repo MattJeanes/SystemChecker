@@ -15,11 +15,17 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Quartz" Version="3.0.6" />
     <PackageReference Include="Quartz.Serialization.Json" Version="3.0.6" />
-    <PackageReference Include="SlackAPI" Version="1.0.5.93" />
+    <PackageReference Include="SlackAPI" Version="1.0.5.93">
+      <NoWarn>NU1701</NoWarn>
+    </PackageReference>
     <PackageReference Include="StackExchange.Redis" Version="1.2.7-alpha-00002" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.2.4" />
     <PackageReference Include="System.Security.Principal.Windows" Version="4.5.0" />
     <PackageReference Include="TimeZoneConverter" Version="2.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SystemChecker.Contracts\SystemChecker.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

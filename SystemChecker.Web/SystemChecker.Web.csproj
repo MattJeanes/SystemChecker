@@ -8,7 +8,7 @@
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.1" />
     <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.7.0" />
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0-dev-00024" />
-
+    <PackageReference Include="Moneybarn.Common.Http" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="ClientApp\**" />

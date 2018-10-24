@@ -1,28 +1,24 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
-using SystemChecker.Model.Data;
+using SystemChecker.Contracts.Data;
+using SystemChecker.Contracts.DTO;
 using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Data.Interfaces;
-using SystemChecker.Model.DTO;
 using TimeZoneConverter;
 
 namespace SystemChecker.Model.Helpers
 {
     public interface ISettingsHelper
     {
-        Task<ISettings> Get();
+        Task<CheckerSettings> Get();
         Task<GlobalSettings> GetGlobal();
-        Task Set(ISettings settings);
+        Task Set(CheckerSettings settings);
         Task SetGlobal(GlobalSettings settings);
     }
     public class SettingsHelper : ISettingsHelper
@@ -47,7 +43,7 @@ namespace SystemChecker.Model.Helpers
             _appSettings = appSettings.Value;
             _mapper = mapper;
         }
-        public async Task<ISettings> Get()
+        public async Task<CheckerSettings> Get()
         {
             var logins = await _logins.GetAll().ToListAsync();
             var connStrings = await _connStrings.GetAll().ToListAsync();
@@ -55,7 +51,7 @@ namespace SystemChecker.Model.Helpers
             var contacts = await _contacts.GetAll().ToListAsync();
             var checkGroups = await _checkGroups.GetAll().ToListAsync();
 
-            var settings = new Settings
+            var settings = new CheckerSettings
             {
                 Logins = _mapper.Map<List<LoginDTO>>(logins),
                 ConnStrings = _mapper.Map<List<ConnStringDTO>>(connStrings),
@@ -68,7 +64,7 @@ namespace SystemChecker.Model.Helpers
             return settings;
         }
 
-        public async Task Set(ISettings settings)
+        public async Task Set(CheckerSettings settings)
         {
             var connStrings = await _connStrings.GetAll().ToListAsync();
             foreach (var connString in connStrings.Where(x => !settings.ConnStrings.Exists(y => y.ID == x.ID)))

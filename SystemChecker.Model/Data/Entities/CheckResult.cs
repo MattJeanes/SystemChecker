@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using SystemChecker.Model.Enums;
+using SystemChecker.Contracts.Enums;
 
 namespace SystemChecker.Model.Data.Entities
 {

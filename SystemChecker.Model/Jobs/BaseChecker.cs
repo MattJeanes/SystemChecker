@@ -1,16 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Quartz;
+﻿using Quartz;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using SystemChecker.Model.Data;
+using SystemChecker.Contracts.Data;
+using SystemChecker.Contracts.Enums;
 using SystemChecker.Model.Data.Entities;
-using SystemChecker.Model.Data.Interfaces;
-using SystemChecker.Model.Enums;
 using SystemChecker.Model.Helpers;
 using SystemChecker.Model.Loggers;
 
@@ -21,7 +14,7 @@ namespace SystemChecker.Model.Jobs
         protected readonly ICheckerHelper _helper;
         protected ICheckLogger _logger;
         protected Check _check;
-        protected ISettings _settings;
+        protected CheckerSettings _settings;
         public BaseChecker(ICheckerHelper helper)
         {
             _helper = helper;
