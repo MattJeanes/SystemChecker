@@ -35,10 +35,10 @@ export class DetailsComponent implements OnInit, OnDestroy {
     private hub = new HubConnectionBuilder()
         .withUrl("hub/details", { transport: HttpTransportType.WebSockets })
         .build();
-    private hubReady: boolean = false;
+    private hubReady = false;
     private checkID?: number;
     private selectedKey?: number;
-    private loading: boolean = false;
+    private loading = false;
     constructor(
         private appService: AppService, private messageService: MessageService, private ngZone: NgZone, private activatedRoute: ActivatedRoute,
         private utilService: UtilService, private loadingService: TdLoadingService) {

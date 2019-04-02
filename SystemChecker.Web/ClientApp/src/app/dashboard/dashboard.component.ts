@@ -71,8 +71,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private hub = new HubConnectionBuilder()
         .withUrl("hub/dashboard", { transport: HttpTransportType.WebSockets })
         .build();
-    private hubReady: boolean = false;
-    private loading: boolean = false;
+    private hubReady = false;
+    private loading = false;
     constructor(private appService: AppService, private messageService: MessageService, private ngZone: NgZone) {
         this.hub.on("check", () => {
             if (this.loading) { return; }
@@ -187,8 +187,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
             let warning = 0;
             let failed = 0;
             let notRun = 0;
-            this.checks.filter(y => y.EnvironmentID === x.ID && (this.activeOnly === false || y.Active)).forEach(x => {
-                const status = x.LastResultStatus;
+            this.checks.filter(y => y.EnvironmentID === x.ID && (this.activeOnly === false || y.Active)).forEach(z => {
+                const status = z.LastResultStatus;
                 switch (status) {
                     case CheckResultStatus.Success:
                         success++;

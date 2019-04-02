@@ -1,1 +1,1 @@
-﻿export { Autosize } from "./autosize.directive";
+﻿export { AutosizeDirective } from "./autosize.directive";

@@ -11,7 +11,7 @@ import { AppService } from "../../services";
 export class RunCheckComponent implements OnInit {
     public check: ICheck;
     public log: IRunLog[] = [];
-    public running: boolean = false;
+    public running = false;
     public CheckLogType = CheckLogType;
     constructor(
         private appService: AppService, private dialogRef: MatDialogRef<RunCheckComponent>,

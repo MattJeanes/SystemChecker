@@ -9,7 +9,7 @@ import { filter, first } from "rxjs/operators";
 export class UtilService {
     private currentUrl: string;
     private history: string[] = [];
-    private ignoreNavigation: boolean = false;
+    private ignoreNavigation = false;
     constructor(private dialogService: TdDialogService, private router: Router) {
         this.router.events
             .pipe(filter((e: Event) => e instanceof NavigationEnd))

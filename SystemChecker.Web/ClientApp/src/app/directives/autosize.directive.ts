@@ -1,13 +1,13 @@
-﻿// https://github.com/stevepapa/ng-autosize
+// https://github.com/stevepapa/ng-autosize
 // Package currently isn't published to npm properly so can't use yet + made small adjustments to it
 
 import { AfterContentChecked, Directive, ElementRef, HostListener, Input } from "@angular/core";
 
 @Directive({
-    selector: "textarea[autosize]",
+    selector: "textarea[appAutosize]",
 })
 
-export class Autosize implements AfterContentChecked {
+export class AutosizeDirective implements AfterContentChecked {
 
     private el: HTMLElement;
     // tslint:disable:variable-name

@@ -3,7 +3,7 @@ import { Component } from "@angular/core";
 import { MessageService, PageService } from "./services";
 
 @Component({
-    selector: "systemchecker",
+    selector: "app-systemchecker",
     templateUrl: "./app.template.html",
     styleUrls: ["./app.style.scss"],
 })

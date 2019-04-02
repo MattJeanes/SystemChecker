@@ -33,7 +33,7 @@
                     <div class="full" formArrayName="options">
                         <div class="header ui-g-12" *ngIf="options.controls.length>0">Type settings</div>
                         <div class="ui-g-12" *ngFor="let option of options.controls; let i=index" [formGroupName]="i">
-                            <check-option class="full" [option]="option.get('option')!.value" [environmentID]="form.get('environment')!.value" formControlName="value"></check-option>
+                            <app-check-option class="full" [option]="option.get('option')!.value" [environmentID]="form.get('environment')!.value" formControlName="value"></app-check-option>
                         </div>
                     </div>
                 </mat-tab>
@@ -51,7 +51,7 @@
                             <div *ngIf="subcheck.value.options" class="full" formArrayName="options">
                                 <div class="header ui-g-12" *ngIf="subcheck.value.options.length>0">Type settings</div>
                                 <div class="ui-g-12" *ngFor="let subOption of subcheck.value.options; let j=index; trackBy: track" [formGroupName]="j">
-                                    <check-option class="full" [option]="subOption.option" formControlName="value"></check-option>
+                                    <app-check-option class="full" [option]="subOption.option" formControlName="value"></app-check-option>
                                 </div>
                             </div>
                             <button mat-raised-button color="warn" (click)="deleteSubCheck(i)">Delete</button>
@@ -69,7 +69,7 @@
                                 <input matInput (keyup)="validateExpression(i)" placeholder="second minute hour day-of-month month day-of-week" formControlName="expression">
                             </mat-form-field>
                             <mat-form-field class="ui-g-12 full">
-                                <textarea autosize matInput formControlName="next"></textarea>
+                                <textarea appAutosize matInput formControlName="next"></textarea>
                             </mat-form-field>
                             <button mat-raised-button color="warn" (click)="deleteSchedule(i)">Delete</button>
                             <hr *ngIf="i < schedules.controls.length-1" class="break">
@@ -98,7 +98,7 @@
                             <div *ngIf="notification.value.options" class="full" formArrayName="options">
                                 <div class="header ui-g-12" *ngIf="notification.value.options.length>0">Type settings</div>
                                 <div class="ui-g-12" *ngFor="let notification of notifications.controls[i].value.options; let j=index; trackBy: track" [formGroupName]="j">
-                                    <check-option class="full" [option]="notification.option" formControlName="value"></check-option>
+                                    <app-check-option class="full" [option]="notification.option" formControlName="value"></app-check-option>
                                 </div>
                             </div>
                             <button mat-raised-button color="warn" (click)="deleteNotification(i)">Delete</button>

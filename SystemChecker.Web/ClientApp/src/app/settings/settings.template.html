@@ -95,7 +95,7 @@
                             <mat-form-field class="ui-g-12 ui-md-4 ui-lg-2">
                                 <mat-select placeholder="Environment" formControlName="environment">
                                     <mat-option [value]="undefined">None</mat-option>
-                                    <mat-option *ngFor="let environment of settings.Environments" [value]="environment.ID">{{environment.Name}}</mat-option>
+                                    <mat-option *ngFor="let environment of settings.Environments" [value]="environment.ID">{{ environment.Name }}</mat-option>
                                 </mat-select>
                             </mat-form-field>
                             <mat-form-field class="ui-g-12 ui-lg-5 ui-xl-7">
@@ -132,7 +132,7 @@
                             <mat-form-field class="ui-g-12 ui-md-4 ui-lg-2">
                                 <mat-select (change)="control.controls.value.updateValueAndValidity()" placeholder="Type" formControlName="type">
                                     <mat-option [value]="undefined">None</mat-option>
-                                    <mat-option *ngFor="let type of contactTypes" [value]="type.ID">{{type.Name}}</mat-option>
+                                    <mat-option *ngFor="let type of contactTypes" [value]="type.ID">{{ type.Name }}</mat-option>
                                 </mat-select>
                             </mat-form-field>
                             <mat-form-field class="ui-g-12 ui-lg-5 ui-xl-7">

@@ -7,7 +7,7 @@ import { AppService, UtilService } from "../../services";
 @Component({
     templateUrl: "./option.template.html",
     styleUrls: ["./option.style.scss"],
-    selector: "check-option",
+    selector: "app-check-option",
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -82,10 +82,10 @@ export class OptionComponent implements ControlValueAccessor, OnInit, OnDestroy 
     }
 
     // tslint:disable-next-line:variable-name
-    private _value?: number = 0;
+    private _value = 0;
 
     // tslint:disable-next-line:variable-name
-    private _environmentID: number = 0;
+    private _environmentID = 0;
 
     constructor(private appService: AppService, private utilService: UtilService, private ngZone: NgZone) { }
 

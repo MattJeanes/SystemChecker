@@ -3,14 +3,13 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
 import localeGB from "@angular/common/locales/en-GB";
 import { LOCALE_ID, NgModule } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { HttpModule } from "@angular/http";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { RouterModule, Routes } from "@angular/router";
 import { JwtModule } from "@auth0/angular-jwt";
 import * as store from "store";
 
-import { Autosize } from "./directives";
+import { AutosizeDirective } from "./directives";
 
 import { OptionComponent, RunCheckComponent } from "./components";
 
@@ -99,7 +98,6 @@ routes.forEach(x => {
         CommonModule,
         BrowserModule,
         BrowserAnimationsModule,
-        HttpModule,
         FormsModule,
         RouterModule.forRoot(routes),
         JwtModule.forRoot({
@@ -139,7 +137,7 @@ routes.forEach(x => {
         LoginComponent,
         UserComponent,
         InitComponent,
-        Autosize,
+        AutosizeDirective,
     ],
     exports: [
         RouterModule,

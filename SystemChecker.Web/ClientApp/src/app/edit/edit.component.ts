@@ -55,7 +55,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
     public notificationTypes: ICheckNotificationType[] = [];
     public settings: ISettings;
     public form: FormGroup;
-    public saving: boolean = false;
+    public saving = false;
     get schedules(): FormArray {
         return this.form.get("schedules") as FormArray;
     }
@@ -169,7 +169,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
     }
     public async validateExpression(index: number | AbstractControl) {
         let nextField: AbstractControl | null = null;
-        let value: string = "";
+        let value = "";
         try {
             const schedule = typeof (index) === "number" ? this.schedules.get(index.toString()) : index;
             if (!schedule) { throw new Error("Invalid schedule"); }

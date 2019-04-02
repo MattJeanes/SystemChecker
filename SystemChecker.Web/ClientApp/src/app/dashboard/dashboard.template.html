@@ -1,5 +1,5 @@
 <div *ngFor="let results of chart; trackBy: trackChart" class="ui-g ui-g-12 ui-lg-6 chart">
-    <span class="environment" (click)="setEnvironment(results.environmentID)">{{results.name}}</span>
+    <span class="environment" (click)="setEnvironment(results.environmentID)">{{ results.name }}</span>
     <ngx-charts-advanced-pie-chart [scheme]="chartColors"
                                    [results]="results.results"
                                    (select)="onChartSelect(results, $event)">
@@ -19,32 +19,32 @@
         <table mat-table [dataSource]="dataSource" class="full" matSort #sort="matSort">
             <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-                <td mat-cell *matCellDef="let check">{{check.Name}}</td>
+                <td mat-cell *matCellDef="let check">{{ check.Name }}</td>
             </ng-container>
 
             <ng-container matColumnDef="active">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Active</th>
-                <td mat-cell *matCellDef="let check">{{check.Active ? "Yes" : "No"}} </td>
+                <td mat-cell *matCellDef="let check">{{ check.Active ? "Yes" : "No" }} </td>
             </ng-container>
 
             <ng-container matColumnDef="group">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Group</th>
-                <td mat-cell *matCellDef="let check">{{check.GroupID ? checkGroupLookup[check.GroupID].Name : "None"}}</td>
+                <td mat-cell *matCellDef="let check">{{ check.GroupID ? checkGroupLookup[check.GroupID].Name : "None" }}</td>
             </ng-container>
 
             <ng-container matColumnDef="environment">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Environment</th>
-                <td mat-cell *matCellDef="let check">{{environmentLookup[check.EnvironmentID].Name}}</td>
+                <td mat-cell *matCellDef="let check">{{ environmentLookup[check.EnvironmentID].Name }}</td>
             </ng-container>
 
             <ng-container matColumnDef="type">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
-                <td mat-cell *matCellDef="let check">{{typeLookup[check.TypeID].Name}}</td>
+                <td mat-cell *matCellDef="let check">{{ typeLookup[check.TypeID].Name }}</td>
             </ng-container>
 
             <ng-container matColumnDef="lastResultStatus">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Result Status</th>
-                <td mat-cell *matCellDef="let check">{{CheckResultStatus[check.LastResultStatus]}}</td>
+                <td mat-cell *matCellDef="let check">{{ CheckResultStatus[check.LastResultStatus] }}</td>
             </ng-container>
 
             <ng-container matColumnDef="options">

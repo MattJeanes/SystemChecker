@@ -9,7 +9,7 @@ import { AppService, UtilService } from "../services";
     styleUrls: ["./user.style.scss"],
 })
 export class UserComponent implements OnInit {
-    public saving: boolean = false;
+    public saving = false;
     public form: FormGroup;
 
     private user: IUser;

@@ -38,7 +38,7 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
     public form: FormGroup;
     public settings: ISettings;
     public contactTypes: IContactType[];
-    public saving: boolean = false;
+    public saving = false;
     get logins(): FormArray {
         return this.form.get("logins") as FormArray;
     }

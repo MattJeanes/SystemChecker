@@ -24,20 +24,20 @@
                                    [legend]="true">
                 <ng-template #tooltipTemplate let-model="model">
                     <div class="tooltip">
-                        {{model.series}}
+                       {{ model.series }}
                         <br />
-                        {{model.value | number}} MS
+                       {{ model.value | number }} MS
                         <br />
-                        {{model.name | date:'short'}}
+                       {{ model.name | date:'short' }}
                     </div>
                 </ng-template>
                 <ng-template #seriesTooltipTemplate let-models="model">
                     <div *ngFor="let model of models" class="tooltip">
-                        <span [style.color]="model.color">{{model.series}}</span>
+                        <span [style.color]="model.color">{{ model.series }}</span>
                         <br />
-                        <span>{{model.value | number}} MS</span>
+                        <span>{{ model.value | number }} MS</span>
                         <br />
-                        <span>{{model.name | date:'short'}}</span>
+                        <span>{{ model.name | date:'short' }}</span>
                     </div>
                 </ng-template>
             </ngx-charts-line-chart>

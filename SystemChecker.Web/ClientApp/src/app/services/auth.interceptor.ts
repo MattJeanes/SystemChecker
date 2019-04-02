@@ -32,7 +32,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
     private handleError(e: any): Error {
         let errMsg: string;
-        let logged: boolean = false;
+        let logged = false;
         if (e instanceof HttpErrorResponse) {
             const err = (e.error && (e.error.error || JSON.stringify(e.error))) || e.message;
             if (e.error && e.error.stack) {

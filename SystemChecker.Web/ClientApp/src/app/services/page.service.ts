@@ -7,9 +7,9 @@ import { AppService } from "./app.service";
 
 @Injectable()
 export class PageService {
-    public title: string = "Loading..";
-    public dashboardLink: boolean = false;
-    public settingsLink: boolean = false;
+    public title = "Loading..";
+    public dashboardLink = false;
+    public settingsLink = false;
     constructor(private router: Router, private appService: AppService) {
         this.router.events
             .pipe(filter((e: Event) => e instanceof NavigationEnd))

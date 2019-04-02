@@ -11,7 +11,7 @@ export class LoginComponent implements OnInit {
     public returnUrl?: string;
     public username: string;
     public password: string;
-    public auto: boolean = false;
+    public auto = false;
 
     constructor(private appService: AppService, private activatedRoute: ActivatedRoute, private utilService: UtilService, private router: Router) { }
 
