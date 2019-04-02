@@ -4,7 +4,7 @@ import { MatDialog } from "@angular/material";
 import {
     ICheck, ICheckDetail, ICheckNotificationType, ICheckResults, ICheckType,
     IContactType, IInitRequest, IInitResult, ILoginResult, IRunLog, ISettings,
-    ISlackChannel, ISubCheckType, IUser,
+    ISlackChannel, ISubCheckType, IUser, IValidateCronResult,
 } from "../app.interfaces";
 
 import { Router } from "@angular/router";
@@ -120,7 +120,7 @@ export class AppService {
             .toPromise() as Promise<void>;
     }
     public async validateCronExpression(cron: string, validateOnly?: boolean) {
-        return await this.httpClient.post<{ valid: boolean, next?: string; error?: string }>(
+        return await this.httpClient.post<IValidateCronResult>(
             "/api/cron" + (typeof validateOnly !== "undefined" ? "/" + validateOnly.toString() : ""), cron).pipe(first()).toPromise();
     }
     public setToken(token: string) {

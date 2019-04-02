@@ -14,7 +14,7 @@ export function cronValidator(appService: AppService): ValidatorFn {
         let valid = true;
         try {
             const validate = await appService.validateCronExpression(control.value, true);
-            if (!validate.valid) {
+            if (!validate.Valid) {
                 valid = false;
             }
         } catch (e) {
@@ -177,10 +177,10 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
             if (!expression) { throw new Error("Expression is required"); }
             nextField = schedule.get("next")!;
             const validate = await this.appService.validateCronExpression(expression);
-            if (validate.valid && validate.next) {
-                value = validate.next;
-            } else if (validate.error) {
-                value = validate.error;
+            if (validate.Valid && validate.Next) {
+                value = validate.Next;
+            } else if (validate.Error) {
+                value = validate.Error;
             } else {
                 value = "Unknown error";
             }

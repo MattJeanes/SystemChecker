@@ -1,4 +1,4 @@
-﻿import { CheckLogType, CheckResultStatus, OptionType } from "./app.enums";
+import { CheckLogType, CheckResultStatus, OptionType } from "./app.enums";
 
 export interface ICheck {
     ID: number;
@@ -206,4 +206,10 @@ export interface IInitRequest {
 
 export interface IInitResult {
     Required: boolean;
+}
+
+export interface IValidateCronResult {
+    Valid: boolean;
+    Next?: string;
+    Error?: string;
 }

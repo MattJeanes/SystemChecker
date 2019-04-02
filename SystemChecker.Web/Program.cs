@@ -55,9 +55,9 @@ namespace SystemChecker.Web
                         .AddDebug()
                         .AddConsole();
                 });
-                using (var serviceProvider = serviceCollection.BuildServiceProvider())
+                using (var logProvider = serviceCollection.BuildServiceProvider())
                 {
-                    var critLogger = serviceProvider.GetRequiredService<ILogger<Program>>();
+                    var critLogger = logProvider.GetRequiredService<ILogger<Program>>();
                     critLogger.LogInformation($"Current directory: {Directory.GetCurrentDirectory()}");
                     critLogger.LogError(e, "Critical failure in host build");
                 }
