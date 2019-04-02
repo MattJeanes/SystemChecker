@@ -32,11 +32,11 @@ export class DetailsComponent implements OnInit, OnDestroy {
     public dateFrom: Date = new Date();
     public dateTo: Date = new Date();
     public loadingId = "details-chart-loading";
+    public checkID?: number;
     private hub = new HubConnectionBuilder()
         .withUrl("hub/details", { transport: HttpTransportType.WebSockets })
         .build();
     private hubReady = false;
-    private checkID?: number;
     private selectedKey?: number;
     private loading = false;
     constructor(

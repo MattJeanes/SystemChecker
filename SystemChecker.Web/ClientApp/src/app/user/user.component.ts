@@ -63,7 +63,7 @@ export class UserComponent implements OnInit {
         }
     }
 
-    private updateForm() {
+    public updateForm() {
         this.form.reset({
             id: this.user.ID,
             username: this.user.Username,
