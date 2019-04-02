@@ -21,6 +21,7 @@ export class LoginComponent implements OnInit {
             this.router.navigate(["/"]);
             return;
         }
+        this.appService.clearToken();
         const queryParams = await this.activatedRoute.queryParams.pipe(first()).toPromise();
         this.returnUrl = queryParams.return;
         try {
