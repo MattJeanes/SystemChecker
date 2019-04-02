@@ -67,31 +67,33 @@ export function JwtTokenGetter(): string {
 }
 
 const routes: Routes = [
-    { path: "", redirectTo: "dashboard", pathMatch: "full" },
-    { path: "dashboard", component: DashboardComponent, data: { title: "Dashboard", noDashboardLink: true } },
-    { path: "edit", component: EditComponent, data: { title: "New Check" } },
-    { path: "edit/:id", component: EditComponent, data: { title: "Edit Check" } },
-    { path: "edit/:id/:copy", component: EditComponent, data: { title: "Copy Check" } },
-    { path: "settings", component: SettingsComponent, data: { title: "Settings", noSettingsLink: true } },
-    { path: "details/:id", component: DetailsComponent, data: { title: "Details" } },
-    { path: "login", component: LoginComponent, data: { title: "Login", noDashboardLink: true } },
-    { path: "user", component: UserComponent, data: { title: "User" } },
-    { path: "init", component: InitComponent, data: { title: "SystemChecker Init", noDashboardLink: true } },
-    { path: "**", component: PageNotFoundComponent, data: { title: "Not Found" } },
+    { path: "", redirectTo: "dashboard", pathMatch: "full", canDeactivate: [CanDeactivateGuard], canActivate: [AuthGuard] },
+    { path: "dashboard", component: DashboardComponent, data: { title: "Dashboard", noDashboardLink: true }, canDeactivate: [CanDeactivateGuard], canActivate: [AuthGuard] },
+    { path: "edit", component: EditComponent, data: { title: "New Check" }, canDeactivate: [CanDeactivateGuard], canActivate: [AuthGuard] },
+    { path: "edit/:id", component: EditComponent, data: { title: "Edit Check" }, canDeactivate: [CanDeactivateGuard], canActivate: [AuthGuard] },
+    { path: "edit/:id/:copy", component: EditComponent, data: { title: "Copy Check" }, canDeactivate: [CanDeactivateGuard], canActivate: [AuthGuard] },
+    { path: "settings", component: SettingsComponent, data: { title: "Settings", noSettingsLink: true }, canDeactivate: [CanDeactivateGuard], canActivate: [AuthGuard] },
+    { path: "details/:id", component: DetailsComponent, data: { title: "Details" }, canDeactivate: [CanDeactivateGuard], canActivate: [AuthGuard] },
+    { path: "login", component: LoginComponent, data: { title: "Login", noDashboardLink: true }, canDeactivate: [CanDeactivateGuard] },
+    { path: "user", component: UserComponent, data: { title: "User" }, canDeactivate: [CanDeactivateGuard], canActivate: [AuthGuard] },
+    { path: "init", component: InitComponent, data: { title: "SystemChecker Init", noDashboardLink: true }, canDeactivate: [CanDeactivateGuard] },
+    { path: "**", component: PageNotFoundComponent, data: { title: "Not Found" }, canDeactivate: [CanDeactivateGuard], canActivate: [AuthGuard] },
 ];
 
-routes.forEach(x => {
-    if (!x.canDeactivate) {
-        x.canDeactivate = [];
-    }
-    x.canDeactivate.push(CanDeactivateGuard);
+// https://github.com/angular/angular/issues/29374
+// TODO: Use this again once fixed / remove workaround above
+//routes.forEach(x => {
+//    if (!x.canDeactivate) {
+//        x.canDeactivate = [];
+//    }
+//    x.canDeactivate.push(CanDeactivateGuard);
 
-    if (x.path === "login" || x.path === "init") { return; }
-    if (!x.canActivate) {
-        x.canActivate = [];
-    }
-    x.canActivate.push(AuthGuard);
-});
+//    if (x.path === "login" || x.path === "init") { return; }
+//    if (!x.canActivate) {
+//        x.canActivate = [];
+//    }
+//    x.canActivate.push(AuthGuard);
+//});
 
 @NgModule({
     imports: [
