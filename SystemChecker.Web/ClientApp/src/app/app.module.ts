@@ -82,7 +82,7 @@ const routes: Routes = [
 
 // https://github.com/angular/angular/issues/29374
 // TODO: Use this again once fixed / remove workaround above
-//routes.forEach(x => {
+// routes.forEach(x => {
 //    if (!x.canDeactivate) {
 //        x.canDeactivate = [];
 //    }
@@ -93,7 +93,7 @@ const routes: Routes = [
 //        x.canActivate = [];
 //    }
 //    x.canActivate.push(AuthGuard);
-//});
+// });
 
 @NgModule({
     imports: [
