@@ -8,7 +8,7 @@ import { MessageService, PageService } from "./services";
     styleUrls: ["./app.style.scss"],
 })
 export class AppComponent implements OnInit {
-   
+
     get theme(): string { return localStorage.theme; }
     set theme(value: string) { localStorage.theme = value; }
 

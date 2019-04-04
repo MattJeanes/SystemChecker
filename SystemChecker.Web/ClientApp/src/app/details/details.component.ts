@@ -2,15 +2,15 @@ import { Component, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { HttpTransportType, HubConnectionBuilder } from "@aspnet/signalr";
 import { TdLoadingService } from "@covalent/core";
-import { first } from "rxjs/operators";
 import * as moment from "moment";
 import { PageVisibilityService } from "ngx-page-visibility";
 import { Subscription } from "rxjs";
+import { first } from "rxjs/operators";
 
-import { ICheck, ICheckResults } from "../app.interfaces";
-import { AppService, MessageService, UtilService } from "../services";
 import { CheckResultStatus } from "../app.enums";
+import { ICheck, ICheckResults } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
+import { AppService, MessageService, UtilService } from "../services";
 
 @Component({
     templateUrl: "./details.template.html",

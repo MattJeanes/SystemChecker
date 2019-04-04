@@ -1,9 +1,9 @@
 import { Component, NgZone, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { MatPaginator, MatSort, MatTableDataSource } from "@angular/material";
 import { HttpTransportType, HubConnectionBuilder } from "@aspnet/signalr";
-import * as store from "store";
 import { PageVisibilityService } from "ngx-page-visibility";
 import { Subscription } from "rxjs";
+import * as store from "store";
 
 import { CheckResultStatus } from "../app.enums";
 import { ICheck, ICheckGroup, ICheckType, IEnvironment, ISettings } from "../app.interfaces";
