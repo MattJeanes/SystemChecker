@@ -41,7 +41,7 @@ namespace SystemChecker.Model.Jobs
             _check = check;
             _logger = logger;
 
-            CheckResult result = new CheckResult
+            var result = new CheckResult
             {
                 CheckID = check.ID,
                 Status = CheckResultStatus.Success

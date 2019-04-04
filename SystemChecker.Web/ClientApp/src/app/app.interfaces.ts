@@ -45,7 +45,7 @@ export interface ICheckType {
 }
 
 export interface IOption {
-    ID: number;
+    ID: string;
     OptionType: OptionType;
     Label: string;
     DefaultValue?: string;

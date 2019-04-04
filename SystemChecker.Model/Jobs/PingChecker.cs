@@ -11,16 +11,18 @@ namespace SystemChecker.Model.Jobs
     public class PingChecker : BaseChecker
     {
         public PingChecker(ICheckerHelper helper) : base(helper) { }
-        private enum Settings
+
+        public class Settings
         {
-            Server = 12,
-            TimeoutMS = 13
+            public string ServerAddress { get; set; }
+            public int TimeoutMS { get; set; }
         }
 
-        public async override Task<CheckResult> PerformCheck(CheckResult result)
+        public override async Task<CheckResult> PerformCheck(CheckResult result)
         {
-            string server = _check.Data.TypeOptions[((int)Settings.Server).ToString()];
-            int timeoutMS = _check.Data.TypeOptions[((int)Settings.TimeoutMS).ToString()];
+            var settings = _check.Data.GetTypeOptions<Settings>();
+            string server = settings.ServerAddress;
+            int timeoutMS = settings.TimeoutMS;
 
             if (string.IsNullOrEmpty(server))
             {
@@ -60,8 +62,8 @@ namespace SystemChecker.Model.Jobs
             };
 
             // Create a buffer of 32 bytes of data to be transmitted.
-            string data = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-            byte[] buffer = Encoding.ASCII.GetBytes(data);
+            var data = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+            var buffer = Encoding.ASCII.GetBytes(data);
             var reply = await pingSender.SendPingAsync(server, timeoutMS, buffer, options);
             return reply;
         }

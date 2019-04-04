@@ -2,7 +2,7 @@ namespace SystemChecker.Contracts.DTO
 {
     public class OptionDTO
     {
-        public int ID { get; set; }
+        public string ID { get; set; }
         public int OptionType { get; set; }
         public string Label { get; set; }
         public string DefaultValue { get; set; }

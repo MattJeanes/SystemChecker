@@ -19,6 +19,8 @@ namespace SystemChecker.Model.Data.Entities
 
         public int CheckTypeID { get; set; }
 
+        public string Identifier { get; set; }
+
         public string Name { get; set; }
 
         public List<SubCheckTypeOption> Options { get; set; }

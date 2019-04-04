@@ -1,19 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Quartz;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using SystemChecker.Model.Data;
 using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Data.Interfaces;
 using SystemChecker.Model.Helpers;
-using SystemChecker.Model.Loggers;
 
 namespace SystemChecker.Model.Jobs
 {
@@ -32,7 +25,8 @@ namespace SystemChecker.Model.Jobs
         public async Task Execute(IJobExecutionContext context)
         {
             var global = await _settingsHelper.GetGlobal();
-            if (!global.ResultAggregateDays.HasValue) {
+            if (!global.ResultAggregateDays.HasValue)
+            {
                 _logger.LogWarning("ResultAggregateDays is unset, cannot run cleanup job");
                 return;
             }

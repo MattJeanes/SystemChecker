@@ -18,6 +18,8 @@ namespace SystemChecker.Model.Data.Entities
         [NotMapped]
         public dynamic TypeOptions { get => JsonConvert.DeserializeObject(TypeOptionsJSON); set => TypeOptionsJSON = JsonConvert.SerializeObject(value); }
 
+        public T GetTypeOptions<T>() => JsonConvert.DeserializeObject<T>(TypeOptionsJSON);
+
         [Column("TypeOptions")]
         public string TypeOptionsJSON { get; set; }
     }

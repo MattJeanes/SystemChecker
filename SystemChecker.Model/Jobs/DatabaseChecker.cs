@@ -16,55 +16,29 @@ namespace SystemChecker.Model.Jobs
     {
         public DatabaseChecker(ICheckerHelper helper) : base(helper) { }
 
-        private enum Settings
+        public class Settings
         {
-            ConnString = 7,
-            Query = 8,
+            public int ConnectionString { get; set; }
+            public string Query { get; set; }
         }
 
-        /// <summary>
-        /// This enum value MUST correlate to dbo.tblSubCheckType 'ID' column
-        /// </summary>
-        private enum SubCheckType
+        public enum SubChecks
         {
-            FieldEqualTo = 3,
-            FieldNotEqualTo = 4,
-            FieldGreaterThan = 5,
-            FieldLessThan = 6,
+            FieldEqualTo,
+            FieldNotEqualTo,
+            FieldGreaterThan,
+            FieldLessThan
         }
 
-        /// <summary>
-        /// These enum values MUST correlate to dbo.tblSubCheckTypeOption 'ID' column
-        /// </summary>
-        private enum FieldEqualTo
+        public class FieldCompare
         {
-            Value = 6,
-            FieldName = 7,
-            Exists = 8,
+            public string FieldName { get; set; }
+            public string Value { get; set; }
+            public bool Exists { get; set; }
         }
 
-        private enum FieldNotEqualTo
-        {
-            FieldName = 9,
-            Value = 10,
-            Exists = 11,
-        }
 
-        private enum FieldGreaterThan
-        {
-            FieldName = 12,
-            Value = 13,
-            Exists = 14,
-        }
-
-        private enum FieldLessThan
-        {
-            FieldName = 15,
-            Value = 16,
-            Exists = 17,
-        }
-
-        public async override Task<CheckResult> PerformCheck(CheckResult result)
+        public override async Task<CheckResult> PerformCheck(CheckResult result)
         {
             var connStringDTO = GetConnStringDTO();
             var query = GetQuery();
@@ -91,7 +65,7 @@ namespace SystemChecker.Model.Jobs
 
         private ConnStringDTO GetConnStringDTO()
         {
-            int connStringId = _check.Data.TypeOptions[((int)Settings.ConnString).ToString()];
+            var connStringId = _check.Data.GetTypeOptions<Settings>().ConnectionString;
             var connString = _settings.ConnStrings.FirstOrDefault(x => x.ID == connStringId);
             if (connString == null || string.IsNullOrEmpty(connString.Value))
             {
@@ -103,7 +77,7 @@ namespace SystemChecker.Model.Jobs
 
         private string GetQuery()
         {
-            string query = _check.Data.TypeOptions[((int)Settings.Query).ToString()];
+            var query = _check.Data.GetTypeOptions<Settings>().Query;
             if (string.IsNullOrEmpty(query))
             {
                 throw new Exception("Query invalid");
@@ -138,35 +112,32 @@ namespace SystemChecker.Model.Jobs
 
         private void RunSubCheck(SubCheck subCheck, JArray jsonResult, CheckResult checkResult)
         {
-            switch (subCheck.TypeID)
+            switch (subCheck.Type.Identifier)
             {
-                case (int)SubCheckType.FieldEqualTo:
-                    string fieldName = subCheck.Options[((int)FieldEqualTo.FieldName).ToString()];
-                    bool exists = subCheck.Options[((int)FieldEqualTo.Exists).ToString()];
+                case nameof(SubChecks.FieldEqualTo):
+                case nameof(SubChecks.FieldNotEqualTo):
+                case nameof(SubChecks.FieldGreaterThan):
+                case nameof(SubChecks.FieldLessThan):
+                    var fieldCompareOptions = subCheck.GetOptions<FieldCompare>();
+                    var fieldName = fieldCompareOptions.FieldName;
+                    var exists = fieldCompareOptions.Exists;
                     var actualValue = GetFieldValue(fieldName, exists, jsonResult);
-                    string expectedValue = subCheck.Options[((int)FieldEqualTo.Value).ToString()];
-                    VerifyAreEquals(expectedValue, actualValue, fieldName);
-                    break;
-                case (int)SubCheckType.FieldNotEqualTo:
-                    fieldName = subCheck.Options[((int)FieldNotEqualTo.FieldName).ToString()];
-                    exists = subCheck.Options[((int)FieldNotEqualTo.Exists).ToString()];
-                    actualValue = GetFieldValue(fieldName, exists, jsonResult);
-                    expectedValue = subCheck.Options[((int)FieldNotEqualTo.Value).ToString()];
-                    VerifyAreNotEquals(expectedValue, actualValue, fieldName);
-                    break;
-                case (int)SubCheckType.FieldGreaterThan:
-                    fieldName = subCheck.Options[((int)FieldGreaterThan.FieldName).ToString()];
-                    exists = subCheck.Options[((int)FieldGreaterThan.Exists).ToString()];
-                    actualValue = GetFieldValue(fieldName, exists, jsonResult);
-                    expectedValue = subCheck.Options[((int)FieldGreaterThan.Value).ToString()];
-                    VerifyIsGreaterThan(expectedValue, actualValue, fieldName);
-                    break;
-                case (int)SubCheckType.FieldLessThan:
-                    fieldName = subCheck.Options[((int)FieldLessThan.FieldName).ToString()];
-                    exists = subCheck.Options[((int)FieldLessThan.Exists).ToString()];
-                    actualValue = GetFieldValue(fieldName, exists, jsonResult);
-                    expectedValue = subCheck.Options[((int)FieldLessThan.Value).ToString()];
-                    VerifyIsLessThan(expectedValue, actualValue, fieldName);
+                    var expectedValue = fieldCompareOptions.Value;
+                    switch (subCheck.Type.Identifier)
+                    {
+                        case nameof(SubChecks.FieldEqualTo):
+                            VerifyAreEquals(expectedValue, actualValue, fieldName);
+                            break;
+                        case nameof(SubChecks.FieldNotEqualTo):
+                            VerifyAreNotEquals(expectedValue, actualValue, fieldName);
+                            break;
+                        case nameof(SubChecks.FieldGreaterThan):
+                            VerifyIsGreaterThan(expectedValue, actualValue, fieldName);
+                            break;
+                        case nameof(SubChecks.FieldLessThan):
+                            VerifyIsLessThan(expectedValue, actualValue, fieldName);
+                            break;
+                    }
                     break;
                 default:
                     _logger.Warn($"Unknown sub-check type {subCheck.TypeID} - ignoring");

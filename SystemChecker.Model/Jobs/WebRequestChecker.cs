@@ -15,39 +15,45 @@ namespace SystemChecker.Model.Jobs
     public class WebRequestChecker : BaseChecker
     {
         public WebRequestChecker(ICheckerHelper helper) : base(helper) { }
-        private enum Settings
+
+        public class Settings
         {
-            RequestUrl = 5,
-            Authentication = 6,
-            TimeoutMS = 9,
-            TimeWarnMS = 10,
-            HttpMethod = 14,
-        }
-        private enum SubChecks
-        {
-            ResponseContains = 1,
-            JSONProperty = 2,
-        }
-        private enum ResponseContains
-        {
-            Text = 1,
-        }
-        private enum JSONProperty
-        {
-            FieldName = 2,
-            Exists = 3,
-            ValueContains = 4,
+            public string RequestUrl { get; set; }
+            public int? Authentication { get; set; }
+            public int TimeoutMS { get; set; }
+            public int? TimeWarnMS { get; set; }
+            public string HttpMethod { get; set; }
         }
 
-        public async override Task<CheckResult> PerformCheck(CheckResult result)
+        public enum SubChecks
+        {
+            ResponseContains,
+            JsonProperty
+        }
+
+        public class ResponseContains
+        {
+            public string Text { get; set; }
+        }
+
+        public class JsonProperty
+        {
+            public string FieldName { get; set; }
+            public bool Exists { get; set; }
+            public string Value { get; set; }
+        }
+
+        public override async Task<CheckResult> PerformCheck(CheckResult result)
         {
             ICredentials credentials = null;
 
-            string url = _check.Data.TypeOptions[((int)Settings.RequestUrl).ToString()];
-            int? authId = _check.Data.TypeOptions[((int)Settings.Authentication).ToString()];
-            int timeoutMS = _check.Data.TypeOptions[((int)Settings.TimeoutMS).ToString()];
-            int? timeWarnMS = _check.Data.TypeOptions[((int)Settings.TimeWarnMS).ToString()];
-            string httpMethod = _check.Data.TypeOptions[((int)Settings.HttpMethod).ToString()];
+            var settings = _check.Data.GetTypeOptions<Settings>();
+
+            string url = settings.RequestUrl;
+            int? authId = settings.Authentication;
+            int timeoutMS = settings.TimeoutMS;
+            int? timeWarnMS = settings.TimeWarnMS;
+            string httpMethod = settings.HttpMethod;
 
             if (authId.HasValue && authId.Value > 0)
             {
@@ -86,12 +92,12 @@ namespace SystemChecker.Model.Jobs
                     _logger.Info("Request headers:");
                     foreach (var header in response.RequestMessage.Headers)
                     {
-                        _logger.Info($"\t{header.Key}: {String.Join(",", header.Value)}");
+                        _logger.Info($"\t{header.Key}: {string.Join(",", header.Value)}");
                     }
                     _logger.Info("Response headers:");
                     foreach (var header in response.Headers)
                     {
-                        _logger.Info($"\t{header.Key}: {String.Join(",", header.Value)}");
+                        _logger.Info($"\t{header.Key}: {string.Join(",", header.Value)}");
                     }
                     var responseText = await response.Content.ReadAsStringAsync();
                     _logger.Info("Response text (truncated to 2048 characters):");
@@ -118,10 +124,11 @@ namespace SystemChecker.Model.Jobs
 
         private void RunSubCheck(SubCheck subCheck, string responseText, CheckResult result)
         {
-            switch (subCheck.TypeID)
+            switch (subCheck.Type.Identifier)
             {
-                case (int)SubChecks.ResponseContains:
-                    string text = subCheck.Options[((int)ResponseContains.Text).ToString()];
+                case nameof(SubChecks.ResponseContains):
+                    var responseContainsOptions = subCheck.GetOptions<ResponseContains>();
+                    string text = responseContainsOptions.Text;
                     if (responseText.Contains(text))
                     {
                         _logger.Info($"Response contains '{text}'");
@@ -131,10 +138,11 @@ namespace SystemChecker.Model.Jobs
                         throw new SubCheckException($"Response does not contain '{text}'");
                     }
                     break;
-                case (int)SubChecks.JSONProperty:
-                    string fieldName = subCheck.Options[((int)JSONProperty.FieldName).ToString()];
-                    bool exists = subCheck.Options[((int)JSONProperty.Exists).ToString()];
-                    string valueContains = subCheck.Options[((int)JSONProperty.ValueContains).ToString()];
+                case nameof(SubChecks.JsonProperty):
+                    var jsonPropertyOptions = subCheck.GetOptions<JsonProperty>();
+                    string fieldName = jsonPropertyOptions.FieldName;
+                    bool exists = jsonPropertyOptions.Exists;
+                    string valueContains = jsonPropertyOptions.Value;
                     var obj = JObject.Parse(responseText);
                     var value = obj.SelectToken(fieldName)?.ToString();
                     if (value == null && exists)

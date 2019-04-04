@@ -5,8 +5,7 @@ namespace SystemChecker.Model.Data.Entities
 {
     public abstract class Option
     {
-        [Key]
-        public int ID { get; set; }
+        public string ID { get; set; }
 
         [Column("OptionTypeID")]
         public int OptionType { get; set; }
