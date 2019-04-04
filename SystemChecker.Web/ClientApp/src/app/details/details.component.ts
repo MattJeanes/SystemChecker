@@ -3,14 +3,14 @@ import { ActivatedRoute } from "@angular/router";
 import { HttpTransportType, HubConnectionBuilder } from "@aspnet/signalr";
 import { TdLoadingService } from "@covalent/core";
 import { first } from "rxjs/operators";
+import * as moment from "moment";
+import { PageVisibilityService } from "ngx-page-visibility";
+import { Subscription } from "rxjs";
 
 import { ICheck, ICheckResults } from "../app.interfaces";
 import { AppService, MessageService, UtilService } from "../services";
-
 import { CheckResultStatus } from "../app.enums";
 import { RunCheckComponent } from "../components";
-
-import * as moment from "moment";
 
 @Component({
     templateUrl: "./details.template.html",
@@ -19,6 +19,7 @@ import * as moment from "moment";
 export class DetailsComponent implements OnInit, OnDestroy {
     public check?: ICheck;
     public results?: ICheckResults;
+    public newResults = false;
     public chart: Array<{
         name: string;
         series: Array<{ value: number, name: string | Date }>
@@ -39,11 +40,13 @@ export class DetailsComponent implements OnInit, OnDestroy {
     private hubReady = false;
     private selectedKey?: number;
     private loading = false;
+    private subscriptions: Subscription[] = [];
     constructor(
         private appService: AppService, private messageService: MessageService, private ngZone: NgZone, private activatedRoute: ActivatedRoute,
-        private utilService: UtilService, private loadingService: TdLoadingService) {
+        private utilService: UtilService, private loadingService: TdLoadingService, private pageVisibilityService: PageVisibilityService) {
         this.hub.on("check", (id: number) => {
             if (id !== this.checkID || this.loading || !moment(this.dateTo).isSameOrAfter(moment(), "day")) { return; }
+            if (!this.pageVisibilityService.isPageVisible()) { this.newResults = true; return; }
             // Because this is a call from the server, Angular change detection won't detect it so we must force ngZone to run
             this.ngZone.run(async () => {
                 await this.loadResults();
@@ -58,15 +61,22 @@ export class DetailsComponent implements OnInit, OnDestroy {
             await this.loadResults();
             await this.hub.start();
             this.hubReady = true;
+            this.subscriptions = [
+                this.pageVisibilityService.$onPageVisible.subscribe(() => this.ngZone.run(this.onPageVisible.bind(this))),
+            ];
         } catch (e) {
             this.messageService.error("Failed to load", e.toString());
         }
     }
+
     public ngOnDestroy() {
         if (this.hubReady) {
             this.hub.stop();
         }
+        this.subscriptions.forEach(x => x.unsubscribe());
+        this.subscriptions = [];
     }
+
     public async loadResults() {
         try {
             if (!this.checkID) { return; }
@@ -153,5 +163,11 @@ export class DetailsComponent implements OnInit, OnDestroy {
         if (!this.results) { return; }
         this.dateMin = new Date(this.results.MinDate);
         this.dateMax = new Date(this.results.MaxDate);
+    }
+    private async onPageVisible() {
+        if (this.newResults) {
+            this.newResults = false;
+            await this.loadResults();
+        }
     }
 }

@@ -7,6 +7,7 @@ import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { RouterModule, Routes } from "@angular/router";
 import { JwtModule } from "@auth0/angular-jwt";
+import { NgxPageVisibilityModule } from 'ngx-page-visibility';
 import * as store from "store";
 
 import { AutosizeDirective } from "./directives";
@@ -126,6 +127,7 @@ const routes: Routes = [
         MatTableModule,
         MatSortModule,
         MatPaginatorModule,
+        NgxPageVisibilityModule,
     ],
     declarations: [
         AppComponent,

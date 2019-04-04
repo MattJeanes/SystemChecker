@@ -2,6 +2,8 @@ import { Component, NgZone, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { MatPaginator, MatSort, MatTableDataSource } from "@angular/material";
 import { HttpTransportType, HubConnectionBuilder } from "@aspnet/signalr";
 import * as store from "store";
+import { PageVisibilityService } from "ngx-page-visibility";
+import { Subscription } from "rxjs";
 
 import { CheckResultStatus } from "../app.enums";
 import { ICheck, ICheckGroup, ICheckType, IEnvironment, ISettings } from "../app.interfaces";
@@ -73,9 +75,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
         .build();
     private hubReady = false;
     private loading = false;
-    constructor(private appService: AppService, private messageService: MessageService, private ngZone: NgZone) {
+    private newResults = false;
+    private subscriptions: Subscription[];
+    constructor(
+        private appService: AppService,
+        private messageService: MessageService,
+        private ngZone: NgZone,
+        private pageVisibilityService: PageVisibilityService,
+    ) {
         this.hub.on("check", () => {
             if (this.loading) { return; }
+            if (!this.pageVisibilityService.isPageVisible()) { this.newResults = true; return; }
             // Because this is a call from the server, Angular change detection won't detect it so we must force ngZone to run
             this.ngZone.run(async () => {
                 await this.loadChecks();
@@ -168,11 +178,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
         await this.loadChecks();
         await this.hub.start();
         this.hubReady = true;
+        this.subscriptions = [
+            this.pageVisibilityService.$onPageVisible.subscribe(() => this.ngZone.run(this.onPageVisible.bind(this))),
+        ];
     }
     public ngOnDestroy() {
         if (this.hubReady) {
             this.hub.stop();
         }
+        this.subscriptions.forEach(x => x.unsubscribe());
+        this.subscriptions = [];
     }
     public applyFilter() {
         this.dataSource.filter = `${(this.activeOnly ? "active:yes," : "")}${(this.filter ? this.filter.replace(/ /g, "").toLowerCase() : "")}`;
@@ -249,5 +264,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
     public trackChart(index: number, chart: IChart) {
         return chart ? chart.environmentID : undefined;
+    }
+    private async onPageVisible() {
+        if (this.newResults) {
+            this.newResults = false;
+            await this.loadChecks();
+        }
     }
 }

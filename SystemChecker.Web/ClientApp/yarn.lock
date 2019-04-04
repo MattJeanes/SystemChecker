@@ -4918,6 +4918,13 @@ neo-async@^2.5.0, neo-async@^2.6.0:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.0.tgz#b9d15e4d71c6762908654b5183ed38b753340835"
   integrity sha512-MFh0d/Wa7vkKO3Y3LlacqAEeHK0mckVqzDieUKTT+KGxi+zIpeVsFxymkIiRpbpDziHc290Xr9A1O4Om7otoRA==
 
+ngx-page-visibility@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/ngx-page-visibility/-/ngx-page-visibility-5.0.1.tgz#30acef9048adf89ffe8fb5fda4e756b4780e852c"
+  integrity sha512-q2MvknEMUN/2mNt9b0aG4HQfwuLbxmfEVPR+l3me/Be13EyXG6TgSXLm1sQ87cDxE18sjxb3W8w30gYy1J9DvQ==
+  dependencies:
+    tslib "^1.9.0"
+
 nice-try@^1.0.4:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
