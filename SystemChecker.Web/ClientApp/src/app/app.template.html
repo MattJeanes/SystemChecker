@@ -1,9 +1,14 @@
-<div class="ui-g">
+<div class="ui-g main">
     <div class="ui-g-0 ui-md-1 ui-xl-2"></div>
     <div class="ui-g-12 ui-md-10 ui-xl-8">
         <div class="buttons">
             <div *ngIf="pageService.username">
-                <a class="link" routerLink="/user"><h4 class="user" matTooltip="Click to edit user" matTooltipPosition="before">Logged in as<br />{{ pageService.username }}</h4></a>
+                <a class="link" routerLink="/user"><h4 class="user" matTooltip="Click to edit user">Logged in as<br />{{ pageService.username }}</h4></a>
+            </div>
+            <div>
+                <button matTooltip="Switch theme" (click)="switchTheme()" mat-icon-button color="primary">
+                    <mat-icon>brightness_medium</mat-icon>
+                </button>
             </div>
             <div class="settings">
                 <a [disabled]="!pageService.settingsLink" class="button" mat-raised-button color="primary" routerLink="/settings">Settings</a>

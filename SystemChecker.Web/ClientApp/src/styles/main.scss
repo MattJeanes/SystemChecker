@@ -4,6 +4,7 @@
 
 @import '_theme.scss';
 @import '_grid.scss';
+@import '_charts.scss';
 
 body {
     font-size: 16px;
@@ -54,4 +55,15 @@ h3, h4 {
 
 .mat-card-actions .mat-button:first-child, .mat-card-actions .mat-raised-button:first-child {
     margin-right: 8px !important;
+}
+
+html.dark {
+    background-color: #333333 !important;
+}
+
+.dark {
+    body {
+        background-color: #333333 !important;
+        color: white;
+    }
 }
