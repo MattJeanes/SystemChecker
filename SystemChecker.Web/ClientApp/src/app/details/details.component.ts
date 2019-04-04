@@ -73,8 +73,10 @@ export class DetailsComponent implements OnInit, OnDestroy {
         if (this.hubReady) {
             this.hub.stop();
         }
-        this.subscriptions.forEach(x => x.unsubscribe());
-        this.subscriptions = [];
+        if (this.subscriptions) {
+            this.subscriptions.forEach(x => x.unsubscribe());
+            this.subscriptions = [];
+        }
     }
 
     public async loadResults() {

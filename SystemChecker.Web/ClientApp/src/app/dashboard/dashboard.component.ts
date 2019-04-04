@@ -186,8 +186,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (this.hubReady) {
             this.hub.stop();
         }
-        this.subscriptions.forEach(x => x.unsubscribe());
-        this.subscriptions = [];
+        if (this.subscriptions) {
+            this.subscriptions.forEach(x => x.unsubscribe());
+            this.subscriptions = [];
+        }
     }
     public applyFilter() {
         this.dataSource.filter = `${(this.activeOnly ? "active:yes," : "")}${(this.filter ? this.filter.replace(/ /g, "").toLowerCase() : "")}`;
