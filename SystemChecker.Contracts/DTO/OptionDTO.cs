@@ -8,5 +8,6 @@ namespace SystemChecker.Contracts.DTO
         public string DefaultValue { get; set; }
         public bool IsRequired { get; set; }
         public bool Multiple { get; set; }
+        public int? SortOrder { get; set; }
     }
 }

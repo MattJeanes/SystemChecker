@@ -50,6 +50,7 @@ export interface IOption {
     Label: string;
     DefaultValue?: string;
     IsRequired: boolean;
+    SortOrder?: number;
 }
 
 export interface ILogin {

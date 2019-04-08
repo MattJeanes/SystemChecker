@@ -41,27 +41,27 @@ SELECT CONVERT(VARCHAR(50),ID),
 
 DROP TABLE #temp
 
-DECLARE @Mapping TABLE(OldID VARCHAR(50), ID VARCHAR(50)) 
+DECLARE @CheckNotificationTypeOptionMapping TABLE(OldID VARCHAR(50), ID VARCHAR(50)) 
 
-INSERT INTO @Mapping (OldID,ID)
+INSERT INTO @CheckNotificationTypeOptionMapping (OldID,ID)
 VALUES
 ('1','ChannelID'),
 ('2','EmailAddresses'),
 ('3','PhoneNumbers')
 
 UPDATE o SET o.ID=m.ID FROM dbo.tblCheckNotificationTypeOption o
-INNER JOIN @Mapping m ON m.OldID = o.ID
+INNER JOIN @CheckNotificationTypeOptionMapping m ON m.OldID = o.ID
 
 
-WHILE EXISTS (SELECT 1 FROM @Mapping) BEGIN
+WHILE EXISTS (SELECT 1 FROM @CheckNotificationTypeOptionMapping) BEGIN
 	DECLARE @OldID VARCHAR(50)
 	DECLARE @ID VARCHAR(50) 
-	SELECT TOP 1 @ID=ID, @OldID=OldID FROM @Mapping
+	SELECT TOP 1 @ID=ID, @OldID=OldID FROM @CheckNotificationTypeOptionMapping
 	UPDATE n SET
 		n.Options = REPLACE(n.Options, '"' + @OldID + '":', '"' + @ID + '":')
 	FROM dbo.tblCheckNotification n 
 	WHERE CHARINDEX('"' + @OldID + '":', n.Options) > 0
-	DELETE FROM @Mapping WHERE OldID=@OldID AND ID=@ID
+	DELETE FROM @CheckNotificationTypeOptionMapping WHERE OldID=@OldID AND ID=@ID
 END
 
 -- Check Type Option
@@ -108,9 +108,9 @@ SELECT CONVERT(VARCHAR(50),ID),
 
 DROP TABLE #temp
 
-DECLARE @Mapping TABLE(OldID VARCHAR(50), ID VARCHAR(50)) 
+DECLARE @CheckTypeOptionMapping TABLE(OldID VARCHAR(50), ID VARCHAR(50)) 
 
-INSERT INTO @Mapping (OldID,ID)
+INSERT INTO @CheckTypeOptionMapping (OldID,ID)
 VALUES
 ('5','RequestUrl'),
 ('6','Authentication'),
@@ -123,18 +123,18 @@ VALUES
 ('14','HttpMethod')
 
 UPDATE o SET o.ID=m.ID FROM dbo.tblCheckTypeOption o
-INNER JOIN @Mapping m ON m.OldID = o.ID
+INNER JOIN @CheckTypeOptionMapping m ON m.OldID = o.ID
 
 
-WHILE EXISTS (SELECT 1 FROM @Mapping) BEGIN
+WHILE EXISTS (SELECT 1 FROM @CheckTypeOptionMapping) BEGIN
 	DECLARE @OldID VARCHAR(50)
 	DECLARE @ID VARCHAR(50) 
-	SELECT TOP 1 @ID=ID, @OldID=OldID FROM @Mapping
+	SELECT TOP 1 @ID=ID, @OldID=OldID FROM @CheckTypeOptionMapping
 	UPDATE n SET
 		n.TypeOptions = REPLACE(n.TypeOptions, '"' + @OldID + '":', '"' + @ID + '":')
 	FROM dbo.tblCheckData n 
 	WHERE CHARINDEX('"' + @OldID + '":', n.TypeOptions) > 0
-	DELETE FROM @Mapping WHERE OldID=@OldID AND ID=@ID
+	DELETE FROM @CheckTypeOptionMapping WHERE OldID=@OldID AND ID=@ID
 END
 
 -- SubCheck Type Option
@@ -182,9 +182,9 @@ SELECT CONVERT(VARCHAR(50),ID),
 
 DROP TABLE #temp
 
-DECLARE @Mapping TABLE(OldID VARCHAR(50), ID VARCHAR(50)) 
+DECLARE @SubCheckTypeOptionMapping TABLE(OldID VARCHAR(50), ID VARCHAR(50)) 
 
-INSERT INTO @Mapping (OldID,ID)
+INSERT INTO @SubCheckTypeOptionMapping (OldID,ID)
 VALUES
 ('1','Text'),
 ('2','FieldName'),
@@ -204,18 +204,18 @@ VALUES
 ('17','Exists')
 
 UPDATE o SET o.ID=m.ID FROM dbo.tblSubCheckTypeOption o
-INNER JOIN @Mapping m ON m.OldID = o.ID
+INNER JOIN @SubCheckTypeOptionMapping m ON m.OldID = o.ID
 
 
-WHILE EXISTS (SELECT 1 FROM @Mapping) BEGIN
+WHILE EXISTS (SELECT 1 FROM @SubCheckTypeOptionMapping) BEGIN
 	DECLARE @OldID VARCHAR(50)
 	DECLARE @ID VARCHAR(50) 
-	SELECT TOP 1 @ID=ID, @OldID=OldID FROM @Mapping
+	SELECT TOP 1 @ID=ID, @OldID=OldID FROM @SubCheckTypeOptionMapping
 	UPDATE n SET
 		n.Options = REPLACE(n.Options, '"' + @OldID + '":', '"' + @ID + '":')
 	FROM dbo.tblSubCheck n 
 	WHERE CHARINDEX('"' + @OldID + '":', n.Options) > 0
-	DELETE FROM @Mapping WHERE OldID=@OldID AND ID=@ID
+	DELETE FROM @SubCheckTypeOptionMapping WHERE OldID=@OldID AND ID=@ID
 END
 
 -- SubCheck Type - Identifier
@@ -240,9 +240,9 @@ GO
 ALTER TABLE [dbo].[tblSubCheckType] ADD CONSTRAINT [FK_tblSubCheckType_tblCheckType] FOREIGN KEY ([CheckTypeID]) REFERENCES [dbo].[tblCheckType] ([ID])
 GO
 
-DECLARE @Mapping TABLE(ID INT NOT NULL, Identifier VARCHAR(50))
+DECLARE @SubCheckTypeIdentifierMapping TABLE(ID INT NOT NULL, Identifier VARCHAR(50))
 
-INSERT INTO @Mapping (ID,Identifier) VALUES
+INSERT INTO @SubCheckTypeIdentifierMapping (ID,Identifier) VALUES
 (1,'ResponseContains'),
 (2,'JsonProperty'),
 (3,'FieldEqualTo'),
@@ -261,7 +261,7 @@ INSERT INTO dbo.tblSubCheckType
 SELECT t.ID,
        t.CheckTypeID,
 	   m.Identifier,
-       t.Name FROM #temp t INNER JOIN @Mapping m ON m.ID = t.ID
+       t.Name FROM #temp t INNER JOIN @SubCheckTypeIdentifierMapping m ON m.ID = t.ID
 
 
 SET IDENTITY_INSERT dbo.tblSubCheckType OFF
@@ -270,3 +270,26 @@ DROP TABLE #temp
 
 ALTER TABLE [dbo].[tblSubCheck] ADD CONSTRAINT [FK_tblSubCheck_tblSubCheckType] FOREIGN KEY ([TypeID]) REFERENCES [dbo].[tblSubCheckType] ([ID])
 ALTER TABLE [dbo].[tblSubCheckTypeOption] ADD CONSTRAINT [FK_tblSubCheckTypeOption_tblSubCheckType] FOREIGN KEY ([SubCheckTypeID]) REFERENCES [dbo].[tblSubCheckType] ([ID])
+
+-- Sort Order
+ALTER TABLE dbo.tblCheckNotificationTypeOption ADD SortOrder INT NULL
+ALTER TABLE dbo.tblCheckTypeOption ADD SortOrder INT NULL
+ALTER TABLE dbo.tblSubCheckTypeOption ADD SortOrder INT NULL
+
+UPDATE dbo.tblSubCheckTypeOption SET SortOrder=0 WHERE ID='FieldName'
+UPDATE dbo.tblSubCheckTypeOption SET SortOrder=1 WHERE ID='Value'
+UPDATE dbo.tblSubCheckTypeOption SET SortOrder=2 WHERE ID='Exists'
+
+DECLARE @SortOrderMapping TABLE (ID VARCHAR(50), CheckTypeID INT NOT NULL, SortOrder INT NULL)
+INSERT INTO @SortOrderMapping (ID,CheckTypeID,SortOrder) VALUES
+('RequestUrl',1,0),
+('HttpMethod',1,1),
+('Authentication',1,2),
+('TimeoutMS',1,3),
+('TimeWarnMS',1,4),
+('ConnectionString',2,0),
+('Query',2,1),
+('ServerAddress',3,0),
+('TimeoutMS',3,1)
+
+UPDATE cto SET cto.SortOrder=m.SortOrder FROM dbo.tblCheckTypeOption cto INNER JOIN @SortOrderMapping m ON m.CheckTypeID = cto.CheckTypeID AND m.ID = cto.ID

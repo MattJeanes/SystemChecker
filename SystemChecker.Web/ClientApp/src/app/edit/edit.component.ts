@@ -284,7 +284,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
     }
     public async changeType(type: ICheckType) {
         try {
-            const optionGroups = type.Options.map(option => {
+            const optionGroups = type.Options.sort(this.sortOptions).map(option => {
                 const value = [];
                 const currentValue = this.check.Data.TypeOptions[option.ID];
                 value.push(currentValue !== undefined ? currentValue : option.DefaultValue);
@@ -313,7 +313,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
     }
     public changeSubCheckType(options: FormArray, type: ISubCheckType, subCheck?: ISubCheck) {
         try {
-            const optionGroups = type.Options.map(option => {
+            const optionGroups = type.Options.sort(this.sortOptions).map(option => {
                 const value = [];
                 const currentValue = subCheck ? subCheck.Options[option.ID] : undefined;
                 value.push(currentValue !== undefined ? currentValue : option.DefaultValue);
@@ -343,7 +343,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
     }
     public changeNotificationType(options: FormArray, type: ICheckNotificationType, notification?: ICheckNotification) {
         try {
-            const optionGroups = type.Options.map(option => {
+            const optionGroups = type.Options.sort(this.sortOptions).map(option => {
                 const value = [];
                 const currentValue = notification ? notification.Options[option.ID] : undefined;
                 value.push(currentValue !== undefined ? currentValue : option.DefaultValue);
@@ -379,6 +379,9 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
     }
     public back() {
         this.utilService.back();
+    }
+    private sortOptions(a: IOption, b: IOption) {
+        return (a.SortOrder || 0) >= (b.SortOrder || 0) ? 1 : -1;
     }
     private modelToCheck() {
         const model = this.form.value;
