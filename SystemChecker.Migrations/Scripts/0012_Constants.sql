@@ -275,6 +275,7 @@ ALTER TABLE [dbo].[tblSubCheckTypeOption] ADD CONSTRAINT [FK_tblSubCheckTypeOpti
 ALTER TABLE dbo.tblCheckNotificationTypeOption ADD SortOrder INT NULL
 ALTER TABLE dbo.tblCheckTypeOption ADD SortOrder INT NULL
 ALTER TABLE dbo.tblSubCheckTypeOption ADD SortOrder INT NULL
+GO
 
 UPDATE dbo.tblSubCheckTypeOption SET SortOrder=0 WHERE ID='FieldName'
 UPDATE dbo.tblSubCheckTypeOption SET SortOrder=1 WHERE ID='Value'
