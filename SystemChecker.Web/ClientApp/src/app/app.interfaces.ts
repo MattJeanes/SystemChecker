@@ -138,15 +138,8 @@ export interface ICheckNotificationType {
 }
 
 export interface ISlackChannel {
-    name: string;
-    creator: string;
-    is_archived: boolean;
-    is_member: boolean;
-    is_general: boolean;
-    is_channel: boolean;
-    is_group: boolean;
-    num_members: number;
-    members: string[];
+    ID: string;
+    Name: string;
 }
 
 export interface IEnvironment {

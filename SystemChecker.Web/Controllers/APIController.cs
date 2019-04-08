@@ -220,10 +220,10 @@ namespace SystemChecker.Web.Controllers
         }
 
         [HttpGet("slackchannels")]
-        public async Task<List<ChannelDTO>> GetSlackChannelsAsync()
+        public async Task<List<SlackChannelDTO>> GetSlackChannelsAsync()
         {
             var channels = await _slackHelper.GetChannels();
-            return _mapper.Map<List<ChannelDTO>>(channels);
+            return _mapper.Map<List<SlackChannelDTO>>(channels);
         }
 
         [HttpGet("contacttypes")]

@@ -81,9 +81,9 @@ namespace SystemChecker.Client
             return await _client.CallAsync<List<CheckNotificationTypeDTO>>(HttpMethod.Get, "checknotificationtypes");
         }
 
-        public async Task<List<ChannelDTO>> GetSlackChannelsAsync()
+        public async Task<List<SlackChannelDTO>> GetSlackChannelsAsync()
         {
-            return await _client.CallAsync<List<ChannelDTO>>(HttpMethod.Get, "slackchannels");
+            return await _client.CallAsync<List<SlackChannelDTO>>(HttpMethod.Get, "slackchannels");
         }
 
         public async Task<List<ContactTypeDTO>> GetContactTypesAsync()

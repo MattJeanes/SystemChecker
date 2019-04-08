@@ -44,7 +44,7 @@
         <mat-form-field>
             <mat-select [multiple]="option.Multiple" [placeholder]="option.Label" [(ngModel)]="value" [required]="option.IsRequired">
                 <mat-option [value]="undefined">None</mat-option>
-                <mat-option *ngFor="let channel of slackChannels" [value]="channel.id">#{{ channel.name }}</mat-option>
+                <mat-option *ngFor="let channel of slackChannels" [value]="channel.ID">#{{ channel.Name }}</mat-option>
             </mat-select>
         </mat-form-field>
     </div>

@@ -19,7 +19,7 @@ namespace SystemChecker.Contracts.Services
         Task<bool> DeleteAsync(int id);
         Task<List<SubCheckTypeDTO>> GetSubCheckTypesAsync(int checkTypeID);
         Task<List<CheckNotificationTypeDTO>> GetCheckNotificationTypesAsync();
-        Task<List<ChannelDTO>> GetSlackChannelsAsync();
+        Task<List<SlackChannelDTO>> GetSlackChannelsAsync();
         Task<List<ContactTypeDTO>> GetContactTypesAsync();
         Task<LoginResult> LoginAsync(LoginRequest request);
         Task<UserDTO> GetUserAsync();
