@@ -2,8 +2,8 @@
 using System;
 using System.Threading.Tasks;
 using SystemChecker.Contracts.Data;
-using SystemChecker.Contracts.Enums;
 using SystemChecker.Model.Data.Entities;
+using SystemChecker.Model.Data.Enums;
 using SystemChecker.Model.Helpers;
 using SystemChecker.Model.Loggers;
 
@@ -43,43 +43,44 @@ namespace SystemChecker.Model.Jobs
 
             var result = new CheckResult
             {
-                CheckID = check.ID,
-                Status = CheckResultStatus.Success
+                CheckID = check.ID
             };
             try
             {
                 _settings = await _helper.GetSettings();
+                await _helper.LoadResultStatuses();
+                result.Status = _helper.GetResultStatus(ResultStatusEnum.Success);
                 logger.Info($"Starting check using {GetType().Name}");
                 result = await PerformCheck(result);
             }
             catch (SubCheckException e)
             {
-                result.Status = CheckResultStatus.SubCheckFailed;
+                result.Status = _helper.GetResultStatus(ResultStatusEnum.SubCheckFailed);
                 logger.Error("Failed to run check - sub-check failed");
                 logger.Error(e.ToString());
             }
             catch (Exception e)
             {
-                result.Status = CheckResultStatus.Failed;
+                result.Status = _helper.GetResultStatus(ResultStatusEnum.Failed);
                 logger.Error("Failed to run check");
                 logger.Error(e.ToString());
             }
             finally
             {
-                Action<string> log;
-                if (result.Status == CheckResultStatus.Success)
+                Action<string> log = logger.Error;
+                switch (result.Status?.Type.Identifier)
                 {
-                    log = logger.Info;
+                    case nameof(ResultTypeEnum.Success):
+                        log = logger.Info;
+                        break;
+                    case nameof(ResultTypeEnum.Warning):
+                        log = logger.Warn;
+                        break;
+                    case nameof(ResultTypeEnum.Failed):
+                        log = logger.Error;
+                        break;
                 }
-                else if ((int)result.Status > (int)CheckResultStatus.Success)
-                {
-                    log = logger.Warn;
-                }
-                else
-                {
-                    log = logger.Error;
-                }
-                log($"Result: {result.Status.ToString()}");
+                log($"Result: {result.Status?.Name ?? "Unknown"} ({result.Status?.Type.Name ?? "Unknown"}");
                 if (result.TimeMS > 0)
                 {
                     log($"TimeMS: {result.TimeMS}");

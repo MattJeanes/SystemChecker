@@ -28,7 +28,10 @@ namespace SystemChecker.Model.Data.Entities
         [NotMapped]
         public dynamic Options { get => JsonConvert.DeserializeObject(OptionsJSON); set => OptionsJSON = JsonConvert.SerializeObject(value); }
 
-        public T GetOptions<T>() => JsonConvert.DeserializeObject<T>(OptionsJSON);
+        public T GetOptions<T>()
+        {
+            return JsonConvert.DeserializeObject<T>(OptionsJSON);
+        }
 
         [Column("Options")]
         public string OptionsJSON { get; set; }

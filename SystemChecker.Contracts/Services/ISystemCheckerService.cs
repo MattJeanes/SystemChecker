@@ -7,11 +7,13 @@ namespace SystemChecker.Contracts.Services
 {
     public interface ISystemCheckerService
     {
-        Task<List<CheckDTO>> GetAllAsync(bool? simpleStatus = null);
-        Task<CheckDTO> GetByIdAsync(int id, bool? simpleStatus = null);
+        Task<List<CheckDTO>> GetAllAsync();
+        Task<CheckDTO> GetByIdAsync(int id);
         Task<CheckDetailDTO> GetDetailsAsync(int id, bool? includeResults = null);
         Task<CheckResults> GetCheckResultsAsync(int id, string dateFrom, string dateTo);
         Task<List<CheckTypeDTO>> GetTypesAsync();
+        Task<List<ResultTypeDTO>> GetResultTypesAsync();
+        Task<List<ResultStatusDTO>> GetResultStatusesAsync();
         Task<CheckerSettings> GetSettingsAsync();
         Task<CheckerSettings> SetSettingsAsync(CheckerSettings value);
         Task<CheckDetailDTO> EditAsync(CheckDetailDTO value);

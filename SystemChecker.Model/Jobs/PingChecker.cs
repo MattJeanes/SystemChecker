@@ -2,8 +2,8 @@
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
-using SystemChecker.Contracts.Enums;
 using SystemChecker.Model.Data.Entities;
+using SystemChecker.Model.Data.Enums;
 using SystemChecker.Model.Helpers;
 
 namespace SystemChecker.Model.Jobs
@@ -21,8 +21,8 @@ namespace SystemChecker.Model.Jobs
         public override async Task<CheckResult> PerformCheck(CheckResult result)
         {
             var settings = _check.Data.GetTypeOptions<Settings>();
-            string server = settings.ServerAddress;
-            int timeoutMS = settings.TimeoutMS;
+            var server = settings.ServerAddress;
+            var timeoutMS = settings.TimeoutMS;
 
             if (string.IsNullOrEmpty(server))
             {
@@ -40,11 +40,11 @@ namespace SystemChecker.Model.Jobs
                 if (reply.Status == IPStatus.TimedOut)
                 {
                     _logger.Error($"Timeout after {timeoutMS}ms");
-                    result.Status = CheckResultStatus.Timeout;
+                    result.Status = _helper.GetResultStatus(ResultStatusEnum.Timeout);
                 }
                 else
                 {
-                    result.Status = CheckResultStatus.Failed;
+                    result.Status = _helper.GetResultStatus(ResultStatusEnum.Failed);
                 }
             }
 

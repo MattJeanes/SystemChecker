@@ -6,8 +6,8 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using SystemChecker.Contracts.Enums;
 using SystemChecker.Model.Data.Entities;
+using SystemChecker.Model.Data.Enums;
 using SystemChecker.Model.Helpers;
 
 namespace SystemChecker.Model.Jobs
@@ -49,11 +49,11 @@ namespace SystemChecker.Model.Jobs
 
             var settings = _check.Data.GetTypeOptions<Settings>();
 
-            string url = settings.RequestUrl;
-            int? authId = settings.Authentication;
-            int timeoutMS = settings.TimeoutMS;
-            int? timeWarnMS = settings.TimeWarnMS;
-            string httpMethod = settings.HttpMethod;
+            var url = settings.RequestUrl;
+            var authId = settings.Authentication;
+            var timeoutMS = settings.TimeoutMS;
+            var timeWarnMS = settings.TimeWarnMS;
+            var httpMethod = settings.HttpMethod;
 
             if (authId.HasValue && authId.Value > 0)
             {
@@ -87,7 +87,7 @@ namespace SystemChecker.Model.Jobs
 
                     if (timer.ElapsedMilliseconds > timeWarnMS)
                     {
-                        result.Status = CheckResultStatus.TimeWarning;
+                        result.Status = _helper.GetResultStatus(ResultStatusEnum.TimeWarning);
                     }
                     _logger.Info("Request headers:");
                     foreach (var header in response.RequestMessage.Headers)
@@ -108,7 +108,7 @@ namespace SystemChecker.Model.Jobs
                 catch (TaskCanceledException e) when (!e.CancellationToken.IsCancellationRequested)
                 {
                     _logger.Error($"Timeout after {timeoutMS}ms");
-                    result.Status = CheckResultStatus.Timeout;
+                    result.Status = _helper.GetResultStatus(ResultStatusEnum.Timeout);
                 }
                 finally
                 {
@@ -128,7 +128,7 @@ namespace SystemChecker.Model.Jobs
             {
                 case nameof(SubChecks.ResponseContains):
                     var responseContainsOptions = subCheck.GetOptions<ResponseContains>();
-                    string text = responseContainsOptions.Text;
+                    var text = responseContainsOptions.Text;
                     if (responseText.Contains(text))
                     {
                         _logger.Info($"Response contains '{text}'");
@@ -140,9 +140,9 @@ namespace SystemChecker.Model.Jobs
                     break;
                 case nameof(SubChecks.JsonProperty):
                     var jsonPropertyOptions = subCheck.GetOptions<JsonProperty>();
-                    string fieldName = jsonPropertyOptions.FieldName;
-                    bool exists = jsonPropertyOptions.Exists;
-                    string valueContains = jsonPropertyOptions.Value;
+                    var fieldName = jsonPropertyOptions.FieldName;
+                    var exists = jsonPropertyOptions.Exists;
+                    var valueContains = jsonPropertyOptions.Value;
                     var obj = JObject.Parse(responseText);
                     var value = obj.SelectToken(fieldName)?.ToString();
                     if (value == null && exists)

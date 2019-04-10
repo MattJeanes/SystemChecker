@@ -19,7 +19,10 @@ namespace SystemChecker.Model.Data.Entities
 
         public DateTimeOffset DTS { get; set; }
 
-        public CheckResultStatus Status { get; set; }
+        public int StatusID { get; set; }
+
+        [ForeignKey(nameof(StatusID))]
+        public ResultStatus Status { get; set; }
 
         public int TimeMS { get; set; }
     }

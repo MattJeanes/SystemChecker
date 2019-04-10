@@ -3,8 +3,8 @@ import { Injectable } from "@angular/core";
 import { MatDialog } from "@angular/material";
 import {
     ICheck, ICheckDetail, ICheckNotificationType, ICheckResults, ICheckType,
-    IContactType, IInitRequest, IInitResult, ILoginResult, IRunLog, ISettings,
-    ISlackChannel, ISubCheckType, IUser, IValidateCronResult,
+    IContactType, IInitRequest, IInitResult, ILoginResult, IResultStatus, IResultType,
+    IRunLog, ISettings, ISlackChannel, ISubCheckType, IUser, IValidateCronResult,
 } from "../app.interfaces";
 
 import { Router } from "@angular/router";
@@ -16,11 +16,11 @@ import * as store from "store";
 @Injectable()
 export class AppService {
     constructor(private httpClient: HttpClient, private dialogService: MatDialog, private jwtHelperService: JwtHelperService, private router: Router) { }
-    public async get(id: number, simpleStatus?: boolean) {
-        return await this.httpClient.get<ICheck>(`/api/${id}` + (typeof simpleStatus !== "undefined" ? "/" + simpleStatus.toString() : "")).pipe(first()).toPromise();
+    public async get(id: number) {
+        return await this.httpClient.get<ICheck>(`/api/${id}`).pipe(first()).toPromise();
     }
-    public async getAll(simpleStatus?: boolean) {
-        const checks = await this.httpClient.get<ICheck[]>("/api/" + (typeof simpleStatus !== "undefined" ? simpleStatus.toString() : "")).pipe(first()).toPromise();
+    public async getAll() {
+        const checks = await this.httpClient.get<ICheck[]>("/api/").pipe(first()).toPromise();
         return checks;
     }
     public async getDetails(id: number, includeResults?: boolean) {
@@ -47,6 +47,12 @@ export class AppService {
     }
     public async getTypes() {
         return await this.httpClient.get<ICheckType[]>("/api/types").pipe(first()).toPromise();
+    }
+    public async getResultTypes() {
+        return await this.httpClient.get<IResultType[]>("/api/resulttypes").pipe(first()).toPromise();
+    }
+    public async getResultStatuses() {
+        return await this.httpClient.get<IResultStatus[]>("/api/resultstatuses").pipe(first()).toPromise();
     }
     public async getSettings() {
         return await this.httpClient.get<ISettings>("/api/settings").pipe(first()).toPromise();

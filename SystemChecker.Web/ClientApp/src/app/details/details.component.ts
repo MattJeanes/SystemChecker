@@ -7,8 +7,8 @@ import { PageVisibilityService } from "ngx-page-visibility";
 import { Subscription } from "rxjs";
 import { first } from "rxjs/operators";
 
-import { CheckResultStatus } from "../app.enums";
-import { ICheck, ICheckResults } from "../app.interfaces";
+import { ResultType } from "../app.enums";
+import { ICheck, ICheckResults, IResultStatus, IResultType } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
 import { AppService, MessageService, UtilService } from "../services";
 
@@ -38,9 +38,17 @@ export class DetailsComponent implements OnInit, OnDestroy {
         .withUrl("hub/details", { transport: HttpTransportType.WebSockets })
         .build();
     private hubReady = false;
-    private selectedKey?: number;
+    private selectedKey?: IResultStatus;
     private loading = false;
     private subscriptions: Subscription[] = [];
+    private resultStatuses: IResultStatus[] = [];
+    private resultStatusLookup: {
+        [key: number]: IResultStatus,
+    };
+    private resultTypes: IResultType[] = [];
+    private resultTypeLookup: {
+        [key: number]: IResultType,
+    };
     constructor(
         private appService: AppService, private messageService: MessageService, private ngZone: NgZone, private activatedRoute: ActivatedRoute,
         private utilService: UtilService, private loadingService: TdLoadingService, private pageVisibilityService: PageVisibilityService) {
@@ -58,6 +66,21 @@ export class DetailsComponent implements OnInit, OnDestroy {
             const params = await this.activatedRoute.params.pipe(first()).toPromise();
             this.checkID = parseInt(params.id);
             this.check = await this.appService.get(this.checkID);
+
+            this.resultStatuses = await this.appService.getResultStatuses();
+            delete this.resultStatusLookup;
+            this.resultStatusLookup = {};
+            this.resultStatuses.map(x => {
+                this.resultStatusLookup[x.ID] = x;
+            });
+
+            this.resultTypes = await this.appService.getResultTypes();
+            delete this.resultTypeLookup;
+            this.resultTypeLookup = {};
+            this.resultTypes.map(x => {
+                this.resultTypeLookup[x.ID] = x;
+            });
+
             await this.loadResults();
             await this.hub.start();
             this.hubReady = true;
@@ -115,17 +138,17 @@ export class DetailsComponent implements OnInit, OnDestroy {
     }
     public updateCharts() {
         if (!this.results || !this.results.Results || this.results.Results.length === 0) { return; }
-        let groups = this.utilService.group(this.results.Results, x => x.Status);
+        let groups = this.utilService.group(this.results.Results, x => x.StatusID);
         if (this.selectedKey) {
-            const key = this.selectedKey.toString();
+            const key = this.selectedKey.ID.toString();
             groups = groups.filter(x => x.key === key);
         }
         this.customColors = groups.map(group => ({
-            name: CheckResultStatus[group.key],
-            value: this.getColorForStatus(parseInt(group.key) as CheckResultStatus),
+            name: this.resultStatusLookup[parseInt(group.key)].Name,
+            value: this.getColorForStatus(this.resultStatusLookup[parseInt(group.key)]),
         }));
         this.chart = groups.map(group => ({
-            name: CheckResultStatus[group.key],
+            name: this.resultStatusLookup[parseInt(group.key)].Name,
             series: group.data.map(x => ({
                 value: x.TimeMS,
                 name: new Date(x.DTS),
@@ -141,7 +164,7 @@ export class DetailsComponent implements OnInit, OnDestroy {
     }
     public select(event: any) {
         if (typeof event === "string") {
-            this.selectedKey = CheckResultStatus[event];
+            this.selectedKey = this.resultStatuses.find(x => x.Name === event);
             const group = this.chart.find(x => x.name === event);
             if (group) {
                 this.chart = [group];
@@ -152,10 +175,11 @@ export class DetailsComponent implements OnInit, OnDestroy {
         delete this.selectedKey;
         this.updateCharts();
     }
-    private getColorForStatus(status: CheckResultStatus) {
-        if (status > CheckResultStatus.Success) {
+    private getColorForStatus(status: IResultStatus) {
+        const type = this.resultTypeLookup[status.TypeID];
+        if (type.Name === ResultType[ResultType.Warning]) {
             return "#FFEE58";
-        } else if (status === CheckResultStatus.Success) {
+        } else if (type.Name === ResultType[ResultType.Success]) {
             return "#66BB6A";
         } else {
             return "#EF5350";

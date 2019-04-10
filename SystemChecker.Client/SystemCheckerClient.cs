@@ -21,14 +21,14 @@ namespace SystemChecker.Client
             });
         }
 
-        public async Task<List<CheckDTO>> GetAllAsync(bool? simpleStatus = null)
+        public async Task<List<CheckDTO>> GetAllAsync()
         {
-            return await _client.CallAsync<List<CheckDTO>>(HttpMethod.Get, simpleStatus.HasValue ? simpleStatus.Value.ToString() : string.Empty);
+            return await _client.CallAsync<List<CheckDTO>>(HttpMethod.Get, string.Empty);
         }
 
-        public async Task<CheckDTO> GetByIdAsync(int id, bool? simpleStatus = null)
+        public async Task<CheckDTO> GetByIdAsync(int id)
         {
-            return await _client.CallAsync<CheckDTO>(HttpMethod.Get, $"{id}/{(simpleStatus.HasValue ? simpleStatus.Value.ToString() : string.Empty)}");
+            return await _client.CallAsync<CheckDTO>(HttpMethod.Get, id.ToString());
         }
 
         public async Task<CheckDetailDTO> GetDetailsAsync(int id, bool? includeResults = null)
@@ -44,6 +44,16 @@ namespace SystemChecker.Client
         public async Task<List<CheckTypeDTO>> GetTypesAsync()
         {
             return await _client.CallAsync<List<CheckTypeDTO>>(HttpMethod.Get, "types");
+        }
+
+        public async Task<List<ResultTypeDTO>> GetResultTypesAsync()
+        {
+            return await _client.CallAsync<List<ResultTypeDTO>>(HttpMethod.Get, "resulttypes");
+        }
+
+        public async Task<List<ResultStatusDTO>> GetResultStatusesAsync()
+        {
+            return await _client.CallAsync<List<ResultStatusDTO>>(HttpMethod.Get, "resultstatuses");
         }
 
         public async Task<CheckerSettings> GetSettingsAsync()

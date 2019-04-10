@@ -42,9 +42,9 @@
                 <td mat-cell *matCellDef="let check">{{ typeLookup[check.TypeID].Name }}</td>
             </ng-container>
 
-            <ng-container matColumnDef="lastResultStatus">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Result Status</th>
-                <td mat-cell *matCellDef="let check">{{ CheckResultStatus[check.LastResultStatus] }}</td>
+            <ng-container matColumnDef="lastResultType">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Result Type</th>
+                <td mat-cell *matCellDef="let check">{{ check.LastResultType ? resultTypeLookup[check.LastResultType].Name : "Not run" }}</td>
             </ng-container>
 
             <ng-container matColumnDef="options">

@@ -1,12 +1,12 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SystemChecker.Contracts.Data;
-using SystemChecker.Contracts;
 using SystemChecker.Model.Data.Entities;
+using SystemChecker.Model.Data.Enums;
 using SystemChecker.Model.Data.Interfaces;
 using SystemChecker.Model.Loggers;
 using SystemChecker.Model.Notifiers;
@@ -22,6 +22,8 @@ namespace SystemChecker.Model.Helpers
         Task RunNotifiers(Check check, CheckResult result, CheckerSettings settings, ICheckLogger logger);
         Task<Check> GetDetails(int value);
         Task SaveChangesAsync();
+        Task LoadResultStatuses();
+        ResultStatus GetResultStatus(ResultStatusEnum resultStatus);
     }
     public class CheckerHelper : ICheckerHelper
     {
@@ -32,8 +34,18 @@ namespace SystemChecker.Model.Helpers
         private readonly IServiceProvider _serviceProvider;
         private readonly ICheckLogger _checkLogger;
         private readonly IConnectionMultiplexer _connectionMultiplexer;
-        public CheckerHelper(IRepository<SubCheckType> subCheckTypes, IRepository<CheckResult> checkResults, ICheckRepository checks, IMapper mapper,
-            ISettingsHelper settingsHelper, IServiceProvider serviceProvider, ICheckLogger checkLogger, IConnectionMultiplexer connectionMultiplexer)
+        private readonly IRepository<ResultStatus> _resultStatuses;
+        private List<ResultStatus> _resultStatusesCache;
+        public CheckerHelper(
+            IRepository<SubCheckType> subCheckTypes,
+            IRepository<CheckResult> checkResults,
+            ICheckRepository checks,
+            ISettingsHelper settingsHelper,
+            IServiceProvider serviceProvider,
+            ICheckLogger checkLogger,
+            IConnectionMultiplexer connectionMultiplexer,
+            IRepository<ResultStatus> resultStatuses
+            )
         {
             _subCheckTypes = subCheckTypes;
             _checkResults = checkResults;
@@ -42,6 +54,7 @@ namespace SystemChecker.Model.Helpers
             _serviceProvider = serviceProvider;
             _checkLogger = checkLogger;
             _connectionMultiplexer = connectionMultiplexer;
+            _resultStatuses = resultStatuses;
         }
 
         public async Task<CheckerSettings> GetSettings()
@@ -68,6 +81,8 @@ namespace SystemChecker.Model.Helpers
 
         public async Task SaveResult(CheckResult result)
         {
+            result.StatusID = result.Status.ID;
+            result.Status = null;
             _checkResults.Add(result);
             await _checkResults.SaveChangesAsync();
             var pubsub = _connectionMultiplexer.GetSubscriber();
@@ -123,6 +138,24 @@ namespace SystemChecker.Model.Helpers
         public async Task SaveChangesAsync()
         {
             await _checks.SaveChangesAsync();
+        }
+
+        public async Task LoadResultStatuses()
+        {
+            _resultStatusesCache = await _resultStatuses
+                .GetAll()
+                .Include(x => x.Type)
+                .ToListAsync();
+        }
+
+        public ResultStatus GetResultStatus(ResultStatusEnum resultStatus)
+        {
+            if (_resultStatusesCache == null)
+            {
+                throw new Exception($"Result status cache not loaded call {nameof(LoadResultStatuses)} first");
+            }
+            return _resultStatusesCache
+                .First(x => x.Identifier == resultStatus.ToString());
         }
     }
 }

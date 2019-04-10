@@ -1,15 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using SystemChecker.Contracts.Data;
-using SystemChecker.Contracts.Enums;
-using SystemChecker.Model.Data;
 using SystemChecker.Model.Data.Entities;
+using SystemChecker.Model.Data.Enums;
 using SystemChecker.Model.Data.Interfaces;
-using SystemChecker.Model.Helpers;
 using SystemChecker.Model.Loggers;
 
 namespace SystemChecker.Model.Notifiers
@@ -45,7 +41,7 @@ namespace SystemChecker.Model.Notifiers
             logger.Info($"Running {GetType().Name}");
             var message = $"Check {_check.Name} completed in {_result.TimeMS}ms with result: {_result.Status.ToString()}";
 
-            var failed = result.Status <= CheckResultStatus.Failed;
+            var failed = result.Status.Type.Identifier == nameof(ResultTypeEnum.Failed);
             if (notification.Sent != null && !failed)
             {
                 logger.Info("Notification sent and no longer failing, resetting");
@@ -55,9 +51,20 @@ namespace SystemChecker.Model.Notifiers
             else if (notification.Sent == null && failed)
             {
                 var sent = false;
-                if (!sent) sent = await CheckCount(message);
-                if (!sent) sent = await CheckMinutes(message);
-                if (sent) notification.Sent = DateTime.UtcNow;
+                if (!sent)
+                {
+                    sent = await CheckCount(message);
+                }
+
+                if (!sent)
+                {
+                    sent = await CheckMinutes(message);
+                }
+
+                if (sent)
+                {
+                    notification.Sent = DateTime.UtcNow;
+                }
             }
             else if (notification.Sent != null)
             {
@@ -76,10 +83,11 @@ namespace SystemChecker.Model.Notifiers
             else
             {
                 shouldSend = !(await _checkResults.GetAll()
+                    .Include(x => x.Status).ThenInclude(x => x.Type)
                     .Where(x => x.CheckID == _check.ID)
                     .OrderByDescending(x => x.ID)
                     .Take(_notification.FailCount.Value)
-                    .Where(x => x.Status > CheckResultStatus.Failed)
+                    .Where(x => x.Status.Type.Identifier != nameof(ResultTypeEnum.Failed))
                     .AnyAsync());
             }
             if (shouldSend)
@@ -105,10 +113,11 @@ namespace SystemChecker.Model.Notifiers
                     .Where(x => x.CheckID == _check.ID && x.DTS.UtcDateTime <= dts)
                     .OrderByDescending(x => x.ID)
                     .FirstOrDefaultAsync();
-                if (result?.Status <= CheckResultStatus.Failed)
+                if (result?.Status?.Type.Identifier == nameof(ResultTypeEnum.Failed))
                 {
                     shouldSend = !(await _checkResults.GetAll()
-                        .Where(x => x.CheckID == _check.ID && x.Status > CheckResultStatus.Failed && x.DTS > dts)
+                        .Include(x => x.Status).ThenInclude(x => x.Type)
+                        .Where(x => x.CheckID == _check.ID && x.Status.Type.Identifier != nameof(ResultStatusEnum.Failed) && x.DTS > dts)
                         .AnyAsync());
                 }
             }

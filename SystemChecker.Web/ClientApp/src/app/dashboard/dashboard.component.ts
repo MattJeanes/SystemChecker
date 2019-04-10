@@ -5,8 +5,8 @@ import { PageVisibilityService } from "ngx-page-visibility";
 import { Subscription } from "rxjs";
 import * as store from "store";
 
-import { CheckResultStatus } from "../app.enums";
-import { ICheck, ICheckGroup, ICheckType, IEnvironment, ISettings } from "../app.interfaces";
+import { ResultType } from "../app.enums";
+import { ICheck, ICheckGroup, ICheckType, IEnvironment, IResultStatus, IResultType, ISettings } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
 import { AppService, MessageService } from "../services";
 
@@ -16,7 +16,7 @@ interface IChart {
     results: Array<{
         name: string,
         value: number,
-        type: CheckResultStatus | null,
+        type: number | null,
     }>;
 }
 
@@ -40,7 +40,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }];
     public checks: ICheck[] = [];
     public dataSource: MatTableDataSource<ICheck>;
-    public displayedColumns = ["name", "active", "group", "environment", "type", "lastResultStatus", "options"];
+    public displayedColumns = ["name", "active", "group", "environment", "type", "lastResultType", "options"];
     @ViewChild(MatSort) public sort: MatSort;
     @ViewChild(MatPaginator) public paginator: MatPaginator;
 
@@ -52,15 +52,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
         store.set("activeOnly", value);
     }
     public environmentLookup: {
-        [key: string]: IEnvironment;
+        [key: number]: IEnvironment;
     };
     public checkGroupLookup: {
-        [key: string]: ICheckGroup;
+        [key: number]: ICheckGroup;
     };
     public typeLookup: {
-        [key: string]: ICheckType;
+        [key: number]: ICheckType;
     };
-    public CheckResultStatus = CheckResultStatus;
+    public resultTypeLookup: {
+        [key: number]: IResultType;
+    };
     public settings: ISettings = {
         Logins: [],
         ConnStrings: [],
@@ -70,6 +72,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         Global: {},
     };
     public types: ICheckType[] = [];
+    public resultTypes: IResultType[] = [];
     private hub = new HubConnectionBuilder()
         .withUrl("hub/dashboard", { transport: HttpTransportType.WebSockets })
         .build();
@@ -100,6 +103,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.settings = await this.appService.getSettings();
             delete this.types;
             this.types = await this.appService.getTypes();
+            delete this.resultTypes;
+            this.resultTypes = await this.appService.getResultTypes();
 
             delete this.environmentLookup;
             this.environmentLookup = {};
@@ -119,8 +124,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 this.checkGroupLookup[x.ID] = x;
             });
 
+            delete this.resultTypeLookup;
+            this.resultTypeLookup = {};
+            this.resultTypes.map(x => {
+                this.resultTypeLookup[x.ID] = x;
+            });
+
             delete this.checks;
-            this.checks = await this.appService.getAll(true);
+            this.checks = await this.appService.getAll();
             this.dataSource = new MatTableDataSource(this.checks);
             this.dataSource.sort = this.sort;
             this.dataSource.paginator = this.paginator;
@@ -133,7 +144,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     `group: ${check.GroupID ? this.checkGroupLookup[check.GroupID].Name : "None"}`,
                     `env: ${this.environmentLookup[check.EnvironmentID!].Name}`,
                     `type: ${this.typeLookup[check.TypeID!].Name}`,
-                    `status: ${CheckResultStatus[check.LastResultStatus!]}`,
+                    `resultType: ${check.LastResultType ? this.resultTypeLookup[check.LastResultType].Name : "Not run"}`,
                 ].map(x => x.replace(/ /g, "").toLowerCase());
                 const values = valueRaw.split(",").filter(x => x);
                 for (const value of values) {
@@ -160,8 +171,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
                         return this.environmentLookup[check.EnvironmentID!].Name;
                     case "type":
                         return this.typeLookup[check.TypeID!].Name;
-                    case "lastResultStatus":
-                        return CheckResultStatus[check.LastResultStatus!];
+                    case "lastResultType":
+                        return check.LastResultType ? this.resultTypeLookup[check.LastResultType].Name : "Not run";
                     default:
                         return check[header];
                 }
@@ -205,18 +216,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
             let failed = 0;
             let notRun = 0;
             this.checks.filter(y => y.EnvironmentID === x.ID && (this.activeOnly === false || y.Active)).forEach(z => {
-                const status = z.LastResultStatus;
-                switch (status) {
-                    case CheckResultStatus.Success:
+                const status = this.resultTypeLookup[z.LastResultType];
+                switch (status ? status.Name : undefined) {
+                    case ResultType[ResultType.Success]:
                         success++;
                         break;
-                    case CheckResultStatus.Warning:
+                    case ResultType[ResultType.Warning]:
                         warning++;
                         break;
-                    case CheckResultStatus.Failed:
+                    case ResultType[ResultType.Failed]:
                         failed++;
                         break;
-                    case CheckResultStatus.NotRun:
+                    default:
                         notRun++;
                         break;
                 }
@@ -228,22 +239,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     {
                         name: "Successful",
                         value: success,
-                        type: CheckResultStatus.Success,
+                        type: ResultType.Success,
                     },
                     {
                         name: "Warning",
                         value: warning,
-                        type: CheckResultStatus.Warning,
+                        type: ResultType.Warning,
                     },
                     {
                         name: "Failed",
                         value: failed,
-                        type: CheckResultStatus.Failed,
+                        type: ResultType.Failed,
                     },
                     {
                         name: "Not run",
                         value: notRun,
-                        type: CheckResultStatus.NotRun,
+                        type: ResultType.NotRun,
                     },
                 ],
             };
@@ -252,7 +263,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     public onChartSelect(results: IChart, event: { name: string, value: number }) {
         const selected = results.results.find(x => x.name === event.name);
         if (selected) {
-            this.filter = `env:${this.environmentLookup[results.environmentID].Name}, status:${CheckResultStatus[selected.type!]}`;
+            this.filter = `env:${this.environmentLookup[results.environmentID].Name}, resultType:${ResultType[selected.type!]}`;
             this.applyFilter();
         }
     }

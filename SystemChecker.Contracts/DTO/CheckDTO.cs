@@ -1,5 +1,3 @@
-using SystemChecker.Contracts.Enums;
-
 namespace SystemChecker.Contracts.DTO
 {
     public class CheckDTO
@@ -11,6 +9,7 @@ namespace SystemChecker.Contracts.DTO
         public int TypeID { get; set; }
         public int? GroupID { get; set; }
         public int EnvironmentID { get; set; }
-        public CheckResultStatus? LastResultStatus { get; set; }
+        public int? LastResultStatus { get; set; }
+        public int? LastResultType { get; set; }
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using SystemChecker.Contracts.Enums;
 
 namespace SystemChecker.Contracts.DTO
 {
@@ -11,7 +10,7 @@ namespace SystemChecker.Contracts.DTO
 
         public DateTime DTS { get; set; }
 
-        public CheckResultStatus Status { get; set; }
+        public int StatusID { get; set; }
 
         public int TimeMS { get; set; }
     }

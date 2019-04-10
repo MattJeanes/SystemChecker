@@ -53,6 +53,12 @@ namespace SystemChecker.Model.Data
             CreateMap<ApiKeyDTO, ApiKey>()
                 .EqualityComparison((odto, o) => odto.ID == o.ID)
                 .ReverseMap();
+            CreateMap<ResultTypeDTO, ResultType>()
+                .EqualityComparison((odto, o) => odto.ID == o.ID)
+                .ReverseMap();
+            CreateMap<ResultStatusDTO, ResultStatus>()
+                .EqualityComparison((odto, o) => odto.ID == o.ID)
+                .ReverseMap();
             CreateMap<SlackAPI.Channel, SlackChannelDTO>().ReverseMap();
         }
     }

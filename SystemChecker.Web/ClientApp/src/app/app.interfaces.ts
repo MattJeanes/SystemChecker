@@ -1,4 +1,4 @@
-import { CheckLogType, CheckResultStatus, OptionType } from "./app.enums";
+import { CheckLogType, OptionType } from "./app.enums";
 
 export interface ICheck {
     ID: number;
@@ -7,7 +7,8 @@ export interface ICheck {
     Description?: string;
     TypeID?: number;
     GroupID?: number;
-    LastResultStatus?: CheckResultStatus;
+    LastResultStatus?: number;
+    LastResultType?: number;
     EnvironmentID?: number;
 }
 
@@ -26,7 +27,7 @@ export interface ICheckResult {
     ID: number;
     CheckID: number;
     DTS: string;
-    Status: CheckResultStatus;
+    StatusID: number;
     TimeMS: number;
 }
 
@@ -206,4 +207,15 @@ export interface IValidateCronResult {
     Valid: boolean;
     Next?: string;
     Error?: string;
+}
+
+export interface IResultType {
+    ID: number;
+    Name: string;
+}
+
+export interface IResultStatus {
+    ID: number;
+    TypeID: number;
+    Name: string;
 }

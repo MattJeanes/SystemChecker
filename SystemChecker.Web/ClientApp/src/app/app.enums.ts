@@ -1,4 +1,4 @@
-﻿export enum OptionType {
+export enum OptionType {
     Boolean = 1,
     String = 2,
     Number = 3,
@@ -20,19 +20,14 @@ export enum CheckLogType {
     Done = 4,
 }
 
-export enum CheckResultStatus {
-    TimeWarning = 3,
-    Warning = 2,
-    // Everything above this is a warning
-    Success = 1,
-    NotRun = 0,
-    Failed = -1,
-    // Everything below this is a failure
-    Timeout = -2,
-    SubCheckFailed = -3,
-}
-
 export enum ContactType {
     Email = 1,
     Phone = 2,
+}
+
+export enum ResultType {
+    Success,
+    Failed,
+    Warning,
+    NotRun,
 }

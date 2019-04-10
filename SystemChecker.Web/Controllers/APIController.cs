@@ -9,7 +9,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using SystemChecker.Contracts.Data;
 using SystemChecker.Contracts.DTO;
-using SystemChecker.Contracts.Enums;
 using SystemChecker.Contracts.Services;
 using SystemChecker.Model;
 using SystemChecker.Model.Data.Entities;
@@ -25,6 +24,8 @@ namespace SystemChecker.Web.Controllers
         private readonly IRepository<CheckResult> _checkResults;
         private readonly ISubCheckTypeRepository _subCheckTypes;
         private readonly ICheckTypeRepository _checkTypes;
+        private readonly IRepository<ResultType> _resultTypes;
+        private readonly IRepository<ResultStatus> _resultStatuses;
         private readonly ICheckNotificationTypeRepository _checkNotificationTypes;
         private readonly IRepository<ContactType> _contactTypes;
         private readonly IMapper _mapper;
@@ -35,14 +36,31 @@ namespace SystemChecker.Web.Controllers
         private readonly ISecurityHelper _securityHelper;
         private readonly IUserRepository _users;
         private readonly ILogger _logger;
-        public APIController(ICheckRepository checks, IRepository<CheckResult> checkResults, ISubCheckTypeRepository subCheckTypes, ICheckTypeRepository checkTypes, ICheckNotificationTypeRepository checkNotificationTypes,
-            IRepository<ContactType> contactTypes, IMapper mapper, ISchedulerManager manager, ISettingsHelper settingsHelper, ISlackHelper slackHelper, IJobHelper jobHelper, ISecurityHelper securityHelper,
-            IUserRepository users, ILogger<APIController> logger)
+        public APIController(
+            ICheckRepository checks,
+            IRepository<CheckResult> checkResults,
+            ISubCheckTypeRepository subCheckTypes,
+            ICheckTypeRepository checkTypes,
+            IRepository<ResultType> resultTypes,
+            IRepository<ResultStatus> resultStatuses,
+            ICheckNotificationTypeRepository checkNotificationTypes,
+            IRepository<ContactType> contactTypes,
+            IMapper mapper,
+            ISchedulerManager manager,
+            ISettingsHelper settingsHelper,
+            ISlackHelper slackHelper,
+            IJobHelper jobHelper,
+            ISecurityHelper securityHelper,
+            IUserRepository users,
+            ILogger<APIController> logger
+            )
         {
             _checks = checks;
             _checkResults = checkResults;
             _subCheckTypes = subCheckTypes;
             _checkTypes = checkTypes;
+            _resultTypes = resultTypes;
+            _resultStatuses = resultStatuses;
             _checkNotificationTypes = checkNotificationTypes;
             _contactTypes = contactTypes;
             _mapper = mapper;
@@ -55,50 +73,45 @@ namespace SystemChecker.Web.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{simpleStatus:bool?}")]
-        public async Task<List<CheckDTO>> GetAllAsync(bool? simpleStatus = null)
+        [HttpGet]
+        public async Task<List<CheckDTO>> GetAllAsync()
         {
             var checks = await _checks.GetAll().ToListAsync();
             var dtos = _mapper.Map<List<CheckDTO>>(checks);
             foreach (var check in dtos)
             {
-                await SetLastResultStatus(check, simpleStatus ?? false);
+                await SetLastResultStatus(check);
             }
             return dtos;
         }
 
-        [HttpGet("{id:int}/{simpleStatus:bool?}")]
-        public async Task<CheckDTO> GetByIdAsync(int id, bool? simpleStatus = null)
+        [HttpGet("{id:int}")]
+        public async Task<CheckDTO> GetByIdAsync(int id)
         {
             var check = await _checks.Find(id);
             var dto = _mapper.Map<CheckDTO>(check);
-            await SetLastResultStatus(dto, simpleStatus ?? false);
+            await SetLastResultStatus(dto);
             return dto;
         }
 
-        private async Task SetLastResultStatus(CheckDTO check, bool simpleStatus = true)
+        private async Task SetLastResultStatus(CheckDTO check)
         {
-            var result = await _checkResults.GetAll().Where(x => x.CheckID == check.ID).OrderByDescending(x => x.ID).FirstOrDefaultAsync();
+            var result = await _checkResults.GetAll()
+                .Include(x => x.Status)
+                .Where(x => x.CheckID == check.ID)
+                .OrderByDescending(x => x.ID)
+                .FirstOrDefaultAsync();
+
             var status = result?.Status;
             if (status == null)
             {
-                check.LastResultStatus = CheckResultStatus.NotRun;
-            }
-            else if (!simpleStatus)
-            {
-                check.LastResultStatus = status;
-            }
-            else if (status > CheckResultStatus.Success)
-            {
-                check.LastResultStatus = CheckResultStatus.Warning;
-            }
-            else if (status == CheckResultStatus.Success)
-            {
-                check.LastResultStatus = CheckResultStatus.Success;
+                check.LastResultStatus = null;
+                check.LastResultType = null;
             }
             else
             {
-                check.LastResultStatus = CheckResultStatus.Failed;
+                check.LastResultStatus = status.ID;
+                check.LastResultType = status.TypeID;
             }
         }
 
@@ -132,6 +145,20 @@ namespace SystemChecker.Web.Controllers
         {
             var types = await _checkTypes.GetAll().ToListAsync();
             return _mapper.Map<List<CheckTypeDTO>>(types);
+        }
+
+        [HttpGet("resulttypes")]
+        public async Task<List<ResultTypeDTO>> GetResultTypesAsync()
+        {
+            var resultTypes = await _resultTypes.GetAll().ToListAsync();
+            return _mapper.Map<List<ResultTypeDTO>>(resultTypes);
+        }
+
+        [HttpGet("resultstatuses")]
+        public async Task<List<ResultStatusDTO>> GetResultStatusesAsync()
+        {
+            var resultStatuses = await _resultStatuses.GetAll().ToListAsync();
+            return _mapper.Map<List<ResultStatusDTO>>(resultStatuses);
         }
 
         [HttpGet("settings")]
