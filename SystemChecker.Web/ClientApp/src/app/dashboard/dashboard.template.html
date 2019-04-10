@@ -1,11 +1,13 @@
-<div *ngFor="let results of chart; trackBy: trackChart" class="ui-g ui-g-12 ui-lg-6 chart">
-    <span class="environment" (click)="setEnvironment(results.environmentID)">{{ results.name }}</span>
-    <ngx-charts-advanced-pie-chart [scheme]="chartColors"
-                                   [results]="results.results"
-                                   (select)="onChartSelect(results, $event)">
-    </ngx-charts-advanced-pie-chart>
+<div [hidden]="firstLoad">
+    <div *ngFor="let results of chart; trackBy: trackChart" class="ui-g ui-g-12 ui-lg-6 chart">
+        <span class="environment" (click)="setEnvironment(results.environmentID)">{{ results.name }}</span>
+        <ngx-charts-advanced-pie-chart [scheme]="chartColors"
+                                       [results]="results.results"
+                                       (select)="onChartSelect(results, $event)">
+        </ngx-charts-advanced-pie-chart>
+    </div>
 </div>
-<div class="ui-g-12">
+<div [hidden]="firstLoad" class="ui-g-12">
     <a mat-raised-button color="primary" routerLink="/edit/0">Add new</a>
     <br />
     <br />

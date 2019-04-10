@@ -16,6 +16,9 @@
         </div>
         <h1 *ngIf="!pageService.dashboardLink">{{ pageService.title }}</h1>
         <a class="link" routerLink="/dashboard"><h1 class="fit" *ngIf="pageService.dashboardLink" matTooltip="Click to return to Dashboard" matTooltipPosition="after">{{ pageService.title }}</h1></a>
+        <div *ngIf="pageService.loading" class="load-spinner">
+            <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+        </div>
         <router-outlet></router-outlet>
     </div>
 </div>

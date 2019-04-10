@@ -44,6 +44,7 @@ import {
     MatInputModule,
     MatNativeDateModule,
     MatPaginatorModule,
+    MatProgressSpinnerModule,
     MatSelectModule,
     MatSnackBarModule,
     MatSortModule,
@@ -128,6 +129,7 @@ const routes: Routes = [
         MatSortModule,
         MatPaginatorModule,
         NgxPageVisibilityModule,
+        MatProgressSpinnerModule,
     ],
     declarations: [
         AppComponent,

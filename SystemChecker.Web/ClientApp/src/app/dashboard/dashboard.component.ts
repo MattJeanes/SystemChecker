@@ -8,7 +8,7 @@ import * as store from "store";
 import { ResultType } from "../app.enums";
 import { ICheck, ICheckGroup, ICheckType, IEnvironment, IResultStatus, IResultType, ISettings } from "../app.interfaces";
 import { RunCheckComponent } from "../components";
-import { AppService, MessageService } from "../services";
+import { AppService, MessageService, PageService } from "../services";
 
 interface IChart {
     name: string;
@@ -80,11 +80,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private loading = false;
     private newResults = false;
     private subscriptions: Subscription[];
+    private firstLoad = true;
     constructor(
         private appService: AppService,
         private messageService: MessageService,
         private ngZone: NgZone,
         private pageVisibilityService: PageVisibilityService,
+        private pageService: PageService,
     ) {
         this.hub.on("check", () => {
             if (this.loading) { return; }
@@ -186,12 +188,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
     }
     public async ngOnInit() {
+        this.firstLoad = true;
+        this.pageService.setLoading(true);
         await this.loadChecks();
         await this.hub.start();
         this.hubReady = true;
         this.subscriptions = [
             this.pageVisibilityService.$onPageVisible.subscribe(() => this.ngZone.run(this.onPageVisible.bind(this))),
         ];
+        this.firstLoad = false;
+        this.pageService.setLoading(false);
     }
     public ngOnDestroy() {
         if (this.hubReady) {
