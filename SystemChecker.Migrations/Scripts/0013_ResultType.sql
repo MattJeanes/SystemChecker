@@ -25,7 +25,7 @@ INSERT INTO dbo.tblResultStatus (TypeID, Name) VALUES
 (@Warning,'Warning'),
 (@Warning,'Time Warning'),
 (@Failed,'Timeout'),
-(@Failed,'SubCheckFailed')
+(@Failed,'SubCheck Failed')
 
 
 DECLARE @CheckResultMapping TABLE (Status INT NOT NULL, ResultStatus VARCHAR(50) NOT NULL)
