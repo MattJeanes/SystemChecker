@@ -39,7 +39,7 @@ namespace SystemChecker.Model.Notifiers
             _logger = logger;
 
             logger.Info($"Running {GetType().Name}");
-            var message = $"Check {_check.Name} completed in {_result.TimeMS}ms with result: {_result.Status.ToString()}";
+            var message = $"Check {_check.Name} completed in {_result.TimeMS}ms with result status: {_result.Status.Name.ToString()} (Type: {_result.Status.Type.Name})";
 
             var failed = result.Status.Type.Identifier == nameof(ResultTypeEnum.Failed);
             if (notification.Sent != null && !failed)
