@@ -73,6 +73,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     };
     public types: ICheckType[] = [];
     public resultTypes: IResultType[] = [];
+    public firstLoad = true;
     private hub = new HubConnectionBuilder()
         .withUrl("hub/dashboard", { transport: HttpTransportType.WebSockets })
         .build();
@@ -80,7 +81,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private loading = false;
     private newResults = false;
     private subscriptions: Subscription[];
-    private firstLoad = true;
     constructor(
         private appService: AppService,
         private messageService: MessageService,

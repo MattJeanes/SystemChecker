@@ -10,7 +10,7 @@ export class PageService {
     public title = "Loading..";
     public dashboardLink = false;
     public settingsLink = false;
-    private loading: boolean;
+    public loading = false;
     constructor(private router: Router, private appService: AppService) {
         this.router.events
             .pipe(filter((e: Event) => e instanceof NavigationEnd))
