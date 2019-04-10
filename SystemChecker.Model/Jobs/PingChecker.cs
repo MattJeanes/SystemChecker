@@ -2,8 +2,8 @@
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
+using SystemChecker.Contracts.Enums;
 using SystemChecker.Model.Data.Entities;
-using SystemChecker.Model.Data.Enums;
 using SystemChecker.Model.Helpers;
 
 namespace SystemChecker.Model.Jobs

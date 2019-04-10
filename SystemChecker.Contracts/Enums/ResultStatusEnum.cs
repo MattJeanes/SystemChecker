@@ -1,4 +1,4 @@
-﻿namespace SystemChecker.Model.Data.Enums
+﻿namespace SystemChecker.Contracts.Enums
 {
     public enum ResultStatusEnum
     {

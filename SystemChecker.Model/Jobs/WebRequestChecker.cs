@@ -6,8 +6,8 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using SystemChecker.Contracts.Enums;
 using SystemChecker.Model.Data.Entities;
-using SystemChecker.Model.Data.Enums;
 using SystemChecker.Model.Helpers;
 
 namespace SystemChecker.Model.Jobs

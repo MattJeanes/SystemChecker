@@ -2,8 +2,8 @@
 using System;
 using System.Threading.Tasks;
 using SystemChecker.Contracts.Data;
+using SystemChecker.Contracts.Enums;
 using SystemChecker.Model.Data.Entities;
-using SystemChecker.Model.Data.Enums;
 using SystemChecker.Model.Helpers;
 using SystemChecker.Model.Loggers;
 
