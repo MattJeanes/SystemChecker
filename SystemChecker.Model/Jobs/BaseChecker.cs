@@ -80,7 +80,7 @@ namespace SystemChecker.Model.Jobs
                         log = logger.Error;
                         break;
                 }
-                log($"Result: {result.Status?.Name ?? "Unknown"} ({result.Status?.Type.Name ?? "Unknown"}");
+                log($"Result: {result.Status?.Name ?? "Unknown"} (Type: {result.Status?.Type.Name ?? "Unknown"})");
                 if (result.TimeMS > 0)
                 {
                     log($"TimeMS: {result.TimeMS}");
