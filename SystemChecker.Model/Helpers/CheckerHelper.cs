@@ -81,10 +81,12 @@ namespace SystemChecker.Model.Helpers
 
         public async Task SaveResult(CheckResult result)
         {
+            var status = result.Status;
             result.StatusID = result.Status.ID;
             result.Status = null;
             _checkResults.Add(result);
             await _checkResults.SaveChangesAsync();
+            result.Status = status;
             var pubsub = _connectionMultiplexer.GetSubscriber();
             await pubsub.PublishAsync("check", result.CheckID);
         }
