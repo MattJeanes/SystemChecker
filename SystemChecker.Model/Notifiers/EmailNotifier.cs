@@ -31,7 +31,7 @@ namespace SystemChecker.Model.Notifiers
             }
             var emailIDs = _notification.GetOptions<Options>().EmailAddresses;
             var emailAddresses = _settings.Contacts.Where(x => emailIDs.Contains(x.ID)).Select(x => x.Value);
-            var subject = $"SystemChecker - {_check.Name}: {_result.Status.ToString()}";
+            var subject = $"SystemChecker - {_check.Name}: {_result.Status.Name.ToString()} (Type: {_result.Status.Type.Name})";
             var from = settings.From;
 
             _logger.Info($"Sending email notification from {from} to {string.Join(", ", emailAddresses.ToArray())} with subject {subject}: {message}");

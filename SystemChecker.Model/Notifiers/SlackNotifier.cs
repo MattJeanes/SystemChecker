@@ -28,7 +28,7 @@ namespace SystemChecker.Model.Notifiers
                 throw new Exception("Global Url setting is required for Slack notification");
             };
             var url = $"{global.Url}/details/{_check.ID}";
-            message = $"Check <{url}|{_check.Name}> completed in {_result.TimeMS}ms with result: {_result.Status.ToString()}";
+            message = $"Check <{url}|{_check.Name}> completed in {_result.TimeMS}ms with result status: {_result.Status.Name.ToString()} (Type: {_result.Status.Type.Name})";
             var channelID = _notification.GetOptions<Options>().ChannelID;
             _logger.Info($"Sending slack notification to channel ID {channelID}: {message}");
             await _slackHelper.SendMessage(channelID, message);
