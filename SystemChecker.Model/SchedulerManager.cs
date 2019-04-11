@@ -130,6 +130,7 @@ namespace SystemChecker.Model
                         .WithIdentity(GetTriggerKeyForSchedule(schedule))
                         .WithCronSchedule(schedule.Expression, x => x.InTimeZone(timeZone))
                         .ForJob(job)
+                        .UsingJobData("ScheduleID", schedule.ID)
                         .Build();
 
                     await _scheduler.ScheduleJob(trigger);

@@ -1,0 +1,1 @@
+﻿ALTER TABLE dbo.tblCheckSchedule ADD SkipPublicHolidays BIT NOT NULL DEFAULT(0)

@@ -158,6 +158,7 @@ namespace SystemChecker.Model.Helpers
             var cleanupSchedule = await _globalSettings.Find("CleanupSchedule");
             var loginExpireAfterDays = await _globalSettings.Find("LoginExpireAfterDays");
             var timeZoneId = await _globalSettings.Find("TimeZoneId");
+            var countryCode = await _globalSettings.Find("CountryCode");
 
             return new GlobalSettings
             {
@@ -170,7 +171,8 @@ namespace SystemChecker.Model.Helpers
                 ResultAggregateDays = JsonConvert.DeserializeObject<int?>(resultAggregateDays.Value),
                 CleanupSchedule = JsonConvert.DeserializeObject<string>(cleanupSchedule.Value),
                 LoginExpireAfterDays = JsonConvert.DeserializeObject<int>(loginExpireAfterDays.Value),
-                TimeZoneId = timeZoneId != null ? JsonConvert.DeserializeObject<string>(timeZoneId.Value) : null
+                TimeZoneId = timeZoneId != null ? JsonConvert.DeserializeObject<string>(timeZoneId.Value) : null,
+                CountryCode = countryCode != null ? JsonConvert.DeserializeObject<string>(countryCode.Value) : null
             };
         }
 
@@ -199,6 +201,7 @@ namespace SystemChecker.Model.Helpers
             ((await _globalSettings.Find("CleanupSchedule")) ?? _globalSettings.Add(new GlobalSetting { Key = "CleanupSchedule" })).Value = JsonConvert.SerializeObject(global.CleanupSchedule);
             ((await _globalSettings.Find("LoginExpireAfterDays")) ?? _globalSettings.Add(new GlobalSetting { Key = "LoginExpireAfterDays" })).Value = JsonConvert.SerializeObject(global.LoginExpireAfterDays);
             ((await _globalSettings.Find("TimeZoneId")) ?? _globalSettings.Add(new GlobalSetting { Key = "TimeZoneId" })).Value = JsonConvert.SerializeObject(global.TimeZoneId);
+            ((await _globalSettings.Find("CountryCode")) ?? _globalSettings.Add(new GlobalSetting { Key = "CountryCode" })).Value = JsonConvert.SerializeObject(global.CountryCode);
             await _globalSettings.SaveChangesAsync();
         }
     }

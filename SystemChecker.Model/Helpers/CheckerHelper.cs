@@ -20,7 +20,7 @@ namespace SystemChecker.Model.Helpers
         Task SaveResult(CheckResult result);
         Task RunSubChecks(Check check, ICheckLogger logger, Action<SubCheck> action);
         Task RunNotifiers(Check check, CheckResult result, CheckerSettings settings, ICheckLogger logger);
-        Task<Check> GetDetails(int value);
+        Task<(Check, CheckSchedule)> GetDetails(int checkID, int scheduleID);
         Task SaveChangesAsync();
         Task LoadResultStatuses();
         ResultStatus GetResultStatus(ResultStatusEnum resultStatus);
@@ -35,6 +35,7 @@ namespace SystemChecker.Model.Helpers
         private readonly ICheckLogger _checkLogger;
         private readonly IConnectionMultiplexer _connectionMultiplexer;
         private readonly IRepository<ResultStatus> _resultStatuses;
+        private readonly IRepository<CheckSchedule> _schedules;
         private List<ResultStatus> _resultStatusesCache;
         public CheckerHelper(
             IRepository<SubCheckType> subCheckTypes,
@@ -44,7 +45,8 @@ namespace SystemChecker.Model.Helpers
             IServiceProvider serviceProvider,
             ICheckLogger checkLogger,
             IConnectionMultiplexer connectionMultiplexer,
-            IRepository<ResultStatus> resultStatuses
+            IRepository<ResultStatus> resultStatuses,
+            IRepository<CheckSchedule> schedules
             )
         {
             _subCheckTypes = subCheckTypes;
@@ -55,6 +57,7 @@ namespace SystemChecker.Model.Helpers
             _checkLogger = checkLogger;
             _connectionMultiplexer = connectionMultiplexer;
             _resultStatuses = resultStatuses;
+            _schedules = schedules;
         }
 
         public async Task<CheckerSettings> GetSettings()
@@ -132,9 +135,9 @@ namespace SystemChecker.Model.Helpers
             return _serviceProvider.GetService(type) as BaseNotifier;
         }
 
-        public async Task<Check> GetDetails(int checkID)
+        public async Task<(Check, CheckSchedule)> GetDetails(int checkID, int scheduleID)
         {
-            return await _checks.GetDetails(checkID);
+            return (await _checks.GetDetails(checkID), await _schedules.FirstOrDefaultAsync(x => x.ID == scheduleID));
         }
 
         public async Task SaveChangesAsync()

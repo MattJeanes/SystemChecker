@@ -17,6 +17,7 @@ export interface ICheckSchedule {
     Check?: ICheck;
     Expression: string;
     Active: boolean;
+    SkipPublicHolidays: boolean;
 }
 
 export interface ICheckData {
@@ -93,6 +94,7 @@ export interface IGlobalSettings {
     Url?: string;
     LoginExpireAfterDays?: number;
     TimeZoneId?: string;
+    CountryCode?: string;
 }
 
 export interface ISettings {

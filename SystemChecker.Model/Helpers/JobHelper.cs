@@ -44,7 +44,7 @@ namespace SystemChecker.Model.Helpers
             using (var scope = _container.CreateScope())
             {
                 var checker = scope.ServiceProvider.GetRequiredService(type) as BaseChecker;
-                await checker.Run(check, logger);
+                await checker.Run(check, null, logger);
             }
             return logger;
         }

@@ -65,6 +65,7 @@
                     <div formArrayName="schedules">
                         <div *ngFor="let schedule of schedules.controls; let i=index" [formGroupName]="i">
                             <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
+                            <mat-checkbox class="ui-g-12 full" formControlName="skipPublicHolidays">Skip Public Holidays</mat-checkbox>
                             <mat-form-field class="ui-g-12 full">
                                 <input matInput (keyup)="validateExpression(i)" placeholder="second minute hour day-of-month month day-of-week" formControlName="expression">
                             </mat-form-field>

@@ -87,6 +87,7 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
             url: this.settings.Global.Url,
             loginExpireAfterDays: this.settings.Global.LoginExpireAfterDays,
             timeZoneId: this.settings.Global.TimeZoneId,
+            countryCode: this.settings.Global.CountryCode,
         });
 
         const email = this.settings.Global.Email;
@@ -293,6 +294,7 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
                 ResultRetentionMonths: model.global.resultRetentionMonths,
                 Url: model.global.url,
                 TimeZoneId: model.global.timeZoneId,
+                CountryCode: model.global.countryCode,
             },
         };
         return settings;
@@ -326,6 +328,7 @@ export class SettingsComponent implements OnInit, ICanComponentDeactivate {
                 url: [undefined],
                 loginExpireAfterDays: [Validators.required, Validators.min(1)],
                 timeZoneId: [Validators.required],
+                countryCode: [Validators.required],
             }),
         });
     }

@@ -31,5 +31,6 @@ namespace SystemChecker.Contracts.Data
         public string CleanupSchedule { get; set; }
         public int LoginExpireAfterDays { get; set; }
         public string TimeZoneId { get; set; }
+        public string CountryCode { get; set; }
     }
 }

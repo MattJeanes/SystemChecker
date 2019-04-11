@@ -131,6 +131,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
         this.schedules.push(this.formBuilder.group({
             expression: ["", Validators.required, cronValidator(this.appService)],
             active: true,
+            skipPublicHolidays: false,
             next: { value: "", disabled: true },
         }));
         this.form.markAsDirty();
@@ -205,6 +206,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
             id: schedule.ID,
             expression: [schedule.Expression ? schedule.Expression : "", Validators.required, cronValidator(this.appService)],
             active: schedule.Active,
+            skipPublicHolidays: schedule.SkipPublicHolidays,
             next: { value: "", disabled: true },
         }));
 
@@ -397,6 +399,7 @@ export class EditComponent implements OnInit, ICanComponentDeactivate {
                 ID: schedule.id,
                 Expression: schedule.expression,
                 Active: schedule.active,
+                SkipPublicHolidays: schedule.skipPublicHolidays,
             })),
             Data: {
                 TypeOptions: {},
