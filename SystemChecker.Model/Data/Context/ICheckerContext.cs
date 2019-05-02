@@ -20,6 +20,7 @@ namespace SystemChecker.Model.Data
         EntityEntry<TEntity> Update<TEntity>(TEntity entity) where TEntity : class;
 
         DbSet<Check> Checks { get; set; }
+        DbSet<LastResultStatus> LastResultStatuses { get; set; }
         DbSet<CheckType> CheckTypes { get; set; }
         DbSet<Login> Logins { get; set; }
         DbSet<ConnString> ConnStrings { get; set; }

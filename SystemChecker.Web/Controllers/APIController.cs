@@ -21,6 +21,7 @@ namespace SystemChecker.Web.Controllers
     public class APIController : Controller, ISystemCheckerService
     {
         private readonly ICheckRepository _checks;
+        private readonly IRepository<LastResultStatus> _lastResultStatuses;
         private readonly IRepository<CheckResult> _checkResults;
         private readonly ISubCheckTypeRepository _subCheckTypes;
         private readonly ICheckTypeRepository _checkTypes;
@@ -38,6 +39,7 @@ namespace SystemChecker.Web.Controllers
         private readonly ILogger _logger;
         public APIController(
             ICheckRepository checks,
+            IRepository<LastResultStatus> lastResultStatuses,
             IRepository<CheckResult> checkResults,
             ISubCheckTypeRepository subCheckTypes,
             ICheckTypeRepository checkTypes,
@@ -56,6 +58,7 @@ namespace SystemChecker.Web.Controllers
             )
         {
             _checks = checks;
+            _lastResultStatuses = lastResultStatuses;
             _checkResults = checkResults;
             _subCheckTypes = subCheckTypes;
             _checkTypes = checkTypes;
@@ -78,9 +81,12 @@ namespace SystemChecker.Web.Controllers
         {
             var checks = await _checks.GetAll().ToListAsync();
             var dtos = _mapper.Map<List<CheckDTO>>(checks);
-            foreach (var check in dtos)
+            var lastResultStatuses = await _lastResultStatuses.GetAll()
+                .Where(x => dtos.Select(y => y.ID).Contains(x.CheckID))
+                .ToListAsync();
+            foreach (var dto in dtos)
             {
-                await SetLastResultStatus(check);
+                SetLastResultStatus(dto, lastResultStatuses.FirstOrDefault(x => x.CheckID == dto.ID));
             }
             return dtos;
         }
@@ -90,28 +96,22 @@ namespace SystemChecker.Web.Controllers
         {
             var check = await _checks.Find(id);
             var dto = _mapper.Map<CheckDTO>(check);
-            await SetLastResultStatus(dto);
+            var lastResultStatus = await _lastResultStatuses.FirstOrDefaultAsync(x => x.CheckID == check.ID);
+            SetLastResultStatus(dto, lastResultStatus);
             return dto;
         }
 
-        private async Task SetLastResultStatus(CheckDTO check)
+        private void SetLastResultStatus(CheckDTO check, LastResultStatus lastResultStatus)
         {
-            var result = await _checkResults.GetAll()
-                .Include(x => x.Status)
-                .Where(x => x.CheckID == check.ID)
-                .OrderByDescending(x => x.ID)
-                .FirstOrDefaultAsync();
-
-            var status = result?.Status;
-            if (status == null)
+            if (lastResultStatus == null)
             {
                 check.LastResultStatus = null;
                 check.LastResultType = null;
             }
             else
             {
-                check.LastResultStatus = status.ID;
-                check.LastResultType = status.TypeID;
+                check.LastResultStatus = lastResultStatus.StatusID;
+                check.LastResultType = lastResultStatus.TypeID;
             }
         }
 

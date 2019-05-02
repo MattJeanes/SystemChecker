@@ -23,6 +23,7 @@ namespace SystemChecker.Model.Data
         }
 
         public DbSet<Check> Checks { get; set; }
+        public DbSet<LastResultStatus> LastResultStatuses { get; set; }
         public DbSet<CheckType> CheckTypes { get; set; }
         public DbSet<Login> Logins { get; set; }
         public DbSet<ConnString> ConnStrings { get; set; }
