@@ -110,6 +110,7 @@ namespace SystemChecker.Model.Notifiers
             {
                 var dts = DateTimeOffset.UtcNow.AddMinutes(-_notification.FailMinutes.Value);
                 var result = await _checkResults.GetAll()
+                    .Include(x => x.Status).ThenInclude(x => x.Type)
                     .Where(x => x.CheckID == _check.ID && x.DTS.UtcDateTime <= dts)
                     .OrderByDescending(x => x.ID)
                     .FirstOrDefaultAsync();
@@ -117,7 +118,7 @@ namespace SystemChecker.Model.Notifiers
                 {
                     shouldSend = !(await _checkResults.GetAll()
                         .Include(x => x.Status).ThenInclude(x => x.Type)
-                        .Where(x => x.CheckID == _check.ID && x.Status.Type.Identifier != nameof(ResultStatusEnum.Failed) && x.DTS > dts)
+                        .Where(x => x.CheckID == _check.ID && x.Status.Type.Identifier != nameof(ResultStatusEnum.Failed) && x.DTS.UtcDateTime > dts)
                         .AnyAsync());
                 }
             }
