@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SystemChecker.Model.Data.Entities
 {
@@ -21,5 +16,7 @@ namespace SystemChecker.Model.Data.Entities
         public string Expression { get; set; }
 
         public bool Active { get; set; }
+
+        public bool SkipPublicHolidays { get; set; }
     }
 }

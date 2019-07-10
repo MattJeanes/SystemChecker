@@ -1,14 +1,12 @@
-﻿using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using PhoneNumbers;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using SystemChecker.Model.Data;
+using SystemChecker.Contracts.Data;
 
 namespace SystemChecker.Model.Helpers
 {

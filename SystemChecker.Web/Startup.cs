@@ -1,22 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.SpaServices.Webpack;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Serialization;
+using Moneybarn.Common.Http;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using StackExchange.Redis;
 using SystemChecker.Model;
 using SystemChecker.Web.Helpers;
 using SystemChecker.Web.Hubs;
-using StackExchange.Redis;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.Rewrite;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 
 namespace SystemChecker.Web
 {
@@ -30,7 +25,6 @@ namespace SystemChecker.Web
             Configuration = config;
         }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             if (Configuration.GetValue<bool>("UseHttps"))
@@ -40,12 +34,12 @@ namespace SystemChecker.Web
                     options.RedirectStatusCode = StatusCodes.Status301MovedPermanently;
                 });
             }
-            // Add framework services.
             services
                 .AddMvc(options =>
                 {
                     options.InputFormatters.Add(new TextPlainInputFormatter());
                 })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddJsonOptions(options =>
                 {
                     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
@@ -54,9 +48,13 @@ namespace SystemChecker.Web
 
             services.AddSignalR();
             services.AddSystemChecker(Configuration);
+
+            services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "ClientApp/dist";
+            });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
             if (!_env.IsDevelopment())
@@ -71,20 +69,8 @@ namespace SystemChecker.Web
             app.UseAuthenticationMiddleware();
             app.UseErrorHandlingMiddleware();
 
-            if (_env.IsDevelopment())
-            {
-                app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
-                {
-                    HotModuleReplacement = true,
-                    ConfigFile = "webpack.config.ts",
-                    EnvParam = new
-                    {
-                        aot = false // can't use AOT with HMR currently https://github.com/angular/angular-cli/issues/6347
-                    }
-                });
-            }
-
             app.UseStaticFiles();
+            app.UseSpaStaticFiles();
 
             app.UseSignalR(routes =>
             {
@@ -112,10 +98,16 @@ namespace SystemChecker.Web
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
+            });
 
-                routes.MapSpaFallbackRoute(
-                    name: "spa-fallback",
-                    defaults: new { controller = "Home", action = "Index" });
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "ClientApp";
+
+                if (_env.IsDevelopment())
+                {
+                    spa.UseProxyToSpaDevelopmentServer("http://localhost:42452");
+                }
             });
         }
     }

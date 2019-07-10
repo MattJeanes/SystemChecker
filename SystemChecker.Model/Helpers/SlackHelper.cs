@@ -3,14 +3,18 @@ using SlackAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SystemChecker.Model.Helpers
 {
+    public class SlackChannel
+    {
+        public string ID { get; set; }
+        public string Name { get; set; }
+    }
     public interface ISlackHelper
     {
-        Task<Channel[]> GetChannels();
+        Task<IEnumerable<SlackChannel>> GetChannels();
         Task SendMessage(string channelID, string message);
     }
     public class SlackHelper : ISlackHelper
@@ -37,15 +41,19 @@ namespace SystemChecker.Model.Helpers
             return _client;
         }
 
-        public async Task<Channel[]> GetChannels()
+        public async Task<IEnumerable<SlackChannel>> GetChannels()
         {
-            var task = new TaskCompletionSource<Channel[]>();
+            var task = new TaskCompletionSource<IEnumerable<SlackChannel>>();
             var client = await GetClient();
             client.GetChannelList(response =>
             {
                 if (response.ok)
                 {
-                    task.SetResult(response.channels);
+                    task.SetResult(response.channels.Select(x => new SlackChannel
+                    {
+                        ID = x.id,
+                        Name = x.name
+                    }));
                 }
                 else
                 {

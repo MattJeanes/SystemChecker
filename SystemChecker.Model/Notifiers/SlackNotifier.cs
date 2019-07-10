@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using System.Threading.Tasks;
 using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Data.Interfaces;
@@ -12,9 +8,9 @@ namespace SystemChecker.Model.Notifiers
 {
     public class SlackNotifier : BaseNotifier
     {
-        private enum Options
+        public class Options
         {
-            ChannelId = 1
+            public string ChannelID { get; set; }
         }
         private readonly ISlackHelper _slackHelper;
         private readonly ISettingsHelper _settingsHelper;
@@ -32,8 +28,8 @@ namespace SystemChecker.Model.Notifiers
                 throw new Exception("Global Url setting is required for Slack notification");
             };
             var url = $"{global.Url}/details/{_check.ID}";
-            message = $"Check <{url}|{_check.Name}> completed in {_result.TimeMS}ms with result: {_result.Status.ToString()}";
-            string channelID = _notification.Options[((int)Options.ChannelId).ToString()];
+            message = $"Check <{url}|{_check.Name}> completed in {_result.TimeMS}ms with result status: {_result.Status.Name.ToString()} (Type: {_result.Status.Type.Name})";
+            var channelID = _notification.GetOptions<Options>().ChannelID;
             _logger.Info($"Sending slack notification to channel ID {channelID}: {message}");
             await _slackHelper.SendMessage(channelID, message);
         }

@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Jobs;
@@ -26,13 +24,13 @@ namespace SystemChecker.Model.Helpers
 
         public Type GetJobForCheck(Check check)
         {
-            switch ((Enums.CheckType)check.TypeID)
+            switch ((Contracts.Enums.CheckType)check.TypeID)
             {
-                case Enums.CheckType.WebRequest:
+                case Contracts.Enums.CheckType.WebRequest:
                     return typeof(WebRequestChecker);
-                case Enums.CheckType.Database:
+                case Contracts.Enums.CheckType.Database:
                     return typeof(DatabaseChecker);
-                case Enums.CheckType.Ping:
+                case Contracts.Enums.CheckType.Ping:
                     return typeof(PingChecker);
                 default:
                     throw new InvalidOperationException("Invalid check type");
@@ -46,7 +44,7 @@ namespace SystemChecker.Model.Helpers
             using (var scope = _container.CreateScope())
             {
                 var checker = scope.ServiceProvider.GetRequiredService(type) as BaseChecker;
-                await checker.Run(check, logger);
+                await checker.Run(check, null, logger);
             }
             return logger;
         }

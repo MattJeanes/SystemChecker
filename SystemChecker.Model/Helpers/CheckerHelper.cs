@@ -1,17 +1,13 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
-using SystemChecker.Model.Data;
+using SystemChecker.Contracts.Data;
+using SystemChecker.Contracts.Enums;
 using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Data.Interfaces;
-using SystemChecker.Model.DTO;
 using SystemChecker.Model.Loggers;
 using SystemChecker.Model.Notifiers;
 
@@ -19,13 +15,15 @@ namespace SystemChecker.Model.Helpers
 {
     public interface ICheckerHelper
     {
-        Task<ISettings> GetSettings();
+        Task<CheckerSettings> GetSettings();
         ICheckLogger GetCheckLogger();
         Task SaveResult(CheckResult result);
         Task RunSubChecks(Check check, ICheckLogger logger, Action<SubCheck> action);
-        Task RunNotifiers(Check check, CheckResult result, ISettings settings, ICheckLogger logger);
-        Task<Check> GetDetails(int value);
+        Task RunNotifiers(Check check, CheckResult result, CheckerSettings settings, ICheckLogger logger);
+        Task<(Check, CheckSchedule)> GetDetails(int checkID, int scheduleID);
         Task SaveChangesAsync();
+        Task LoadResultStatuses();
+        ResultStatus GetResultStatus(ResultStatusEnum resultStatus);
     }
     public class CheckerHelper : ICheckerHelper
     {
@@ -36,8 +34,20 @@ namespace SystemChecker.Model.Helpers
         private readonly IServiceProvider _serviceProvider;
         private readonly ICheckLogger _checkLogger;
         private readonly IConnectionMultiplexer _connectionMultiplexer;
-        public CheckerHelper(IRepository<SubCheckType> subCheckTypes, IRepository<CheckResult> checkResults, ICheckRepository checks, IMapper mapper,
-            ISettingsHelper settingsHelper, IServiceProvider serviceProvider, ICheckLogger checkLogger, IConnectionMultiplexer connectionMultiplexer)
+        private readonly IRepository<ResultStatus> _resultStatuses;
+        private readonly IRepository<CheckSchedule> _schedules;
+        private List<ResultStatus> _resultStatusesCache;
+        public CheckerHelper(
+            IRepository<SubCheckType> subCheckTypes,
+            IRepository<CheckResult> checkResults,
+            ICheckRepository checks,
+            ISettingsHelper settingsHelper,
+            IServiceProvider serviceProvider,
+            ICheckLogger checkLogger,
+            IConnectionMultiplexer connectionMultiplexer,
+            IRepository<ResultStatus> resultStatuses,
+            IRepository<CheckSchedule> schedules
+            )
         {
             _subCheckTypes = subCheckTypes;
             _checkResults = checkResults;
@@ -46,9 +56,11 @@ namespace SystemChecker.Model.Helpers
             _serviceProvider = serviceProvider;
             _checkLogger = checkLogger;
             _connectionMultiplexer = connectionMultiplexer;
+            _resultStatuses = resultStatuses;
+            _schedules = schedules;
         }
 
-        public async Task<ISettings> GetSettings()
+        public async Task<CheckerSettings> GetSettings()
         {
             return await _settingsHelper.Get();
         }
@@ -72,13 +84,17 @@ namespace SystemChecker.Model.Helpers
 
         public async Task SaveResult(CheckResult result)
         {
+            var status = result.Status;
+            result.StatusID = result.Status.ID;
+            result.Status = null;
             _checkResults.Add(result);
             await _checkResults.SaveChangesAsync();
+            result.Status = status;
             var pubsub = _connectionMultiplexer.GetSubscriber();
             await pubsub.PublishAsync("check", result.CheckID);
         }
 
-        public async Task RunNotifiers(Check check, CheckResult result, ISettings settings, ICheckLogger logger)
+        public async Task RunNotifiers(Check check, CheckResult result, CheckerSettings settings, ICheckLogger logger)
         {
             var notifications = check.Notifications.Where(x => x.Active);
             if (!notifications.Any())
@@ -89,28 +105,28 @@ namespace SystemChecker.Model.Helpers
             logger.Info("Running notifiers");
             foreach (var notification in notifications)
             {
-                if (!Enum.IsDefined(typeof(Enums.CheckNotificationType), notification.TypeID))
+                if (!Enum.IsDefined(typeof(Contracts.Enums.CheckNotificationType), notification.TypeID))
                 {
                     logger.Warn($"Unknown notification type: {notification.TypeID} - ignoring");
                     continue;
                 }
-                var notifier = GetNotifier((Enums.CheckNotificationType)notification.TypeID);
+                var notifier = GetNotifier((Contracts.Enums.CheckNotificationType)notification.TypeID);
                 await notifier.Run(check, notification, result, settings, logger);
             }
         }
 
-        private BaseNotifier GetNotifier(Enums.CheckNotificationType notificationType)
+        private BaseNotifier GetNotifier(Contracts.Enums.CheckNotificationType notificationType)
         {
             Type type;
             switch (notificationType)
             {
-                case Enums.CheckNotificationType.Slack:
+                case Contracts.Enums.CheckNotificationType.Slack:
                     type = typeof(SlackNotifier);
                     break;
-                case Enums.CheckNotificationType.Email:
+                case Contracts.Enums.CheckNotificationType.Email:
                     type = typeof(EmailNotifier);
                     break;
-                case Enums.CheckNotificationType.SMS:
+                case Contracts.Enums.CheckNotificationType.SMS:
                     type = typeof(SMSNotifier);
                     break;
                 default:
@@ -119,14 +135,32 @@ namespace SystemChecker.Model.Helpers
             return _serviceProvider.GetService(type) as BaseNotifier;
         }
 
-        public async Task<Check> GetDetails(int checkID)
+        public async Task<(Check, CheckSchedule)> GetDetails(int checkID, int scheduleID)
         {
-            return await _checks.GetDetails(checkID);
+            return (await _checks.GetDetails(checkID), await _schedules.FirstOrDefaultAsync(x => x.ID == scheduleID));
         }
 
         public async Task SaveChangesAsync()
         {
             await _checks.SaveChangesAsync();
+        }
+
+        public async Task LoadResultStatuses()
+        {
+            _resultStatusesCache = await _resultStatuses
+                .GetAll()
+                .Include(x => x.Type)
+                .ToListAsync();
+        }
+
+        public ResultStatus GetResultStatus(ResultStatusEnum resultStatus)
+        {
+            if (_resultStatusesCache == null)
+            {
+                throw new Exception($"Result status cache not loaded call {nameof(LoadResultStatuses)} first");
+            }
+            return _resultStatusesCache
+                .First(x => x.Identifier == resultStatus.ToString());
         }
     }
 }

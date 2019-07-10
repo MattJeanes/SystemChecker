@@ -1,0 +1,77 @@
+<div [hidden]="firstLoad">
+    <div *ngFor="let results of chart; trackBy: trackChart" class="ui-g ui-g-12 ui-lg-6 chart">
+        <span class="environment" (click)="setEnvironment(results.environmentID)">{{ results.name }}</span>
+        <ngx-charts-advanced-pie-chart [scheme]="chartColors"
+                                       [results]="results.results"
+                                       (select)="onChartSelect(results, $event)">
+        </ngx-charts-advanced-pie-chart>
+    </div>
+</div>
+<div [hidden]="firstLoad" class="ui-g-12">
+    <a mat-raised-button color="primary" routerLink="/edit/0">Add new</a>
+    <br />
+    <br />
+    <mat-checkbox [(ngModel)]="activeOnly" (ngModelChange)="onActiveOnlyChange()">Active Only</mat-checkbox>
+    <br />
+    <br />
+    <mat-form-field class="full">
+        <input matInput [(ngModel)]="filter" (keyup)="applyFilter()" placeholder="Search">
+    </mat-form-field>
+    <div class="mat-elevation-z2">
+        <table mat-table [dataSource]="dataSource" class="full" matSort #sort="matSort">
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+                <td mat-cell *matCellDef="let check">{{ check.Name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="active">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Active</th>
+                <td mat-cell *matCellDef="let check">{{ check.Active ? "Yes" : "No" }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="group">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Group</th>
+                <td mat-cell *matCellDef="let check">{{ check.GroupID ? checkGroupLookup[check.GroupID].Name : "None" }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="environment">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Environment</th>
+                <td mat-cell *matCellDef="let check">{{ environmentLookup[check.EnvironmentID].Name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="type">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+                <td mat-cell *matCellDef="let check">{{ typeLookup[check.TypeID].Name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="lastResultType">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Result Type</th>
+                <td mat-cell *matCellDef="let check">{{ check.LastResultType ? resultTypeLookup[check.LastResultType].Name : "Not run" }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="options">
+                <th mat-header-cell *matHeaderCellDef>Options</th>
+                <td mat-cell *matCellDef="let check">
+                    <div class="rowbuttons">
+                        <a matTooltip="Details" matTooltipPosition="above" mat-icon-button color="primary" routerLink="/details/{{check.ID}}">
+                            <mat-icon class="md-24">show_chart</mat-icon>
+                        </a>
+                        <a matTooltip="Edit" matTooltipPosition="above" mat-icon-button color="primary" routerLink="/edit/{{check.ID}}">
+                            <mat-icon class="md-24">edit</mat-icon>
+                        </a>
+                        <a matTooltip="Copy" matTooltipPosition="above" mat-icon-button color="primary" routerLink="/edit/{{check.ID}}/copy">
+                            <mat-icon class="md-24">content_copy</mat-icon>
+                        </a>
+                        <button matTooltip="Run" matTooltipPosition="above" mat-icon-button color="primary" (click)="run(check)">
+                            <mat-icon class="md-24">play_arrow</mat-icon>
+                        </button>
+                    </div>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+        <mat-paginator [pageSize]="25" [pageSizeOptions]="[10,25,50,100]" showFirstLastButtons></mat-paginator>
+    </div>
+</div>

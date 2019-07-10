@@ -1,30 +1,32 @@
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Quartz;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using SystemChecker.Model.Data;
-using SystemChecker.Model.Data.Entities;
-using SystemChecker.Model.Enums;
-using SystemChecker.Model.Data.Interfaces;
-using SystemChecker.Model.DTO;
-using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using Quartz;
+using SystemChecker.Contracts.Data;
+using SystemChecker.Contracts.DTO;
+using SystemChecker.Contracts.Services;
 using SystemChecker.Model;
+using SystemChecker.Model.Data.Entities;
+using SystemChecker.Model.Data.Interfaces;
 using SystemChecker.Model.Helpers;
-using SlackAPI;
-using Microsoft.Extensions.Logging;
 
 namespace SystemChecker.Web.Controllers
 {
     [Route("api")]
-    public class APIController : Controller
+    public class APIController : Controller, ISystemCheckerService
     {
         private readonly ICheckRepository _checks;
+        private readonly IRepository<LastResultStatus> _lastResultStatuses;
         private readonly IRepository<CheckResult> _checkResults;
         private readonly ISubCheckTypeRepository _subCheckTypes;
         private readonly ICheckTypeRepository _checkTypes;
+        private readonly IRepository<ResultType> _resultTypes;
+        private readonly IRepository<ResultStatus> _resultStatuses;
         private readonly ICheckNotificationTypeRepository _checkNotificationTypes;
         private readonly IRepository<ContactType> _contactTypes;
         private readonly IMapper _mapper;
@@ -35,14 +37,33 @@ namespace SystemChecker.Web.Controllers
         private readonly ISecurityHelper _securityHelper;
         private readonly IUserRepository _users;
         private readonly ILogger _logger;
-        public APIController(ICheckRepository checks, IRepository<CheckResult> checkResults, ISubCheckTypeRepository subCheckTypes, ICheckTypeRepository checkTypes, ICheckNotificationTypeRepository checkNotificationTypes,
-            IRepository<ContactType> contactTypes, IMapper mapper, ISchedulerManager manager, ISettingsHelper settingsHelper, ISlackHelper slackHelper, IJobHelper jobHelper, ISecurityHelper securityHelper,
-            IUserRepository users, ILogger<APIController> logger)
+        public APIController(
+            ICheckRepository checks,
+            IRepository<LastResultStatus> lastResultStatuses,
+            IRepository<CheckResult> checkResults,
+            ISubCheckTypeRepository subCheckTypes,
+            ICheckTypeRepository checkTypes,
+            IRepository<ResultType> resultTypes,
+            IRepository<ResultStatus> resultStatuses,
+            ICheckNotificationTypeRepository checkNotificationTypes,
+            IRepository<ContactType> contactTypes,
+            IMapper mapper,
+            ISchedulerManager manager,
+            ISettingsHelper settingsHelper,
+            ISlackHelper slackHelper,
+            IJobHelper jobHelper,
+            ISecurityHelper securityHelper,
+            IUserRepository users,
+            ILogger<APIController> logger
+            )
         {
             _checks = checks;
+            _lastResultStatuses = lastResultStatuses;
             _checkResults = checkResults;
             _subCheckTypes = subCheckTypes;
             _checkTypes = checkTypes;
+            _resultTypes = resultTypes;
+            _resultStatuses = resultStatuses;
             _checkNotificationTypes = checkNotificationTypes;
             _contactTypes = contactTypes;
             _mapper = mapper;
@@ -55,62 +76,54 @@ namespace SystemChecker.Web.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{simpleStatus:bool?}")]
-        public async Task<List<CheckDTO>> GetAll(bool? simpleStatus)
+        [HttpGet]
+        public async Task<List<CheckDTO>> GetAllAsync()
         {
             var checks = await _checks.GetAll().ToListAsync();
             var dtos = _mapper.Map<List<CheckDTO>>(checks);
-            foreach (var check in dtos)
+            var lastResultStatuses = await _lastResultStatuses.GetAll()
+                .Where(x => dtos.Select(y => y.ID).Contains(x.CheckID))
+                .ToListAsync();
+            foreach (var dto in dtos)
             {
-                await SetLastResultStatus(check, simpleStatus ?? false);
+                SetLastResultStatus(dto, lastResultStatuses.FirstOrDefault(x => x.CheckID == dto.ID));
             }
             return dtos;
         }
 
-        [HttpGet("{id:int}/{simpleStatus:bool?}")]
-        public async Task<CheckDTO> GetByID(int id, bool? simpleStatus)
+        [HttpGet("{id:int}")]
+        public async Task<CheckDTO> GetByIdAsync(int id)
         {
             var check = await _checks.Find(id);
             var dto = _mapper.Map<CheckDTO>(check);
-            await SetLastResultStatus(dto, simpleStatus ?? false);
+            var lastResultStatus = await _lastResultStatuses.FirstOrDefaultAsync(x => x.CheckID == check.ID);
+            SetLastResultStatus(dto, lastResultStatus);
             return dto;
         }
 
-        private async Task SetLastResultStatus(CheckDTO check, bool simpleStatus = true)
+        private void SetLastResultStatus(CheckDTO check, LastResultStatus lastResultStatus)
         {
-            var result = await _checkResults.GetAll().Where(x => x.CheckID == check.ID).OrderByDescending(x => x.ID).FirstOrDefaultAsync();
-            var status = result?.Status;
-            if (status == null)
+            if (lastResultStatus == null)
             {
-                check.LastResultStatus = CheckResultStatus.NotRun;
-            }
-            else if (!simpleStatus)
-            {
-                check.LastResultStatus = status;
-            }
-            else if (status > CheckResultStatus.Success)
-            {
-                check.LastResultStatus = CheckResultStatus.Warning;
-            }
-            else if (status == CheckResultStatus.Success)
-            {
-                check.LastResultStatus = CheckResultStatus.Success;
+                check.LastResultStatus = null;
+                check.LastResultType = null;
             }
             else
             {
-                check.LastResultStatus = CheckResultStatus.Failed;
+                check.LastResultStatus = lastResultStatus.StatusID;
+                check.LastResultType = lastResultStatus.TypeID;
             }
         }
 
         [HttpGet("details/{id:int}/{includeResults:bool?}")]
-        public async Task<CheckDetailDTO> GetDetails(int id, bool? includeResults = null)
+        public async Task<CheckDetailDTO> GetDetailsAsync(int id, bool? includeResults = null)
         {
             var check = await _checks.GetDetails(id, includeResults ?? false);
             return _mapper.Map<CheckDetailDTO>(check);
         }
 
         [HttpGet("results/{id:int}/{dateFrom}/{dateTo}")]
-        public async Task<ICheckResults> GetCheckResults(int id, string dateFrom, string dateTo)
+        public async Task<CheckResults> GetCheckResultsAsync(int id, string dateFrom, string dateTo)
         {
             var from = DateTimeOffset.Parse(dateFrom);
             from = from.Date + new TimeSpan(0, 0, 0);
@@ -128,20 +141,48 @@ namespace SystemChecker.Web.Controllers
         }
 
         [HttpGet("types")]
-        public async Task<List<CheckTypeDTO>> GetTypes()
+        public async Task<List<CheckTypeDTO>> GetTypesAsync()
         {
             var types = await _checkTypes.GetAll().ToListAsync();
             return _mapper.Map<List<CheckTypeDTO>>(types);
         }
 
+        [HttpGet("resulttypes")]
+        public async Task<List<ResultTypeDTO>> GetResultTypesAsync()
+        {
+            var resultTypes = await _resultTypes.GetAll().ToListAsync();
+            return _mapper.Map<List<ResultTypeDTO>>(resultTypes);
+        }
+
+        [HttpGet("resultstatuses")]
+        public async Task<List<ResultStatusDTO>> GetResultStatusesAsync()
+        {
+            var resultStatuses = await _resultStatuses.GetAll().ToListAsync();
+            return _mapper.Map<List<ResultStatusDTO>>(resultStatuses);
+        }
+
         [HttpGet("settings")]
-        public async Task<ISettings> GetSettings()
+        public async Task<CheckerSettings> GetSettingsAsync()
         {
             return await _settingsHelper.Get();
         }
 
+        [HttpPost("settings")]
+        public async Task<CheckerSettings> SetSettingsAsync([FromBody]CheckerSettings value)
+        {
+            var global = await _settingsHelper.GetGlobal();
+            await _settingsHelper.Set(value);
+            if (global.TimeZoneId != value.Global.TimeZoneId)
+            {
+                _logger.LogInformation($"TimeZoneId changed from {global.TimeZoneId} to {value.Global.TimeZoneId}, updating schedules");
+                await _manager.UpdateSchedules();
+            }
+            await _manager.UpdateMaintenanceJobs(value.Global);
+            return await GetSettingsAsync();
+        }
+
         [HttpPost]
-        public async Task<CheckDetailDTO> Edit([FromBody]CheckDetailDTO value)
+        public async Task<CheckDetailDTO> EditAsync([FromBody]CheckDetailDTO value)
         {
             Check check;
             if (value.ID > 0)
@@ -161,25 +202,11 @@ namespace SystemChecker.Web.Controllers
 
             await _checks.SaveChangesAsync();
             await _manager.UpdateSchedule(check);
-            return await GetDetails(check.ID);
-        }
-
-        [HttpPost("settings")]
-        public async Task<ISettings> SetSettings([FromBody]Settings value)
-        {
-            var global = await _settingsHelper.GetGlobal();
-            await _settingsHelper.Set(value);
-            if (global.TimeZoneId != value.Global.TimeZoneId)
-            {
-                _logger.LogInformation($"TimeZoneId changed from {global.TimeZoneId} to {value.Global.TimeZoneId}, updating schedules");
-                await _manager.UpdateSchedules();
-            }
-            await _manager.UpdateMaintenanceJobs(value.Global);
-            return await GetSettings();
+            return await GetDetailsAsync(check.ID);
         }
 
         [HttpPost("run/{id:int}")]
-        public async Task<List<RunLog>> Run(int id)
+        public async Task<List<RunLog>> RunAsync(int id)
         {
             var check = await _checks.GetDetails(id);
             var logger = await _jobHelper.RunManualUICheck(check);
@@ -196,7 +223,7 @@ namespace SystemChecker.Web.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<bool> Delete(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             var check = await _checks.GetDetails(id, true);
             _checks.Delete(check);
@@ -206,47 +233,41 @@ namespace SystemChecker.Web.Controllers
         }
 
         [HttpGet("subchecktypes/{checkTypeID:int}")]
-        public async Task<List<SubCheckTypeDTO>> GetSubCheckTypes(int checkTypeID)
+        public async Task<List<SubCheckTypeDTO>> GetSubCheckTypesAsync(int checkTypeId)
         {
-            var subCheckTypes = await _subCheckTypes.GetAll().Where(x => x.CheckTypeID == checkTypeID).ToListAsync();
+            var subCheckTypes = await _subCheckTypes.GetAll().Where(x => x.CheckTypeID == checkTypeId).ToListAsync();
             return _mapper.Map<List<SubCheckTypeDTO>>(subCheckTypes);
         }
 
         [HttpGet("checknotificationtypes")]
-        public async Task<List<CheckNotificationTypeDTO>> GetCheckNotificationTypes()
+        public async Task<List<CheckNotificationTypeDTO>> GetCheckNotificationTypesAsync()
         {
             var checkNotificationTypes = await _checkNotificationTypes.GetAll().ToListAsync();
             return _mapper.Map<List<CheckNotificationTypeDTO>>(checkNotificationTypes);
         }
 
         [HttpGet("slackchannels")]
-        public async Task<Channel[]> GetSlackChannels()
+        public async Task<List<SlackChannelDTO>> GetSlackChannelsAsync()
         {
-            return await _slackHelper.GetChannels();
+            var channels = await _slackHelper.GetChannels();
+            return _mapper.Map<List<SlackChannelDTO>>(channels);
         }
 
         [HttpGet("contacttypes")]
-        public async Task<List<ContactTypeDTO>> GetContactTypes()
+        public async Task<List<ContactTypeDTO>> GetContactTypesAsync()
         {
             var contactTypes = await _contactTypes.GetAll().ToListAsync();
             return _mapper.Map<List<ContactTypeDTO>>(contactTypes);
         }
 
-        [HttpGet("triggers")]
-        public async Task<List<ITrigger>> GetAllTriggers()
-        {
-            var triggers = await _manager.GetAllTriggers();
-            return triggers;
-        }
-
         [HttpPost("login")]
-        public async Task<LoginResult> Login([FromBody] LoginRequest request)
+        public async Task<LoginResult> LoginAsync([FromBody] LoginRequest request)
         {
             return await _securityHelper.Login(request, HttpContext);
         }
 
         [HttpGet("user")]
-        public async Task<UserDTO> GetUser()
+        public async Task<UserDTO> GetUserAsync()
         {
             var username = (string)HttpContext.Items["Username"];
             var user = await _users.GetDetails(username);
@@ -258,7 +279,7 @@ namespace SystemChecker.Web.Controllers
         }
 
         [HttpPost("user")]
-        public async Task<UserDTO> EditUser([FromBody]UserDTO value)
+        public async Task<UserDTO> EditUserAsync([FromBody]UserDTO value)
         {
             var username = (string)HttpContext.Items["Username"];
             if (value.Username != username)
@@ -288,11 +309,11 @@ namespace SystemChecker.Web.Controllers
             _mapper.Map(value, user);
 
             await _users.SaveChangesAsync();
-            return await GetUser();
+            return await GetUserAsync();
         }
 
         [HttpGet("init")]
-        public async Task<InitResult> GetInit()
+        public async Task<InitResult> GetInitAsync()
         {
             var result = new InitResult();
 
@@ -303,7 +324,7 @@ namespace SystemChecker.Web.Controllers
         }
 
         [HttpPost("init")]
-        public async Task<InitResult> SetInit([FromBody]InitRequest request)
+        public async Task<InitResult> SetInitAsync([FromBody]InitRequest request)
         {
             var result = new InitResult();
 
@@ -324,7 +345,7 @@ namespace SystemChecker.Web.Controllers
         }
 
         [HttpPost("cron/{validateOnly:bool?}")]
-        public async Task<object> ValidateCronExpression(bool? validateOnly, [FromBody]string cron)
+        public async Task<ValidateCronResult> ValidateCronExpressionAsync([FromBody]string cron, bool? validateOnly = null)
         {
             try
             {
@@ -334,9 +355,9 @@ namespace SystemChecker.Web.Controllers
                 };
                 if (validateOnly ?? false)
                 {
-                    return new
+                    return new ValidateCronResult
                     {
-                        valid = true
+                        Valid = true
                     };
                 }
                 DateTimeOffset? time = DateTimeOffset.UtcNow;
@@ -353,18 +374,18 @@ namespace SystemChecker.Web.Controllers
                     next += time.Value.LocalDateTime.ToString("yyyy-mm-dd HH:mm:ss") + "\n";
                 }
                 next += "\n" + expression.GetExpressionSummary();
-                return new
+                return new ValidateCronResult
                 {
-                    valid = true,
-                    next
+                    Valid = true,
+                    Next = next
                 };
             }
             catch (Exception e)
             {
-                return new
+                return new ValidateCronResult
                 {
-                    valid = false,
-                    error = e.Message
+                    Valid = false,
+                    Error = e.Message
                 };
             }
         }

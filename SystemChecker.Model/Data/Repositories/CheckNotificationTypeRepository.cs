@@ -1,9 +1,7 @@
-﻿using SystemChecker.Model.Data.Entities;
-using SystemChecker.Model.Data.Interfaces;
-using System;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using SystemChecker.Model.Data.Entities;
+using SystemChecker.Model.Data.Interfaces;
 
 namespace SystemChecker.Model.Data.Repositories
 {

@@ -1,22 +1,22 @@
-﻿using System;
-using System.IO;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using DasMulli.Win32.ServiceUtils;
+﻿using DasMulli.Win32.ServiceUtils;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
+using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using SystemChecker.Model;
 
 namespace SystemChecker.Service
 {
-    class Program
+    internal class Program
     {
-        static async Task<int> Main(string[] args)
+        private static async Task<int> Main(string[] args)
         {
             var isService = false;
             var app = new CommandLineApplication();
@@ -82,15 +82,20 @@ namespace SystemChecker.Service
             }
             catch (Exception e)
             {
-                var critLogger = new LoggerFactory()
-                    .AddFile("logs/systemchecker-critical-{Date}.log")
-                    .AddDebug()
-                    .AddConsole()
-                    .CreateLogger<Program>();
-
-                critLogger.LogInformation($"Current directory: {Directory.GetCurrentDirectory()}");
-                critLogger.LogError(e, "Critical failure in host build");
-                Thread.Sleep(1000); // allow time to flush logs in the event of a crash
+                var serviceCollection = new ServiceCollection();
+                serviceCollection.AddLogging(builder =>
+                {
+                    builder
+                        .AddFile("logs/systemchecker-critical-{Date}.log")
+                        .AddDebug()
+                        .AddConsole();
+                });
+                using (var logProvider = serviceCollection.BuildServiceProvider())
+                {
+                    var critLogger = logProvider.GetRequiredService<ILogger<Program>>();
+                    critLogger.LogInformation($"Current directory: {Directory.GetCurrentDirectory()}");
+                    critLogger.LogError(e, "Critical failure in host build");
+                }
                 return 1;
             }
 
@@ -118,14 +123,14 @@ namespace SystemChecker.Service
             return 0;
         }
 
-        static void RunAsService(IServiceProvider services)
+        private static void RunAsService(IServiceProvider services)
         {
             var schedulerService = new SchedulerService(services);
             var serviceHost = new Win32ServiceHost(schedulerService);
             serviceHost.Run();
         }
 
-        static async Task Run(IServiceProvider services)
+        private static async Task Run(IServiceProvider services)
         {
             var schedulerManager = services.GetRequiredService<ISchedulerManager>();
             await schedulerManager.Start();

@@ -1,0 +1,75 @@
+// Global styles
+
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400');
+
+@import '_theme.scss';
+@import '_grid.scss';
+@import '_charts.scss';
+
+body {
+    font-size: 16px;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 300;
+    letter-spacing: -1px;
+}
+
+h3, h4 {
+    font-weight: 400;
+}
+
+.panel-dark > mat-dialog-container {
+    background-color: #424242;
+    color: white;
+}
+
+.mat-dialog-container {
+    max-width: 100% !important;
+}
+
+.snackbar-error {
+    color: #ffffff;
+    background-color: #ef5350;
+
+    .mat-simple-snackbar-action {
+        color: #ffffff;
+        background-color: #d32f2f;
+    }
+}
+
+.snackbar-success {
+    color: #ffffff !important;
+    background-color: #43a047 !important;
+
+    .mat-simple-snackbar-action {
+        color: #ffffff;
+        background-color: #388e3c;
+    }
+}
+
+.full {
+    width: 100%;
+}
+
+.mat-card-actions .mat-button:first-child, .mat-card-actions .mat-raised-button:first-child {
+    margin-right: 8px !important;
+}
+
+html.dark {
+    background-color: #333333 !important;
+}
+
+.dark {
+    body {
+        background-color: #333333 !important;
+        color: white;
+    }
+}
+
+.load-spinner {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}

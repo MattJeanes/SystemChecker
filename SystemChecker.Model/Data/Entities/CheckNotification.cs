@@ -1,12 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SystemChecker.Model.Enums;
 
 namespace SystemChecker.Model.Data.Entities
 {
@@ -32,6 +27,11 @@ namespace SystemChecker.Model.Data.Entities
 
         [NotMapped]
         public dynamic Options { get => JsonConvert.DeserializeObject(OptionsJSON); set => OptionsJSON = JsonConvert.SerializeObject(value); }
+
+        public T GetOptions<T>()
+        {
+            return JsonConvert.DeserializeObject<T>(OptionsJSON);
+        }
 
         [Column("Options")]
         public string OptionsJSON { get; set; }

@@ -1,0 +1,124 @@
+<mat-card>
+    <mat-card-content>
+        <form [formGroup]="form" novalidate>
+            <mat-tab-group [dynamicHeight]="true">
+                <mat-tab label="Detail">
+                    <div class="header ui-g-12">Basic settings</div>
+                    <br />
+                    <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
+                    <mat-form-field class="ui-g-12 full">
+                        <input matInput placeholder="Name" formControlName="name">
+                    </mat-form-field>
+                    <mat-form-field class="ui-g-12 full">
+                        <textarea mat-textarea matInput autosize placeholder="Description" formControlName="description"></textarea>
+                    </mat-form-field>
+                    <mat-form-field class="ui-g-12 full">
+                        <mat-select placeholder="Group" formControlName="group">
+                            <mat-option [value]="undefined">None</mat-option>
+                            <mat-option *ngFor="let group of settings ? settings.CheckGroups : []" [value]="group.ID">{{group.Name}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field class="ui-g-12 full">
+                        <mat-select placeholder="Environment" formControlName="environment">
+                            <mat-option [value]="undefined">None</mat-option>
+                            <mat-option *ngFor="let environment of settings ? settings.Environments : []" [value]="environment.ID">{{environment.Name}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field class="ui-g-12 full">
+                        <mat-select placeholder="Type" formControlName="type" (ngModelChange)="onTypeChange()">
+                            <mat-option *ngFor="let type of types" [value]="type.ID">{{type.Name}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <br />
+                    <div class="full" formArrayName="options">
+                        <div class="header ui-g-12" *ngIf="options.controls.length>0">Type settings</div>
+                        <div class="ui-g-12" *ngFor="let option of options.controls; let i=index" [formGroupName]="i">
+                            <app-check-option class="full" [option]="option.get('option')!.value" [environmentID]="form.get('environment')!.value" formControlName="value"></app-check-option>
+                        </div>
+                    </div>
+                </mat-tab>
+                <mat-tab label="Sub-checks">
+                    <br />
+                    <button mat-raised-button color="primary" (click)="addSubCheck()">Add new</button>
+                    <div formArrayName="subChecks">
+                        <div *ngFor="let subcheck of subChecks.controls; let i=index" [formGroupName]="i">
+                            <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
+                            <mat-form-field class="ui-g-12 full">
+                                <mat-select placeholder="Type" formControlName="type" (ngModelChange)="onSubCheckTypeChange(i)">
+                                    <mat-option *ngFor="let type of subCheckTypes" [value]="type.ID">{{type.Name}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <div *ngIf="subcheck.value.options" class="full" formArrayName="options">
+                                <div class="header ui-g-12" *ngIf="subcheck.value.options.length>0">Type settings</div>
+                                <div class="ui-g-12" *ngFor="let subOption of subcheck.value.options; let j=index; trackBy: track" [formGroupName]="j">
+                                    <app-check-option class="full" [option]="subOption.option" formControlName="value"></app-check-option>
+                                </div>
+                            </div>
+                            <button mat-raised-button color="warn" (click)="deleteSubCheck(i)">Delete</button>
+                            <hr *ngIf="i < subChecks.controls.length-1" class="break">
+                        </div>
+                    </div>
+                </mat-tab>
+                <mat-tab label="Schedules">
+                    <br />
+                    <button mat-raised-button color="primary" (click)="addSchedule()">Add new</button>
+                    <div formArrayName="schedules">
+                        <div *ngFor="let schedule of schedules.controls; let i=index" [formGroupName]="i">
+                            <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
+                            <mat-checkbox class="ui-g-12 full" formControlName="skipPublicHolidays">Skip Public Holidays</mat-checkbox>
+                            <mat-form-field class="ui-g-12 full">
+                                <input matInput (keyup)="validateExpression(i)" placeholder="second minute hour day-of-month month day-of-week" formControlName="expression">
+                            </mat-form-field>
+                            <mat-form-field class="ui-g-12 full">
+                                <textarea appAutosize matInput formControlName="next"></textarea>
+                            </mat-form-field>
+                            <button mat-raised-button color="warn" (click)="deleteSchedule(i)">Delete</button>
+                            <hr *ngIf="i < schedules.controls.length-1" class="break">
+                        </div>
+                    </div>
+                </mat-tab>
+                <mat-tab label="Notifications">
+                    <br />
+                    <button mat-raised-button color="primary" (click)="addNotification()">Add new</button>
+                    <div formArrayName="notifications">
+                        <div *ngFor="let notification of notifications.controls; let i=index" [formGroupName]="i">
+                            <mat-checkbox class="ui-g-12 full" formControlName="active">Active</mat-checkbox>
+                            <div [ngClass]="{'mat-form-field-invalid': notification.controls.conditions.invalid}" formGroupName="conditions" class="ui-g-12 full">
+                                <mat-form-field class="full">
+                                    <input type="number" matInput placeholder="Fail Count" formControlName="failCount">
+                                </mat-form-field>
+                                <mat-form-field class="full">
+                                    <input type="number" matInput placeholder="Fail Minutes" formControlName="failMinutes">
+                                </mat-form-field>
+                            </div>
+                            <mat-form-field class="ui-g-12 full">
+                                <mat-select placeholder="Type" formControlName="type" (ngModelChange)="onNotificationTypeChange(i)">
+                                    <mat-option *ngFor="let type of notificationTypes" [value]="type.ID">{{type.Name}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <div *ngIf="notification.value.options" class="full" formArrayName="options">
+                                <div class="header ui-g-12" *ngIf="notification.value.options.length>0">Type settings</div>
+                                <div class="ui-g-12" *ngFor="let notification of notifications.controls[i].value.options; let j=index; trackBy: track" [formGroupName]="j">
+                                    <app-check-option class="full" [option]="notification.option" formControlName="value"></app-check-option>
+                                </div>
+                            </div>
+                            <button mat-raised-button color="warn" (click)="deleteNotification(i)">Delete</button>
+                            <hr *ngIf="i < notifications.controls.length-1" class="break">
+                        </div>
+                    </div>
+                </mat-tab>
+            </mat-tab-group>
+        </form>
+        <!--<pre>{{check | json}}</pre>-->
+        <!--<pre>{{modelToCheck() | json}}</pre>-->
+    </mat-card-content>
+    <mat-card-actions>
+        <button mat-raised-button (click)="back()" [disabled]="saving">Back</button>
+        <button mat-raised-button color="primary" (click)="updateForm()" [disabled]="form.pristine || saving">Revert</button>
+        <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid || form.pristine || saving">Save</button>
+        <button mat-raised-button color="primary" (click)="run()" [disabled]="form.dirty || saving || check.ID === 0">Run</button>
+        <a mat-raised-button color="accent" routerLink="/edit/{{check.ID}}/copy" [disabled]="form.dirty || saving || check.ID === 0">Copy</a>
+        <a mat-raised-button color="accent" routerLink="/details/{{check.ID}}" [disabled]="saving || check.ID === 0">Details</a>
+        <button *ngIf="check.ID > 0" mat-raised-button color="warn" (click)="delete()">Delete</button>
+    </mat-card-actions>
+</mat-card>

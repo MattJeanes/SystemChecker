@@ -1,18 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using System.Diagnostics;
-using SystemChecker.Web.Helpers;
-using Microsoft.Extensions.DependencyInjection;
-using SystemChecker.Model;
-using Microsoft.AspNetCore.Server.HttpSys;
-using System.Runtime.InteropServices;
-using System.Reflection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
+using System.IO;
 using System.Threading;
 
 namespace SystemChecker.Web
@@ -56,15 +47,20 @@ namespace SystemChecker.Web
             }
             catch (Exception e)
             {
-                var critLogger = new LoggerFactory()
-                    .AddFile("logs/systemchecker-critical-{Date}.log")
-                    .AddDebug()
-                    .AddConsole()
-                    .CreateLogger<Program>();
-
-                critLogger.LogInformation($"Current directory: {Directory.GetCurrentDirectory()}");
-                critLogger.LogError(e, "Critical failure in host build");
-                Thread.Sleep(1000); // allow time to flush logs in the event of a crash
+                var serviceCollection = new ServiceCollection();
+                serviceCollection.AddLogging(builder =>
+                {
+                    builder
+                        .AddFile("logs/systemchecker-critical-{Date}.log")
+                        .AddDebug()
+                        .AddConsole();
+                });
+                using (var logProvider = serviceCollection.BuildServiceProvider())
+                {
+                    var critLogger = logProvider.GetRequiredService<ILogger<Program>>();
+                    critLogger.LogInformation($"Current directory: {Directory.GetCurrentDirectory()}");
+                    critLogger.LogError(e, "Critical failure in host build");
+                }
                 return 1;
             }
 

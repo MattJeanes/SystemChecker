@@ -1,10 +1,8 @@
-﻿using Microsoft.Extensions.Options;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using System.Text;
 using System.Threading.Tasks;
 using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Data.Interfaces;
@@ -14,9 +12,9 @@ namespace SystemChecker.Model.Notifiers
 {
     public class EmailNotifier : BaseNotifier
     {
-        private enum Options
+        public class Options
         {
-            EmailAddresses = 2
+            public List<int> EmailAddresses { get; set; }
         }
         private readonly ISettingsHelper _settingsHelper;
         public EmailNotifier(IRepository<CheckResult> checkResults, ISettingsHelper settingsHelper) : base(checkResults)
@@ -31,9 +29,9 @@ namespace SystemChecker.Model.Notifiers
             {
                 throw new Exception("Email not set up");
             }
-            List<int> emailIDs = _notification.Options[((int)Options.EmailAddresses).ToString()].ToObject<List<int>>();
+            var emailIDs = _notification.GetOptions<Options>().EmailAddresses;
             var emailAddresses = _settings.Contacts.Where(x => emailIDs.Contains(x.ID)).Select(x => x.Value);
-            var subject = $"SystemChecker - {_check.Name}: {_result.Status.ToString()}";
+            var subject = $"SystemChecker - {_check.Name}: {_result.Status.Name.ToString()} (Type: {_result.Status.Type.Name})";
             var from = settings.From;
 
             _logger.Info($"Sending email notification from {from} to {string.Join(", ", emailAddresses.ToArray())} with subject {subject}: {message}");

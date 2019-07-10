@@ -1,15 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
-using PhoneNumbers;
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -17,7 +11,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using SystemChecker.Model.Data;
+using SystemChecker.Contracts.Data;
 using SystemChecker.Model.Data.Entities;
 using SystemChecker.Model.Data.Interfaces;
 

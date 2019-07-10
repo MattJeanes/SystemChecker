@@ -15,7 +15,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SystemChecker.Migrations", "SystemChecker.Migrations\SystemChecker.Migrations.csproj", "{39C024A7-DD00-4DEF-8EA9-D4BDD605371C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SystemChecker.Service", "SystemChecker.Service\SystemChecker.Service.csproj", "{01FF94AA-4214-43FC-9CB0-EA94A8B620A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SystemChecker.Service", "SystemChecker.Service\SystemChecker.Service.csproj", "{01FF94AA-4214-43FC-9CB0-EA94A8B620A7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SystemChecker.Client", "SystemChecker.Client\SystemChecker.Client.csproj", "{DC647FEF-2F39-48EA-B5D4-B964CE20A7C5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SystemChecker.Contracts", "SystemChecker.Contracts\SystemChecker.Contracts.csproj", "{1419C14B-F357-4D66-8476-DBA2EF429010}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SystemChecker.TestClient", "SystemChecker.TestClient\SystemChecker.TestClient.csproj", "{34EE7C8E-C490-43D8-AF89-5692F0447998}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +45,18 @@ Global
 		{01FF94AA-4214-43FC-9CB0-EA94A8B620A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{01FF94AA-4214-43FC-9CB0-EA94A8B620A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01FF94AA-4214-43FC-9CB0-EA94A8B620A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC647FEF-2F39-48EA-B5D4-B964CE20A7C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC647FEF-2F39-48EA-B5D4-B964CE20A7C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC647FEF-2F39-48EA-B5D4-B964CE20A7C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC647FEF-2F39-48EA-B5D4-B964CE20A7C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1419C14B-F357-4D66-8476-DBA2EF429010}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1419C14B-F357-4D66-8476-DBA2EF429010}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1419C14B-F357-4D66-8476-DBA2EF429010}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1419C14B-F357-4D66-8476-DBA2EF429010}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34EE7C8E-C490-43D8-AF89-5692F0447998}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34EE7C8E-C490-43D8-AF89-5692F0447998}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34EE7C8E-C490-43D8-AF89-5692F0447998}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34EE7C8E-C490-43D8-AF89-5692F0447998}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
