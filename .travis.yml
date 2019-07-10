@@ -2,7 +2,8 @@ sudo: required
 language: csharp
 mono: none
 cache: yarn
-dotnet: 2.1.302
+dist: xenial
+dotnet: 2.2.301
 if: tag IS blank
 
 services:
