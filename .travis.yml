@@ -14,13 +14,29 @@ before_script:
   - export minor=$(cat meta.json | jq '.version.minor')
   - export patch=$(cat meta.json | jq '.version.patch')
   - export version=$major.$minor.$patch
+  - export DOCKER_CLI_EXPERIMENTAL=enabled
   - nvm install 10.7.0
   - nvm use 10.7.0
 
 script:
-  - docker build -t mattjeanes/systemchecker.service -t mattjeanes/systemchecker.service:$version -f "SystemChecker.Service/Dockerfile" .
-  - docker build -t mattjeanes/systemchecker.web -t mattjeanes/systemchecker.web:$version -f "SystemChecker.Web/Dockerfile" .
-  - docker build -t mattjeanes/systemchecker.migrations -t mattjeanes/systemchecker.migrations:$version -f "SystemChecker.Migrations/Dockerfile" "SystemChecker.Migrations"
+  - docker build -t mattjeanes/systemchecker.service -t mattjeanes/systemchecker.service:latest -f "SystemChecker.Service/Dockerfile" . --build-arg arch=stretch-slim --target final
+  - docker build -t mattjeanes/systemchecker.service -t mattjeanes/systemchecker.service:latest-arm32v7 -f "SystemChecker.Service/Dockerfile" . --build-arg arch=stretch-slim-arm32v7 --target final
+  - docker manifest create mattjeanes/systemchecker.service:$version mattjeanes/systemchecker.service:latest mattjeanes/systemchecker.service:latest-arm32v7
+  - docker manifest annotate mattjeanes/systemchecker.service:$version mattjeanes/systemchecker.service:latest --os linux --arch amd64
+  - docker manifest annotate mattjeanes/systemchecker.service:$version mattjeanes/systemchecker.service:latest-arm32v7 --os linux --arch arm
+  
+  - docker build -t mattjeanes/systemchecker.web -t mattjeanes/systemchecker.web:latest -f "SystemChecker.Web/Dockerfile" . --build-arg arch=stretch-slim --target final
+  - docker build -t mattjeanes/systemchecker.web -t mattjeanes/systemchecker.web:latest-arm32v7 -f "SystemChecker.Web/Dockerfile" . --build-arg arch=stretch-slim-arm32v7 --target final
+  - docker manifest create mattjeanes/systemchecker.web:$version mattjeanes/systemchecker.web:latest mattjeanes/systemchecker.web:latest-arm32v7
+  - docker manifest annotate mattjeanes/systemchecker.web:$version mattjeanes/systemchecker.web:latest --os linux --arch amd64
+  - docker manifest annotate mattjeanes/systemchecker.web:$version mattjeanes/systemchecker.web:latest-arm32v7 --os linux --arch arm
+  
+  - docker build -t mattjeanes/systemchecker.migrations -t mattjeanes/systemchecker.migrations:latest -f "SystemChecker.Migrations/Dockerfile" "SystemChecker.Migrations" --build-arg arch=stretch-slim --target final
+  - docker build -t mattjeanes/systemchecker.migrations -t mattjeanes/systemchecker.migrations:latest-arm32v7 -f "SystemChecker.Migrations/Dockerfile" "SystemChecker.Migrations" --build-arg arch=stretch-slim-arm32v7 --target final
+  - docker manifest create mattjeanes/systemchecker.migrations:$version mattjeanes/systemchecker.migrations:latest mattjeanes/systemchecker.migrations:latest-arm32v7
+  - docker manifest annotate mattjeanes/systemchecker.migrations:$version mattjeanes/systemchecker.migrations:latest --os linux --arch amd64
+  - docker manifest annotate mattjeanes/systemchecker.migrations:$version mattjeanes/systemchecker.migrations:latest-arm32v7 --os linux --arch arm
+  
   - dotnet publish ./SystemChecker.Service/SystemChecker.Service.csproj -o "../publish/SystemChecker.Service" --configfile ./.nuget/nuget.config
   - yarn --cwd SystemChecker.Web/ClientApp
   - dotnet publish ./SystemChecker.Web/SystemChecker.Web.csproj -o "../publish/SystemChecker.Web" --configfile ./.nuget/nuget.config
@@ -35,12 +51,9 @@ after_success:
 
 before_deploy:
   - docker login -u $DOCKER_USER -p $DOCKER_PASS
-  - docker push mattjeanes/systemchecker.service:$version
-  - docker push mattjeanes/systemchecker.service
-  - docker push mattjeanes/systemchecker.web:$version
-  - docker push mattjeanes/systemchecker.web
-  - docker push mattjeanes/systemchecker.migrations:$version
-  - docker push mattjeanes/systemchecker.migrations
+  - docker manifest push mattjeanes/systemchecker.service:$version
+  - docker manifest push mattjeanes/systemchecker.web:$version
+  - docker manifest push mattjeanes/systemchecker.migrations:$version
   - pwd && ls
   - cd ./publish/SystemChecker.Service && zip -q -r ../SystemChecker.Service.zip *
   - cd ../SystemChecker.Web && zip -q -r ../SystemChecker.Web.zip *

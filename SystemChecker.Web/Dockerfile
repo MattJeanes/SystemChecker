@@ -1,4 +1,5 @@
 # Dockerfile
+ARG arch
 
 # yarn
 #FROM node AS node
@@ -22,7 +23,7 @@ RUN dotnet restore --configfile ./.nuget/nuget.config
 RUN dotnet publish ./SystemChecker.Web/SystemChecker.Web.csproj --output /app/ --configuration Release
 
 # final
-FROM mcr.microsoft.com/dotnet/core/aspnet:2.2
+FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-${arch} as final
 WORKDIR /app
 COPY --from=builder /app .
 ENTRYPOINT ["dotnet", "SystemChecker.Web.dll"]
