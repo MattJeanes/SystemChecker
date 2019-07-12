@@ -19,28 +19,14 @@ before_script:
   - nvm use 10.7.0
 
 script:
-  - docker build -t mattjeanes/systemchecker.service -t mattjeanes/systemchecker.service:latest -f "SystemChecker.Service/Dockerfile" . --build-arg arch=stretch-slim --target final
-  - docker build -t mattjeanes/systemchecker.service -t mattjeanes/systemchecker.service:latest-arm32v7 -f "SystemChecker.Service/Dockerfile" . --build-arg arch=stretch-slim-arm32v7 --target final
-  - docker manifest create mattjeanes/systemchecker.service:$version mattjeanes/systemchecker.service:latest mattjeanes/systemchecker.service:latest-arm32v7
-  - docker manifest annotate mattjeanes/systemchecker.service:$version mattjeanes/systemchecker.service:latest --os linux --arch amd64
-  - docker manifest annotate mattjeanes/systemchecker.service:$version mattjeanes/systemchecker.service:latest-arm32v7 --os linux --arch arm
-  
-  - docker build -t mattjeanes/systemchecker.web -t mattjeanes/systemchecker.web:latest -f "SystemChecker.Web/Dockerfile" . --build-arg arch=stretch-slim --target final
-  - docker build -t mattjeanes/systemchecker.web -t mattjeanes/systemchecker.web:latest-arm32v7 -f "SystemChecker.Web/Dockerfile" . --build-arg arch=stretch-slim-arm32v7 --target final
-  - docker manifest create mattjeanes/systemchecker.web:$version mattjeanes/systemchecker.web:latest mattjeanes/systemchecker.web:latest-arm32v7
-  - docker manifest annotate mattjeanes/systemchecker.web:$version mattjeanes/systemchecker.web:latest --os linux --arch amd64
-  - docker manifest annotate mattjeanes/systemchecker.web:$version mattjeanes/systemchecker.web:latest-arm32v7 --os linux --arch arm
-  
-  - docker build -t mattjeanes/systemchecker.migrations -t mattjeanes/systemchecker.migrations:latest -f "SystemChecker.Migrations/Dockerfile" "SystemChecker.Migrations" --build-arg arch=stretch-slim --target final
-  - docker build -t mattjeanes/systemchecker.migrations -t mattjeanes/systemchecker.migrations:latest-arm32v7 -f "SystemChecker.Migrations/Dockerfile" "SystemChecker.Migrations" --build-arg arch=stretch-slim-arm32v7 --target final
-  - docker manifest create mattjeanes/systemchecker.migrations:$version mattjeanes/systemchecker.migrations:latest mattjeanes/systemchecker.migrations:latest-arm32v7
-  - docker manifest annotate mattjeanes/systemchecker.migrations:$version mattjeanes/systemchecker.migrations:latest --os linux --arch amd64
-  - docker manifest annotate mattjeanes/systemchecker.migrations:$version mattjeanes/systemchecker.migrations:latest-arm32v7 --os linux --arch arm
-  
-  - dotnet publish ./SystemChecker.Service/SystemChecker.Service.csproj -o "../publish/SystemChecker.Service" --configfile ./.nuget/nuget.config
   - yarn --cwd SystemChecker.Web/ClientApp
-  - dotnet publish ./SystemChecker.Web/SystemChecker.Web.csproj -o "../publish/SystemChecker.Web" --configfile ./.nuget/nuget.config
-  - dotnet publish ./SystemChecker.Migrations/SystemChecker.Migrations.csproj -o "../publish/SystemChecker.Migrations"
+  - |
+    for appname in SystemChecker.Service SystemChecker.Web SystemChecker.Migrations; do
+      app=`echo $appname | tr '[:upper:]' '[:lower:]'`
+      docker build -t $DOCKER_USER/$app -t $DOCKER_USER/$app:$version-amd64 -t $DOCKER_USER/$app:$version-amd64 -f "$appname/Dockerfile" . --build-arg arch=stretch-slim
+      docker build -t $DOCKER_USER/$app -t $DOCKER_USER/$app:latest-arm32v7 -t $DOCKER_USER/$app:$version-arm32v7 -f "$appname/Dockerfile" . --build-arg arch=stretch-slim-arm32v7
+      dotnet publish ./$appname/$appname.csproj -o "../publish/$appname" --configfile ./.nuget/nuget.config
+    done
   
 after_success:
   - git config --local user.name "$GITHUB_USER"
@@ -51,14 +37,22 @@ after_success:
 
 before_deploy:
   - docker login -u $DOCKER_USER -p $DOCKER_PASS
-  - docker manifest push mattjeanes/systemchecker.service:$version
-  - docker manifest push mattjeanes/systemchecker.web:$version
-  - docker manifest push mattjeanes/systemchecker.migrations:$version
-  - pwd && ls
-  - cd ./publish/SystemChecker.Service && zip -q -r ../SystemChecker.Service.zip *
-  - cd ../SystemChecker.Web && zip -q -r ../SystemChecker.Web.zip *
-  - cd ../SystemChecker.Migrations && zip -q -r ../SystemChecker.Migrations.zip *
-  - cd ../ && pwd && ls && cd ../
+  - cd ./publish
+  - |
+    for appname in SystemChecker.Service SystemChecker.Web SystemChecker.Migrations; do
+      app=`echo $appname | tr '[:upper:]' '[:lower:]'`
+      for ver in $version latest; do
+        for arch in amd64 arm32v7; do
+          docker push $DOCKER_USER/$app:$ver-$arch
+        done
+        docker manifest create $DOCKER_USER/$app:$ver $DOCKER_USER/$app:$ver-amd64 $DOCKER_USER/$app:$ver-arm32v7
+        docker manifest annotate $DOCKER_USER/$app:$ver $DOCKER_USER/$app:$ver-amd64 --os linux --arch amd64
+        docker manifest annotate $DOCKER_USER/$app:$ver $DOCKER_USER/$app:$ver-arm32v7 --os linux --arch arm
+        docker manifest push $DOCKER_USER/$app:$ver
+      done
+      cd ./$appname && zip -q -r ../$appname.zip * && cd ../
+    done
+  - pwd && ls && cd ../
 deploy:
   provider: releases
   api_key: "${GITHUB_TOKEN}"
