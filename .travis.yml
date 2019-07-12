@@ -23,8 +23,11 @@ script:
   - |
     for appname in SystemChecker.Service SystemChecker.Web SystemChecker.Migrations; do
       app=`echo $appname | tr '[:upper:]' '[:lower:]'`
-      docker build -t $DOCKER_USER/$app -t $DOCKER_USER/$app:$version-amd64 -t $DOCKER_USER/$app:$version-amd64 -f "$appname/Dockerfile" . --build-arg arch=stretch-slim
+      echo "Building $appname docker amd64"
+      docker build -t $DOCKER_USER/$app -t $DOCKER_USER/$app:latest-amd64 -t $DOCKER_USER/$app:$version-amd64 -f "$appname/Dockerfile" . --build-arg arch=stretch-slim
+      echo "Building $appname docker arm32v7"
       docker build -t $DOCKER_USER/$app -t $DOCKER_USER/$app:latest-arm32v7 -t $DOCKER_USER/$app:$version-arm32v7 -f "$appname/Dockerfile" . --build-arg arch=stretch-slim-arm32v7
+      echo "Building $appname zip"
       dotnet publish ./$appname/$appname.csproj -o "../publish/$appname" --configfile ./.nuget/nuget.config
     done
   
@@ -41,8 +44,11 @@ before_deploy:
   - |
     for appname in SystemChecker.Service SystemChecker.Web SystemChecker.Migrations; do
       app=`echo $appname | tr '[:upper:]' '[:lower:]'`
+      echo "Deploying $appname"
       for ver in $version latest; do
+        echo "Deploying version $ver"
         for arch in amd64 arm32v7; do
+          echo "Pushing docker tag $ver-arch"
           docker push $DOCKER_USER/$app:$ver-$arch
         done
         docker manifest create $DOCKER_USER/$app:$ver $DOCKER_USER/$app:$ver-amd64 $DOCKER_USER/$app:$ver-arm32v7
