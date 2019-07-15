@@ -1,9 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Quartz;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,9 +8,12 @@ namespace SystemChecker.Model.Listeners
     public class GlobalSchedulerListener : ISchedulerListener
     {
         private readonly ILogger _logger;
-        public GlobalSchedulerListener(ILogger<GlobalSchedulerListener> logger)
+        private readonly ISchedulerManager _schedulerManager;
+
+        public GlobalSchedulerListener(ILogger<GlobalSchedulerListener> logger, ISchedulerManager schedulerManager)
         {
             _logger = logger;
+            _schedulerManager = schedulerManager;
         }
 
         public Task JobAdded(IJobDetail jobDetail, CancellationToken token)
@@ -72,7 +71,7 @@ namespace SystemChecker.Model.Listeners
 
         public Task SchedulerError(string msg, SchedulerException cause, CancellationToken token)
         {
-            _logger.LogError($"Scheduler error: {msg}: {cause.Message}");
+            _schedulerManager.CriticalError(cause, msg);
             return Task.CompletedTask;
         }
 

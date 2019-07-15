@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Quartz;
 using Quartz.Impl.Matchers;
 using Quartz.Spi;
@@ -13,7 +12,6 @@ using SystemChecker.Model.Data.Interfaces;
 using SystemChecker.Model.Helpers;
 using SystemChecker.Model.Jobs;
 using SystemChecker.Model.Listeners;
-using SystemChecker.Model.Loggers;
 
 namespace SystemChecker.Model
 {
@@ -21,6 +19,7 @@ namespace SystemChecker.Model
     {
         Task Start();
         Task Stop();
+        void CriticalError(Exception ex, string message);
         Task UpdateSchedules();
         Task UpdateSchedule(int id);
         Task UpdateSchedule(Check check);
@@ -28,36 +27,31 @@ namespace SystemChecker.Model
         Task<List<ITrigger>> GetAllTriggers();
         Task UpdateCleanupJob(GlobalSettings global = null);
         Task UpdateMaintenanceJobs(GlobalSettings global);
+        event EventHandler OnCriticalError;
     }
 
     public class SchedulerManager : ISchedulerManager
     {
-        private readonly ISchedulerFactory _factory;
         private readonly IScheduler _scheduler;
         private readonly ISettingsHelper _settingsHelper;
         private readonly ICheckRepository _checks;
         private readonly ILogger _logger;
-        private readonly IServiceProvider _container;
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly ICheckLogger _checkLogger;
         private readonly IJobHelper _jobHelper;
-        private readonly IMapper _mapper;
+        private bool _failed;
+
+        public event EventHandler OnCriticalError;
+
         public SchedulerManager(ISchedulerFactory factory, IJobFactory jobFactory, ISettingsHelper settingsHelper, ICheckRepository checks,
-            ILogger<SchedulerManager> logger, IServiceProvider container, ILoggerFactory loggerFactory, ICheckLogger checkLogger, IJobHelper jobHelper, IMapper mapper)
+            ILogger<SchedulerManager> logger, ILoggerFactory loggerFactory, IJobHelper jobHelper)
         {
-            _factory = factory;
             _scheduler = factory.GetScheduler().Result;
             _scheduler.JobFactory = jobFactory;
             _scheduler.ListenerManager.AddJobListener(new GlobalJobListener(loggerFactory.CreateLogger<GlobalJobListener>()), GroupMatcher<JobKey>.AnyGroup());
-            _scheduler.ListenerManager.AddSchedulerListener(new GlobalSchedulerListener(loggerFactory.CreateLogger<GlobalSchedulerListener>()));
+            _scheduler.ListenerManager.AddSchedulerListener(new GlobalSchedulerListener(loggerFactory.CreateLogger<GlobalSchedulerListener>(), this));
             _settingsHelper = settingsHelper;
             _checks = checks;
             _logger = logger;
-            _container = container;
-            _loggerFactory = loggerFactory;
-            _checkLogger = checkLogger;
             _jobHelper = jobHelper;
-            _mapper = mapper;
         }
 
         public async Task Start()
@@ -66,6 +60,11 @@ namespace SystemChecker.Model
             await _scheduler.Start();
             await UpdateSchedules();
             await UpdateMaintenanceJobs();
+            if (_failed)
+            {
+                await Stop();
+                throw new Exception("Critical scheduler startup failure");
+            }
             _logger.LogInformation("Scheduler started");
         }
 
@@ -74,6 +73,13 @@ namespace SystemChecker.Model
             _logger.LogInformation("Scheduler stopping");
             await _scheduler.Shutdown(true);
             _logger.LogInformation("Scheduler stopped");
+        }
+
+        public void CriticalError(Exception ex, string message)
+        {
+            _failed = true;
+            _logger.LogError(ex, $"Critical scheduler error: {message}");
+            OnCriticalError?.Invoke(this, new EventArgs());
         }
 
         public async Task UpdateMaintenanceJobs(GlobalSettings global = null)
