@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace SystemChecker.Model.Helpers
         ICheckLogger GetCheckLogger();
         Task SaveResult(CheckResult result);
         Task RunSubChecks(Check check, ICheckLogger logger, Action<SubCheck> action);
+        ILogger GetLogger();
         Task RunNotifiers(Check check, CheckResult result, CheckerSettings settings, ICheckLogger logger);
         Task<(Check, CheckSchedule)> GetDetails(int checkID, int scheduleID);
         Task SaveChangesAsync();
@@ -32,6 +34,7 @@ namespace SystemChecker.Model.Helpers
         private readonly ICheckRepository _checks;
         private readonly ISettingsHelper _settingsHelper;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<CheckerHelper> _logger;
         private readonly ICheckLogger _checkLogger;
         private readonly IConnectionMultiplexer _connectionMultiplexer;
         private readonly IRepository<ResultStatus> _resultStatuses;
@@ -44,6 +47,7 @@ namespace SystemChecker.Model.Helpers
             ISettingsHelper settingsHelper,
             IServiceProvider serviceProvider,
             ICheckLogger checkLogger,
+            ILogger<CheckerHelper> logger,
             IConnectionMultiplexer connectionMultiplexer,
             IRepository<ResultStatus> resultStatuses,
             IRepository<CheckSchedule> schedules
@@ -54,6 +58,7 @@ namespace SystemChecker.Model.Helpers
             _checks = checks;
             _settingsHelper = settingsHelper;
             _serviceProvider = serviceProvider;
+            _logger = logger;
             _checkLogger = checkLogger;
             _connectionMultiplexer = connectionMultiplexer;
             _resultStatuses = resultStatuses;
@@ -68,6 +73,11 @@ namespace SystemChecker.Model.Helpers
         public ICheckLogger GetCheckLogger()
         {
             return _checkLogger;
+        }
+
+        public ILogger GetLogger()
+        {
+            return _logger;
         }
 
         public async Task RunSubChecks(Check check, ICheckLogger logger, Action<SubCheck> action)

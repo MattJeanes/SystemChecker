@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Nager.Date;
+﻿using Nager.Date;
 using Quartz;
 using System;
 using System.Threading.Tasks;
@@ -18,7 +17,7 @@ namespace SystemChecker.Model.Jobs
         protected Check _check;
         protected CheckSchedule _schedule;
         protected CheckerSettings _settings;
-        public BaseChecker(ICheckerHelper helper, ILogger<BaseChecker> logger) : base(logger)
+        public BaseChecker(ICheckerHelper helper) : base(helper.GetLogger())
         {
             _helper = helper;
         }
