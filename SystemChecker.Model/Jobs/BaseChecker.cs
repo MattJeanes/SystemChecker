@@ -1,4 +1,5 @@
-﻿using Nager.Date;
+﻿using Microsoft.Extensions.Logging;
+using Nager.Date;
 using Quartz;
 using System;
 using System.Threading.Tasks;
@@ -10,18 +11,19 @@ using SystemChecker.Model.Loggers;
 
 namespace SystemChecker.Model.Jobs
 {
-    public abstract class BaseChecker : IJob
+    public abstract class BaseChecker : BaseJob
     {
         protected readonly ICheckerHelper _helper;
         protected ICheckLogger _logger;
         protected Check _check;
         protected CheckSchedule _schedule;
         protected CheckerSettings _settings;
-        public BaseChecker(ICheckerHelper helper)
+        public BaseChecker(ICheckerHelper helper, ILogger<BaseChecker> logger) : base(logger)
         {
             _helper = helper;
         }
-        public async Task Execute(IJobExecutionContext context)
+
+        public override async Task ExecuteJob(IJobExecutionContext context)
         {
             var checkID = Convert.ToInt32(context.JobDetail.JobDataMap.Get("CheckID"));
             var scheduleID = Convert.ToInt32(context.Trigger.JobDataMap.Get("ScheduleID"));

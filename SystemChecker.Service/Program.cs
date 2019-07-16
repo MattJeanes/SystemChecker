@@ -169,6 +169,7 @@ namespace SystemChecker.Service
             {
                 _schedulerManager.Stop().Wait();
                 serviceStoppedCallback();
+                throw new Exception("Critical service failure");
             };
             _schedulerManager.Start().Wait();
         }

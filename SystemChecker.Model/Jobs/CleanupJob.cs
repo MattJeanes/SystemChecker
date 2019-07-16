@@ -10,19 +10,19 @@ using SystemChecker.Model.Helpers;
 
 namespace SystemChecker.Model.Jobs
 {
-    public class CleanupJob : IJob
+    public class CleanupJob : BaseJob
     {
         private readonly IRepository<CheckResult> _checkResults;
         private readonly ILogger _logger;
         private readonly ISettingsHelper _settingsHelper;
-        public CleanupJob(IRepository<CheckResult> checkResults, ILogger<CleanupJob> logger, ISettingsHelper settingsHelper)
+        public CleanupJob(IRepository<CheckResult> checkResults, ILogger<CleanupJob> logger, ISettingsHelper settingsHelper) : base(logger)
         {
             _checkResults = checkResults;
             _logger = logger;
             _settingsHelper = settingsHelper;
         }
 
-        public async Task Execute(IJobExecutionContext context)
+        public override async Task ExecuteJob(IJobExecutionContext context)
         {
             var global = await _settingsHelper.GetGlobal();
             if (!global.ResultAggregateDays.HasValue)
@@ -38,7 +38,7 @@ namespace SystemChecker.Model.Jobs
 
             var resultsToAggregate = await _checkResults.GetAll()
                 .Where(x => x.DTS < DateTimeOffset.UtcNow.AddDays(-global.ResultAggregateDays.Value))
-                .GroupBy(x => new { x.DTS.UtcDateTime.Hour, x.DTS.UtcDateTime.Date, x.Status, x.CheckID })
+                .GroupBy(x => new { x.DTS.UtcDateTime.Hour, x.DTS.UtcDateTime.Date, x.StatusID, x.CheckID })
                 .Where(x => x.Count() > 1)
                 .ToListAsync();
 
@@ -52,7 +52,7 @@ namespace SystemChecker.Model.Jobs
                 {
                     CheckID = group.Key.CheckID,
                     DTS = dateAverage,
-                    Status = group.Key.Status,
+                    StatusID = group.Key.StatusID,
                     TimeMS = timeMSAverage
                 });
             }
