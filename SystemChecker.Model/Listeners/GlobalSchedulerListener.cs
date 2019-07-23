@@ -71,7 +71,7 @@ namespace SystemChecker.Model.Listeners
 
         public Task SchedulerError(string msg, SchedulerException cause, CancellationToken token)
         {
-            _schedulerManager.CriticalError(cause, msg);
+            _logger.LogError(cause, msg);
             return Task.CompletedTask;
         }
 

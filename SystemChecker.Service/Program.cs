@@ -136,10 +136,6 @@ namespace SystemChecker.Service
             await schedulerManager.Start();
 
             var exitEvent = new ManualResetEvent(false);
-            schedulerManager.OnCriticalError += (_, __) =>
-            {
-                exitEvent.Set();
-            };
             Console.CancelKeyPress += (sender, eventArgs) =>
             {
                 eventArgs.Cancel = true;
@@ -165,12 +161,6 @@ namespace SystemChecker.Service
         public void Start(string[] args, ServiceStoppedCallback serviceStoppedCallback)
         {
             _logger.LogInformation("Service starting");
-            _schedulerManager.OnCriticalError += (_, __) =>
-            {
-                _schedulerManager.Stop().Wait();
-                serviceStoppedCallback();
-                throw new Exception("Critical service failure");
-            };
             _schedulerManager.Start().Wait();
         }
 
