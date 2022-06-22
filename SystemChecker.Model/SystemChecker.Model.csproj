@@ -13,7 +13,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
     <PackageReference Include="Nager.Date" Version="1.24.8" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Quartz" Version="3.0.7" />
     <PackageReference Include="Quartz.Serialization.Json" Version="3.0.7" />
     <PackageReference Include="SlackAPI" Version="1.0.7">
