@@ -1,3 +1,7 @@
+# Project archived
+
+This project is no longer under maintenance or development, and has been archived.
+
 # SystemChecker
 Scalable system to check other systems
 
